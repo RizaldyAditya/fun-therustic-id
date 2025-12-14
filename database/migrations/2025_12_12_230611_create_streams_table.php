@@ -11,14 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('statuses', function (Blueprint $table) {
+        Schema::create('streams', function (Blueprint $table) {
             $table->id()->autoIncrement();
             $table->string('name');
-            $table->string('slug')->unique()->nullable();
-            $table->string('text_color')->nullable();
-            $table->string('bg_color')->nullable();
-            $table->integer('order')->default(0);
-            $table->boolean('is_active')->default(true);
+            $table->string('homepage_url')->nullable();
+            $table->text('logo')->nullable();
+            $table->boolean('is_crawlable')->default(1);
+            $table->boolean('is_active')->default(1);
             $table->timestamps();
             $table->softDeletes();
         });
@@ -29,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('status');
+        Schema::dropIfExists('streams');
     }
 };
