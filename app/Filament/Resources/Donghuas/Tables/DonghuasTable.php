@@ -10,6 +10,7 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Infolists\Components\ImageEntry;
+use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
@@ -17,6 +18,9 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\TextInputColumn;
+use Filament\Tables\Columns\ToggleColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 
@@ -29,24 +33,53 @@ class DonghuasTable
                 ImageColumn::make('image_cover')->disk('public')->label(''),
                 TextColumn::make('id')->label('ID')->sortable()->toggleable(isToggledHiddenByDefault: true)->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('title_en')->label('Title')->sortable()->searchable()
-                    ->description(fn($record) => $record->title_zh),
-                TextColumn::make('episode_watched')->label('Watched')->sortable()
-                    ->description(fn($record) => $record->episode_watched_seasonal),
-                TextColumn::make('episode_latest')->label('Latest EP')->sortable(),
+                    ->description(fn($record) => $record->title_zh)
+                    ->width(400)
+                    ->wrap(),
+                // TextColumn::make('episode_watched')->label('Watched')->sortable()->description(fn($record) => $record->episode_watched_seasonal),
+                TextInputColumn::make('episode_watched')->label('#EP')->width(10)->alignCenter(),
+                TextInputColumn::make('episode_watched_seasonal')->label('')->width(10)->alignCenter(),
+                TextColumn::make('episode_latest')->label('#EP LTS')->alignCenter(),
+                ToggleColumn::make('is_observed')->label('Observe')->alignEnd(),
                 SelectColumn::make('status_id')
                     ->label('Status')
                     ->options(Status::query()->pluck('name', 'id'))
                     ->searchableOptions(),
-                TextColumn::make('status.name')->label('Status')
-                    ->badge()
-                    ->sortable()
-                    ->searchable(),
-                
+                SelectColumn::make('airing')->label('Airing Status')->options(['1' => 'Airing', '0' => 'Completed']),
             ])
             ->filters([
+                // filter is_observed
+                SelectFilter::make('is_observed')->label('Observe')->options(['1' => 'Yes', '0' => 'No']),
+                SelectFilter::make('status_id')->label('Status')->options(Status::query()->pluck('name', 'id')),
+                SelectFilter::make('airing')->label('Airing Status')->options(['1' => 'Airing', '0' => 'Completed']),
                 TrashedFilter::make(),
             ])
             ->recordActions([
+                Action::make('episodeList')
+                    ->label('')
+                    ->icon(Heroicon::VideoCamera)
+                    ->modalHeading(fn($record) => $record->title_en . ' Episode List')
+                    ->modalDescription(fn($record) => $record->title_zh)
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Close')
+                    ->modalWidth('5xl')
+                    ->schema([
+                        Grid::make(12)
+                            ->schema([
+                                RepeatableEntry::make('episodes')
+                                    ->label('Episode List')
+                                    ->columnSpan(3)
+                                    ->schema([
+                                        TextEntry::make('episode_list')
+                                            ->label('# EP')
+                                            ->default(fn($record) => $record->episode_number) // The text inside the "button"
+                                            ->url(fn($record) => $record->episode_url, shouldOpenInNewTab: true)
+                                            ->extraAttributes([
+                                                'class' => 'inline-flex items-center justify-center px-4 py-2 bg-primary-600 text-white font-semibold rounded-lg shadow hover:bg-primary-500 transition',
+                                            ]),
+                                    ]),
+                            ]),
+                    ]),
                 Action::make('viewDetails')
                     ->label('')
                     ->icon('heroicon-o-document-text')
@@ -54,7 +87,7 @@ class DonghuasTable
                     ->modalDescription(fn($record) => $record->title_zh)
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Close')
-                    ->modalWidth('2xl')
+                    ->modalWidth('4xl')
                     ->color('info')
                     ->schema([
                         Grid::make()
@@ -78,7 +111,8 @@ class DonghuasTable
                                             ->badge(),
                                         TextEntry::make('airing')->label('Airing Status')
                                             ->badge(fn($record) => $record->airing ? 'primary' : 'success')
-                                            ->formatStateUsing(fn($state) => $state ? 'Airing' : 'Completed'),
+                                            ->formatStateUsing(fn($state) => $state ? 'Airing' : 'Completed')
+                                            ->color(fn($state) => $state ? 'primary' : 'success'),
                                         TextEntry::make('mc_name')
                                             ->label('MC Name')
                                             ->color('primary')
@@ -87,8 +121,7 @@ class DonghuasTable
                                             ->url(fn($record) => $record->mc_wikia)
                                             ->openUrlInNewTab()
                                             ->color('info')
-                                            ->placeholder('~')
-                                            ->limit(50),
+                                            ->placeholder('~'),
                                     ]),
                             ]),
                         Section::make('Episode')

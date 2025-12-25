@@ -1,11 +1,12 @@
 <?php
-
 namespace App\Filament\Resources\Streams\Schemas;
 
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
+use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Grid;
+use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\FileUpload;
 
 class StreamForm
 {
@@ -13,16 +14,22 @@ class StreamForm
     {
         return $schema
             ->components([
-                TextInput::make('name')
-                    ->required(),
-                TextInput::make('homepage_url')
-                    ->url(),
-                Textarea::make('logo')
-                    ->columnSpanFull(),
-                Toggle::make('is_crawlable')
-                    ->required(),
-                Toggle::make('is_active')
-                    ->required(),
+                Grid::make()
+                    ->columnSpan('full')
+                    ->schema([
+                        Section::make('')
+                            ->schema([
+                                TextInput::make('name')->required()->inlineLabel()->autofocus(),
+                                TextInput::make('label')->required()->inlineLabel(),
+                                TextInput::make('homepage_url')->url()->required()->inlineLabel(),
+                                FileUpload::make('logo')->inlineLabel()
+                            ]),
+                        Section::make('')
+                            ->schema([
+                                Toggle::make('is_crawlable')->required()->inlineLabel(),
+                                Toggle::make('is_active')->required()->inlineLabel()
+                            ])
+                    ])
             ]);
     }
 }

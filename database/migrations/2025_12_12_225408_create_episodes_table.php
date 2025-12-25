@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('episodes', function (Blueprint $table) {
             $table->id()->autoIncrement();
             $table->integer('donghua_id')->nullable();
-            $table->integer('episode_number')->default(0);
+            $table->string('title')->nullable();
+            $table->string('episode_number')->nullable();
             $table->integer('stream_id')->nullable();
             $table->string('stream_url')->nullable();
             $table->string('video_source_url')->nullable(); 

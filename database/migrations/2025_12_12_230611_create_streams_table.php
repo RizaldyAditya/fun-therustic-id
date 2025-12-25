@@ -14,8 +14,10 @@ return new class extends Migration
         Schema::create('streams', function (Blueprint $table) {
             $table->id()->autoIncrement();
             $table->string('name');
+            $table->string('label')->nullable();
             $table->string('homepage_url')->nullable();
             $table->text('logo')->nullable();
+            $table->boolean('is_cover_image')->default(0);
             $table->boolean('is_crawlable')->default(1);
             $table->boolean('is_active')->default(1);
             $table->timestamps();

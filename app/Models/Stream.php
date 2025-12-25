@@ -12,6 +12,7 @@ class Stream extends Model
 
     protected $fillable = [
         'name',
+        'label',
         'homepage_url',
         'logo',
         'is_crawlable',

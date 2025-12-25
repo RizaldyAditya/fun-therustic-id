@@ -24,6 +24,7 @@ class EpisodesForm
                                     ->searchable()
                                     ->required(),
                                 TextInput::make('episode_number')->label('Episode Number')->numeric()->required(),
+                                TextInput::make('title')->label('Episode Title'),
                             ]),
                     ]),
                 Grid::make()
