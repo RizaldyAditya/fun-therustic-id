@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('donghuas', function (Blueprint $table) {
             $table->id()->autoIncrement();
-            $table->string('title_en');
-            $table->string('title_zh');
+            $table->string('title_en')->default('');
+            $table->string('title_zh')->default('');
             $table->json('external_titles')->nullable();
             $table->integer('season')->default(1)->nullable();
             $table->integer('episode_latest')->default(0)->nullable();
@@ -25,7 +25,7 @@ return new class extends Migration
             $table->boolean('airing')->default(0);
             $table->boolean('is_observed')->default(0);
             $table->string('myanimelist')->nullable();
-            $table->text('image_cover');
+            $table->text('image_cover')->nullable();
             $table->string('mc_name')->nullable();
             $table->string('mc_wikia')->nullable();
             $table->integer('studio_id')->nullable();

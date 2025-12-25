@@ -20,7 +20,7 @@ class EpisodesResource extends Resource
 {
     protected static ?string $model = Episode::class;
     protected static string|BackedEnum|null $navigationIcon = Heroicon::Film;
-    protected static ?string $recordTitleAttribute = 'episode_number';
+    protected static ?string $recordTitleAttribute = 'title';
 
     public static function form(Schema $schema): Schema
     {

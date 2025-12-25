@@ -1,16 +1,14 @@
 <?php
-
 namespace App\Filament\Resources\Studios\Tables;
 
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\BulkAction;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\ForceDeleteBulkAction;
-use Filament\Actions\RestoreBulkAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\TrashedFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\Collection;
 
 class StudiosTable
 {
@@ -18,37 +16,29 @@ class StudiosTable
     {
         return $table
             ->columns([
-                TextColumn::make('name')
-                    ->searchable(),
-                TextColumn::make('url')
-                    ->searchable(),
-                IconColumn::make('is_active')
-                    ->boolean(),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('deleted_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('id')->label('ID')->sortable()->alignCenter()->toggleable(isToggledHiddenByDefault: true)->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('name')->sortable()->searchable(),
+                TextColumn::make('url')->url(fn($record) => $record->url)->openUrlInNewTab()->limit(100),
+                IconColumn::make('is_active')->label('Active')->alignEnd()->boolean(),
             ])
             ->filters([
-                TrashedFilter::make(),
+                TernaryFilter::make('is_active')
+                    ->label('Active Status')
+                    ->boolean()
+                    ->trueLabel('Active only')
+                    ->falseLabel('Inactive only')
+                    ->native(false),
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()->label(''),
+                DeleteAction::make()->label('')
             ])
             ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                    ForceDeleteBulkAction::make(),
-                    RestoreBulkAction::make(),
-                ]),
-            ]);
+                BulkAction::make('delete')
+                    ->requiresConfirmation()
+                    ->action(fn(Collection $records) => $records->each->delete()),
+            ])
+            ->defaultSort('name', 'asc')
+            ->recordUrl(null);
     }
 }

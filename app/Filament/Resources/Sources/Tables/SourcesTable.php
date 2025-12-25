@@ -1,14 +1,13 @@
 <?php
-
 namespace App\Filament\Resources\Sources\Tables;
 
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\BulkAction;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\ForceDeleteBulkAction;
-use Filament\Actions\RestoreBulkAction;
-use Filament\Tables\Filters\TrashedFilter;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Collection;
 
 class SourcesTable
 {
@@ -16,20 +15,20 @@ class SourcesTable
     {
         return $table
             ->columns([
-                //
-            ])
-            ->filters([
-                TrashedFilter::make(),
+                TextColumn::make('id')->sortable()->label('ID')->toggleable(isToggledHiddenByDefault: true)->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('name')->sortable()->searchable(),
+                IconColumn::make('is_active')->label('Active')->alignEnd()->boolean(),
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()->label(''),
+                DeleteAction::make()->label('')
             ])
             ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                    ForceDeleteBulkAction::make(),
-                    RestoreBulkAction::make(),
-                ]),
-            ]);
+                BulkAction::make('delete')
+                    ->requiresConfirmation()
+                    ->action(fn(Collection $records) => $records->each->delete()),
+            ])
+            ->defaultSort('id', 'asc')
+            ->recordUrl(null);
     }
 }

@@ -34,11 +34,17 @@ class DonghuaForm
                                                 Forms\Components\FileUpload::make('image_cover')
                                                     ->disk('public')
                                                     ->directory('img/covers')
-                                                    ->required()
                                                     ->label('Cover Image')
                                                     ->visibility('public')
                                                     ->image(),
-                                                Forms\Components\Toggle::make('is_active')->required()->default(true),
+                                                Forms\Components\Toggle::make('is_active')
+                                                    ->label('Active')
+                                                    ->required()
+                                                    ->default(true),
+                                                Forms\Components\Toggle::make('is_observed')
+                                                    ->label('Observe')
+                                                    ->required()
+                                                    ->default(true),
                                             ])
                                     ])
                                     ->icon(Heroicon::PencilSquare),

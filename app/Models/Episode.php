@@ -4,14 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Episode extends Model
 {
-    use SoftDeletes;
-
     protected $fillable = [
         'donghua_id',
+        'title',
         'episode_number',
         'stream_id',
         'stream_url',

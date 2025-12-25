@@ -1,14 +1,16 @@
 <?php
-
 namespace App\Filament\Resources\Streams\Tables;
 
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
-use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 
@@ -19,13 +21,31 @@ class StreamsTable
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('label')
+                    ->searchable()
+                    ->sortable(),
+                ImageColumn::make('logo')->disk('public'),
                 TextColumn::make('homepage_url')
-                    ->searchable(),
-                IconColumn::make('is_crawlable')
-                    ->boolean(),
-                IconColumn::make('is_active')
-                    ->boolean(),
+                    ->searchable()
+                    ->url(fn($record) => $record->homepage_url)
+                    ->openUrlInNewTab(),
+                ToggleColumn::make('is_cover_image')
+                    ->label('Cover IMG')
+                    ->alignEnd()
+                    ->onColor('success')
+                    ->offColor('primary'),
+                ToggleColumn::make('is_crawlable')
+                    ->label('Crawlable')
+                    ->alignEnd()
+                    ->onColor('success')
+                    ->offColor('primary'),
+                ToggleColumn::make('is_active')
+                    ->label('Active')
+                    ->alignEnd()
+                    ->onColor('success')
+                    ->offColor('primary'),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -43,7 +63,16 @@ class StreamsTable
                 TrashedFilter::make(),
             ])
             ->recordActions([
-                EditAction::make(),
+                Action::make('runCrawler')
+                    ->icon('heroicon-s-play')
+                    ->label('Crawl')
+                    ->color('success')
+                    ->action(function ($record, $livewire) {
+                        $livewire->runCrawler($record);
+                    })
+                    ->requiresConfirmation(),
+                EditAction::make()->label(''),
+                DeleteAction::make()->label(''),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
@@ -51,6 +80,8 @@ class StreamsTable
                     ForceDeleteBulkAction::make(),
                     RestoreBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->defaultSort('name', 'asc')
+            ->recordUrl(null);
     }
 }
