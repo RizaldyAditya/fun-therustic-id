@@ -35,7 +35,12 @@ class StreamForm
                                     ->required()
                                     ->inlineLabel()
                                     ->placeholder('https://animexin.dev/'),
-                                FileUpload::make('logo')->inlineLabel(),
+                                FileUpload::make('logo')
+                                    ->disk('public')
+                                    ->directory('img/logos')
+                                    ->visibility('public')
+                                    ->image()
+                                    ->inlineLabel(),
                             ]),
                         Section::make('')
                             ->schema([
