@@ -46,84 +46,92 @@ class AnimexinObserver extends CrawlObserver
                 $donghuaTitle = $node->filter('.bsx > a.tip > .limit > .egghead > .eggtitle')->text();
                 $donghuaTitle = preg_replace('/<([a-z][a-z0-9]*)[^>]*>.*?<\/\1>/is', '', trim($donghuaTitle ?? '')); // remove html tags and its
 
-                // get episode title
-                $episodeTitle = $node->filter('.bsx > a.tip')->attr('title');
-
-                // get episode link
-                $episodeLink = $node->filter('.bsx > a.tip')->attr('href');
-
-                // get episode number
-                $node_episode = $node->filter('.bsx > a.tip > .limit > .egghead > .eggmeta > .eggepisode');
-                if ($node_episode->count() > 0) {
-                    $episodeNumber = $node_episode->text();
-                } else {
-                    $episodeNumber = 0;
-                }
-                preg_match_all('/\[([^\]]*)\]/', $episodeNumber, $episodeNumberMatches);
-                $episodeNumber = preg_replace('/\[.*?\]/', '', $episodeNumber);
-                $episodeNumber = preg_replace('/\((.*?)\)/', '', $episodeNumber);
-                $episodeNumber = preg_replace('/[^0-9]/', '', $episodeNumber);
-                if (!empty($episodeNumberMatches[0])) {
-                    $episodeNumber .= ' ' . $episodeNumberMatches[0][0];
+                // find donghua id
+                $donghua_id = null;
+                $donghua    = Donghua::where('external_titles->animexin_title', trim($donghuaTitle ?? ''))->first();
+                if ($donghua && $donghua->id) {
+                    $donghua_id = $donghua->id;
                 }
 
-                // get video source url
-                $crawlerEpisodeLink = new DomCrawler($this->client->get($episodeLink)->getBody()->getContents());
-                $videoSourceUrl     = $crawlerEpisodeLink->filter('iframe')->attr('src');
-                $allEpisodes        = $crawlerEpisodeLink->filter('.nvs.nvsc > a')->attr('href');
-
-                if (!str_contains($videoSourceUrl, 'youtube')) {
+                if ($donghua_id) {
                     // find stream id
                     $stream = Stream::where('label', 'animexin')->first();
 
-                    // find donghua id
-                    $donghua_id = null;
-                    $donghua    = Donghua::where('external_titles->animexin_title', trim($donghuaTitle ?? ''))->first();
-                    if ($donghua && $donghua->id) {
-                        $donghua_id = $donghua->id;
+                    // get episode title
+                    $episodeTitle = $node->filter('.bsx > a.tip')->attr('title');
+
+                    // get episode link
+                    $episodeLink = $node->filter('.bsx > a.tip')->attr('href');
+
+                    // get episode number
+                    $node_episode = $node->filter('.bsx > a.tip > .limit > .egghead > .eggmeta > .eggepisode');
+                    if ($node_episode->count() > 0) {
+                        $episodeNumber = $node_episode->text();
+                    } else {
+                        $episodeNumber = 0;
+                    }
+                    preg_match_all('/\[([^\]]*)\]/', $episodeNumber, $episodeNumberMatches);
+                    $episodeNumber = preg_replace('/\[.*?\]/', '', $episodeNumber); // remove [xxx]
+                    $episodeNumber = preg_replace('/\((.*?)\)/', '', $episodeNumber); // remove (xxx)
+                    $episodeNumberPre = $episodeNumber = preg_replace('/[^0-9]/', '', $episodeNumber); // remove non number
+                    if (!empty($episodeNumberMatches[0])) {
+                        $episodeNumber .= ' ' . $episodeNumberMatches[0][0];
                     }
 
-                    // save episode
-                    Episode::firstOrCreate(
-                        ['stream_url' => $episodeLink],
-                        [
-                            'donghua_id'       => $donghua_id,
-                            'title'            => trim($episodeTitle),
-                            'stream_id'        => $stream->id,
-                            'episode_number'   => $episodeNumber,
-                            'video_source_url' => $videoSourceUrl,
-                            'updated_at'       => now(),
-                        ]
-                    );
-                }
+                    // get video source url
+                    $crawlerEpisodeLink = new DomCrawler($this->client->get($episodeLink)->getBody()->getContents());
+                    $videoSourceUrl     = $crawlerEpisodeLink->filter('iframe')->attr('src');
+                    $allEpisodes        = $crawlerEpisodeLink->filter('.nvs.nvsc > a')->attr('href');
 
-                // update donghua -> external_titles and animexin_url
-                Donghua::where('id', $donghua_id)
-                    ->where(function ($query) {
-                        $query->whereNull('external_titles->animexin_url')
-                            ->orWhere('external_titles->animexin_url', '');
-                    })
-                    ->update([
-                        'external_titles->animexin_url' => $allEpisodes ?? '',
-                    ]);
+                    if (!str_contains($videoSourceUrl, 'youtube')) {
+                        // save episode
+                        Episode::firstOrCreate(
+                            ['stream_url' => $episodeLink],
+                            [
+                                'donghua_id'       => $donghua_id,
+                                'title'            => trim($episodeTitle),
+                                'stream_id'        => $stream->id,
+                                'episode_number'   => $episodeNumber,
+                                'video_source_url' => $videoSourceUrl
+                            ]
+                        );
 
-                // update donghua -> image_cover
-                if (!empty($donghua_id) && $stream->is_cover_image) {
-                    // get donghua image cover
-                    $donghuaImage = $node->filter('.bsx > a.tip > .limit > img')->attr('src');
-                    $donghuaImage = strtok($donghuaImage ?? '', '?');
-
-                    // download image -> update donghua -> image_cover
-                    $response = Http::get($donghuaImage);
-                    if (!$donghua->image_cover && $response->successful()) {
-                        $extension = pathinfo(parse_url($donghuaImage, PHP_URL_PATH), PATHINFO_EXTENSION) ?: 'jpg';
-                        $fileName  = 'img/covers/' . Str::uuid() . '.' . $extension;
-                        Storage::disk('public')->put($fileName, $response->body());
-
-                        Donghua::where('id', $donghua_id)
-                            ->update([
-                                'image_cover' => $fileName ?? '',
+                        // update donghua -> episode_latest
+                        if ($donghua->episode_latest < $episodeNumberPre) {
+                            Donghua::where('id', $donghua_id)->update([
+                                'episode_latest' => $episodeNumberPre
                             ]);
+                        }
+                    }
+
+                    // update donghua -> external_titles and animexin_url
+                    Donghua::where('id', $donghua_id)
+                        ->where(function ($query) {
+                            $query->whereNull('external_titles->animexin_url')
+                                ->orWhere('external_titles->animexin_url', '');
+                        })
+                        ->update([
+                            'external_titles->animexin_url' => $allEpisodes ?? '',
+                        ]);
+
+                    // update donghua -> image_cover
+                    if ($stream->is_cover_image) {
+                        // get donghua image cover
+                        $donghuaImage = $node->filter('.bsx > a.tip > .limit > img')->attr('src');
+                        $donghuaImage = strtok($donghuaImage ?? '', '?');
+
+                        // download image -> update donghua -> image_cover
+                        $response = Http::get($donghuaImage);
+                        if (!$donghua->image_cover && $response->successful()) {
+                            $extension = pathinfo(parse_url($donghuaImage, PHP_URL_PATH), PATHINFO_EXTENSION) ?: 'jpg';
+                            $fileName  = 'img/covers/' . Str::uuid() . '.' . $extension;
+                            Storage::disk('public')->put($fileName, $response->body());
+
+                            Donghua::where('id', $donghua_id)
+                                ->update([
+                                    'image_cover' => $fileName ?? '',
+                                ]);
+                        }
                     }
                 }
             } catch (\Exception $e) {

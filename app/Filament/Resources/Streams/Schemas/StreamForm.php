@@ -1,12 +1,12 @@
 <?php
 namespace App\Filament\Resources\Streams\Schemas;
 
-use Filament\Schemas\Schema;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
-use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
-use Filament\Forms\Components\FileUpload;
+use Filament\Schemas\Schema;
 
 class StreamForm
 {
@@ -15,21 +15,39 @@ class StreamForm
         return $schema
             ->components([
                 Grid::make()
+                    ->columns(2)
                     ->columnSpan('full')
                     ->schema([
                         Section::make('')
                             ->schema([
-                                TextInput::make('name')->required()->inlineLabel()->autofocus(),
-                                TextInput::make('label')->required()->inlineLabel(),
-                                TextInput::make('homepage_url')->url()->required()->inlineLabel(),
-                                FileUpload::make('logo')->inlineLabel()
+                                TextInput::make('name')
+                                    ->required()
+                                    ->inlineLabel()
+                                    ->placeholder('AnimeXin')
+                                    ->autofocus(),
+                                TextInput::make('label')
+                                    ->required()
+                                    ->inlineLabel()
+                                    ->placeholder('animexin'),
+                                TextInput::make('homepage_url')
+                                    ->label('Homepage URL')
+                                    ->url()
+                                    ->required()
+                                    ->inlineLabel()
+                                    ->placeholder('https://animexin.dev/'),
+                                FileUpload::make('logo')->inlineLabel(),
                             ]),
                         Section::make('')
                             ->schema([
-                                Toggle::make('is_crawlable')->required()->inlineLabel(),
-                                Toggle::make('is_active')->required()->inlineLabel()
-                            ])
-                    ])
+                                Toggle::make('is_crawlable')
+                                    ->label('Crawlable')
+                                    ->required(),
+                                Toggle::make('is_active')
+                                    ->label('Active')
+                                    ->default(true)
+                                    ->required(),
+                            ]),
+                    ]),
             ]);
     }
 }

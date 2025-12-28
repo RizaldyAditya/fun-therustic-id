@@ -21,6 +21,7 @@ class DonghuaResource extends Resource
     protected static ?string $model = Donghua::class;
     protected static string|BackedEnum|null $navigationIcon = Heroicon::QueueList;
     protected static ?string $recordTitleAttribute = 'title_en';
+    protected static ?string $modelLabel = 'Donghua';
 
     public static function form(Schema $schema): Schema
     {

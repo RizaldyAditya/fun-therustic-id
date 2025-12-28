@@ -11,14 +11,14 @@ use App\Observers\DonghuastreamObserver;
 use Spatie\Crawler\CrawlProfiles\CrawlInternalUrls;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
 
-class CrawlWebs extends Command implements PromptsForMissingInput
+class CrawlLatestUpdate extends Command implements PromptsForMissingInput
 {
     /**
      * The name and signature of the console command.
      * Example : php artisan app:crawl-update animexin --page=2
      * @var string
      */
-    protected $signature = 'app:crawl-update {website} {--page=}';
+    protected $signature = 'app:crawl-updates {website} {--page=}';
 
     /**
      * The console command description.

@@ -1,10 +1,14 @@
 <?php
-
 namespace App\Console\Commands;
 
-use Spatie\Crawler\Crawler;
+use App\Models\Donghua;
+use App\Models\Stream;
+use App\Observers\AnimekhorIndexObserver;
+use App\Observers\AnimexinIndexObserver;
+use App\Observers\DonghuastreamIndexObserver;
+use App\Observers\DonghuaworldIndexObserver;
 use Illuminate\Console\Command;
-use App\Observers\EpisodeObserver;
+use Spatie\Crawler\Crawler;
 use Spatie\Crawler\CrawlProfiles\CrawlInternalUrls;
 
 class CrawlIndexPage extends Command
@@ -14,7 +18,7 @@ class CrawlIndexPage extends Command
      *
      * @var string
      */
-    protected $signature = 'app:crawl-index-page {website_label} {--donghua_id=}';
+    protected $signature = 'app:crawl-index {website} {--donghua_id=}';
 
     /**
      * The console command description.
@@ -28,22 +32,92 @@ class CrawlIndexPage extends Command
      */
     public function handle()
     {
-        $website_label   = $this->argument('website_label');
-        $donghua_id = $this->option('donghua_id') ?? false;
+        $input      = $this->argument('website');
+        $donghua_id = $this->option('donghua_id');
 
-        if (!empty($donghua_id)) {
-            $this->error('Donghua id is required');
+        // get website
+        $website = Stream::where(['label' => $input, 'is_crawlable' => true])->first();
+        if (!$website) {
+            $this->error("→ Website '{$input}' not found or not crawlable.");
             return 1;
         }
 
-        $this->info('Starting crawl website : ' . $website_label);
-        Crawler::create()
-            ->ignoreRobots()
-            ->setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:146.0) Gecko/20100101 Firefox/146.0')
-            // ->setCrawlObserver(new EpisodeObserver())
-            ->setCrawlProfile(new CrawlInternalUrls($website_label))
-            ->setMaximumDepth(0)
-            ->startCrawling($website_label);
-        $this->info('Crawl has been completed.');
+        // get donghua
+        $donghua = Donghua::find($donghua_id);
+        if (!$donghua) {
+            $this->error("→ Donghua with ID '{$donghua_id}' not found.");
+            return 1;
+        }
+
+        switch ($website->label) {
+            case 'animexin':
+                $url = $donghua->external_titles['animexin_url'] ?? null;
+                if (empty($url)) {
+                    $this->error("→ No AnimeXin URL found for this Donghua.");
+                    return 1;
+                }
+
+                $this->info("Starting crawl: {$url}");
+                Crawler::create()
+                    ->ignoreRobots()
+                    ->setUserAgent('Mozilla/5.0...')
+                    ->setCrawlObserver(new AnimexinIndexObserver($donghua_id))
+                    ->setCrawlProfile(new CrawlInternalUrls($url))
+                    ->setMaximumDepth(0)
+                    ->startCrawling($url);
+                $this->info('Crawl has been completed.');
+                break;
+            case 'animekhor':
+                $url = $donghua->external_titles['animekhor_url'] ?? null;
+                if (empty($url)) {
+                    $this->error("→ No AnimeKhor URL found for this Donghua.");
+                    return 1;
+                }
+
+                $this->info("Starting crawl: {$url}");
+                Crawler::create()
+                    ->ignoreRobots()
+                    ->setUserAgent('Mozilla/5.0...')
+                    ->setCrawlObserver(new AnimekhorIndexObserver($donghua_id))
+                    ->setCrawlProfile(new CrawlInternalUrls($url))
+                    ->setMaximumDepth(0)
+                    ->startCrawling($url);
+                $this->info('Crawl has been completed.');
+                break;
+            case 'donghuastream':
+                $url = $donghua->external_titles['donghuastream_url'] ?? null;
+                if (empty($url)) {
+                    $this->error("→ No DonghuaStream URL found for this Donghua.");
+                    return 1;
+                }
+
+                $this->info("Starting crawl: {$url}");
+                Crawler::create()
+                    ->ignoreRobots()
+                    ->setUserAgent('Mozilla/5.0...')
+                    ->setCrawlObserver(new DonghuastreamIndexObserver($donghua_id))
+                    ->setCrawlProfile(new CrawlInternalUrls($url))
+                    ->setMaximumDepth(0)
+                    ->startCrawling($url);
+                $this->info('Crawl has been completed.');
+                break;
+            case 'donghuaworld':
+                $url = $donghua->external_titles['donghuaworld_url'] ?? null;
+                if (empty($url)) {
+                    $this->error("→ No DonghuaWorld URL found for this Donghua.");
+                    return 1;
+                }
+
+                $this->info("Starting crawl: {$url}");
+                Crawler::create()
+                    ->ignoreRobots()
+                    ->setUserAgent('Mozilla/5.0...')
+                    ->setCrawlObserver(new DonghuaworldIndexObserver($donghua_id))
+                    ->setCrawlProfile(new CrawlInternalUrls($url))
+                    ->setMaximumDepth(0)
+                    ->startCrawling($url);
+                $this->info('Crawl has been completed.');
+                break;
+        }
     }
 }

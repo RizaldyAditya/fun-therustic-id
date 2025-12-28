@@ -1,12 +1,12 @@
 <?php
 namespace App\Filament\Resources\Streams\Pages;
 
+use App\Console\Commands\CrawlLatestUpdate;
 use App\Filament\Resources\Streams\StreamResource;
 use App\Models\Stream;
 use Filament\Actions\CreateAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Artisan;
 
 class ListStreams extends ListRecords
@@ -27,7 +27,7 @@ class ListStreams extends ListRecords
         $stream = Stream::where('label', $record->label)->first();
 
         if ($stream && $stream->is_crawlable) {
-            Artisan::call('app:crawl-update', [
+            Artisan::call(CrawlLatestUpdate::class, [
                 'website' => $stream->label,
             ]);
 

@@ -20,6 +20,7 @@ class StreamsTable
     {
         return $table
             ->columns([
+                TextColumn::make('id')->sortable()->label('ID')->toggleable(isToggledHiddenByDefault: true)->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('name')
                     ->searchable()
                     ->sortable(),
@@ -28,6 +29,7 @@ class StreamsTable
                     ->sortable(),
                 ImageColumn::make('logo')->disk('public'),
                 TextColumn::make('homepage_url')
+                    ->label('Homepage URL')
                     ->searchable()
                     ->url(fn($record) => $record->homepage_url)
                     ->openUrlInNewTab(),
@@ -65,22 +67,16 @@ class StreamsTable
             ->recordActions([
                 Action::make('runCrawler')
                     ->icon('heroicon-s-play')
-                    ->label('Crawl')
+                    ->label('')
                     ->color('success')
                     ->action(function ($record, $livewire) {
                         $livewire->runCrawler($record);
                     })
-                    ->requiresConfirmation(),
-                EditAction::make()->label(''),
-                DeleteAction::make()->label(''),
+                    ->requiresConfirmation()
+                    ->tooltip('Run Homepage Crawler for Latest Updates'),
+                EditAction::make()->label('')->tooltip('Edit'),
             ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                    ForceDeleteBulkAction::make(),
-                    RestoreBulkAction::make(),
-                ]),
-            ])
+            ->toolbarActions([])
             ->defaultSort('name', 'asc')
             ->recordUrl(null);
     }

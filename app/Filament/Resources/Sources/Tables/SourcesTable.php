@@ -20,8 +20,8 @@ class SourcesTable
                 IconColumn::make('is_active')->label('Active')->alignEnd()->boolean(),
             ])
             ->recordActions([
-                EditAction::make()->label(''),
-                DeleteAction::make()->label('')
+                EditAction::make()->label('')->tooltip('Edit'),
+                DeleteAction::make()->label('')->tooltip('Delete')
             ])
             ->toolbarActions([
                 BulkAction::make('delete')

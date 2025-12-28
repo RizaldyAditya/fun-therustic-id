@@ -1,10 +1,10 @@
 <?php
 namespace App\Filament\Resources\Sources\Schemas;
 
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 
 class SourceForm
 {
@@ -14,9 +14,16 @@ class SourceForm
             ->schema([
                 Section::make('')
                     ->schema([
-                        TextInput::make('name')->required()->inlineLabel()->autofocus(),
-                        Toggle::make('is_active')->required()->inlineLabel()->default(true),
-                    ])
+                        TextInput::make('name')
+                            ->required()
+                            ->inlineLabel()
+                            ->autofocus(),
+                        Toggle::make('is_active')
+                            ->label('Active')
+                            ->required()
+                            ->inlineLabel()
+                            ->default(true),
+                    ]),
             ]);
     }
 }

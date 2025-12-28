@@ -14,7 +14,8 @@ class EpisodesForm
         return $schema
             ->components([
                 Grid::make()
-                    ->columns(1)
+                    ->columns(2)
+                    ->columnSpan('full')
                     ->schema([
                         Section::make('Donghua')
                             ->schema([
@@ -26,11 +27,6 @@ class EpisodesForm
                                 TextInput::make('episode_number')->label('Episode Number')->numeric()->required(),
                                 TextInput::make('title')->label('Episode Title'),
                             ]),
-                    ]),
-                Grid::make()
-                    ->columns(1)
-                    ->columnSpan('full')
-                    ->schema([
                         Section::make('Streaming Web')
                             ->schema([
                                 Select::make('stream_id')
