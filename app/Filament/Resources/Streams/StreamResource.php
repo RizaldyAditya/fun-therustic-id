@@ -17,8 +17,9 @@ use UnitEnum;
 class StreamResource extends Resource
 {
     protected static ?string $model                            = Stream::class;
-    protected static string|UnitEnum|null $navigationGroup     = 'Settings';
+    protected static string|UnitEnum|null $navigationGroup = 'Settings';
     protected static ?string $recordTitleAttribute             = 'name';
+    protected static ?string $modelLabel                       = 'Stream';
 
     public static function form(Schema $schema): Schema
     {

@@ -1,15 +1,23 @@
 <?php
 namespace App\Filament\Resources\Donghuas\Schemas;
 
-use Filament\Forms;
+use App\Console\Commands\CrawlIndexPage;
 use App\Models\Source;
 use App\Models\Status;
 use App\Models\Studio;
-use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
+use Filament\Actions\Action;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\KeyValue;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Artisan;
 
 class DonghuaForm
 {
@@ -24,94 +32,254 @@ class DonghuaForm
                         Tabs::make('Tabs')
                             ->tabs([
                                 Tab::make('Title')
+                                    ->icon('heroicon-o-pencil-square')
                                     ->schema([
                                         Grid::make()
                                             ->columns(2)
                                             ->columnSpan('md')
                                             ->schema([
-                                                Forms\Components\TextInput::make('title_en')->label('Title (English)')->required(),
-                                                Forms\Components\TextInput::make('title_zh')->label('Title (Chinese)')->required(),
-                                                Forms\Components\FileUpload::make('image_cover')
-                                                    ->disk('public')
-                                                    ->directory('img/covers')
-                                                    ->label('Cover Image')
-                                                    ->visibility('public')
-                                                    ->image(),
-                                                Forms\Components\Toggle::make('is_active')
-                                                    ->label('Active')
-                                                    ->required()
-                                                    ->default(true),
-                                                Forms\Components\Toggle::make('is_observed')
-                                                    ->label('Observe')
-                                                    ->required()
-                                                    ->default(true),
-                                            ])
-                                    ])
-                                    ->icon(Heroicon::PencilSquare),
+                                                Fieldset::make('Uploads')
+                                                    ->columns(1)
+                                                    ->schema([
+                                                        FileUpload::make('image_cover')
+                                                            ->label('Cover Image')
+                                                            ->disk('public')
+                                                            ->directory('img/covers')
+                                                            ->label('')
+                                                            ->visibility('public')
+                                                            ->image(),
+
+                                                    ]),
+                                                Fieldset::make('Title')
+                                                    ->columns(1)
+                                                    ->schema([
+                                                        TextInput::make('title_en')->label('Title (EN)')->required()->inlineLabel(),
+                                                        TextInput::make('title_zh')->label('Title (CN / Pinyin)')->required()->inlineLabel(),
+                                                    ]),
+                                                Fieldset::make('Status')
+                                                    ->columns(1)
+                                                    ->schema([
+                                                        Toggle::make('is_active')
+                                                            ->label('Active')
+                                                            ->required()
+                                                            ->default(true)
+                                                            ->onColor('success'),
+                                                        Toggle::make('is_observed')
+                                                            ->label('Currently is Hot!')
+                                                            ->required()
+                                                            ->default(true)
+                                                            ->onColor('danger'),
+                                                        Select::make('status_id')
+                                                            ->label('Watch Status')
+                                                            ->options(Status::query()->pluck('name', 'id'))
+                                                            ->required(),
+                                                        Select::make('airing')
+                                                            ->label('Airing Status')
+                                                            ->options([
+                                                                '0' => 'Finished',
+                                                                '1' => 'Airing',
+                                                            ])
+                                                            ->required(),
+                                                    ]),
+                                            ]),
+                                    ]),
                                 Tab::make('Episode')
-                                    ->schema([
-                                        Grid::make()
-                                            ->columns(5)
-                                            ->columnSpan('md')
-                                            ->schema([
-                                                Forms\Components\TextInput::make('season')->numeric()->required(),
-                                                Forms\Components\TextInput::make('episode_latest')->numeric(),
-                                                Forms\Components\TextInput::make('episode_watched')->numeric(),
-                                                Forms\Components\TextInput::make('episode_watched_seasonal')->numeric(),
-                                                Forms\Components\TextInput::make('episode_total')->numeric(),
-                                            ])
-                                    ])
-                                    ->icon(Heroicon::PercentBadge),
-                                Tab::make('Status')
+                                    ->icon('heroicon-o-hashtag')
                                     ->schema([
                                         Grid::make()
                                             ->columns(2)
                                             ->columnSpan('md')
                                             ->schema([
-                                                Forms\Components\Select::make('status_id')
-                                                    ->options(Status::query()->pluck('name', 'id'))
-                                                    ->required(),
-                                                Forms\Components\Select::make('airing')
-                                                    ->options([
-                                                        '0' => 'Finished',
-                                                        '1' => 'Airing',
-                                                    ])
-                                                    ->required(),
-                                            ])
-                                    ])
-                                    ->icon(Heroicon::CheckBadge),
+                                                Fieldset::make('Episode Number')
+                                                    ->columns(1)
+                                                    ->schema([
+                                                        TextInput::make('episode_latest')->label('# Latest')->numeric()->inlineLabel(),
+                                                        TextInput::make('episode_watched')->label('# Watched (Season)')->numeric()->inlineLabel(),
+                                                        TextInput::make('episode_watched_seasonal')->label('# Watches (Overall)')->numeric()->inlineLabel(),
+                                                        TextInput::make('episode_total')->label('# Total')->numeric()->inlineLabel(),
+                                                    ]),
+                                                Fieldset::make('Others')
+                                                    ->columns(1)
+                                                    ->schema([
+                                                        TextInput::make('season')->numeric()->required()->inlineLabel(),
+                                                    ]),
+                                            ]),
+                                    ]),
                                 Tab::make('Sources')
+                                    ->icon('heroicon-o-book-open')
                                     ->schema([
                                         Grid::make()
                                             ->columns(2)
                                             ->columnSpan('md')
                                             ->schema([
-                                                Forms\Components\Select::make('studio_id')
-                                                    ->label('Studio')
-                                                    ->options(Studio::orderBy('name')->pluck('name', 'id'))
-                                                    ->searchable(),
-                                                Forms\Components\Select::make('source_id')
-                                                    ->label('Source')
-                                                    ->options(Source::orderBy('name')->pluck('name', 'id'))
-                                                    ->searchable(),
-                                            ])
-                                    ])
-                                    ->icon(Heroicon::SquaresPlus),
-                                Tab::make('MAL & Wiki')
+                                                Fieldset::make('MyAnimeList')
+                                                    ->columns(1)
+                                                    ->schema([
+                                                        TextInput::make('myanimelist')->url()->inlineLabel(),
+                                                        Select::make('studio_id')
+                                                            ->label('Studio')
+                                                            ->options(Studio::orderBy('name')->pluck('name', 'id'))
+                                                            ->searchable()
+                                                            ->inlineLabel()
+                                                            ->relationship('studio', 'name')
+                                                            ->preload()
+                                                            ->createOptionForm([
+                                                                TextInput::make('name')->required()->inlineLabel()->autofocus(),
+                                                                TextInput::make('url')->label('URL')->url()->inlineLabel()->autofocus(),
+                                                                Toggle::make('is_active')->label('Active')->required()->default(true)->inlineLabel()
+                                                            ]),
+                                                        Select::make('source_id')
+                                                            ->label('Source')
+                                                            ->options(Source::orderBy('name')->pluck('name', 'id'))
+                                                            ->searchable()
+                                                            ->inlineLabel()
+                                                            ->relationship('source', 'name')
+                                                            ->preload()
+                                                            ->createOptionForm([
+                                                                TextInput::make('name')->required()->inlineLabel()->autofocus(),
+                                                                Toggle::make('is_active')->label('Active')->required()->default(true)->inlineLabel()
+                                                            ]),
+                                                    ]),
+                                                Fieldset::make('Wiki')
+                                                    ->columns(1)
+                                                    ->schema([
+                                                        TextInput::make('mc_name')->label('MC Name'),
+                                                        TextInput::make('mc_wikia')->label('MC Wiki URL')->url(),
+                                                    ]),
+
+                                            ]),
+                                    ]),
+                                Tab::make('Streaming Links')
+                                    ->icon('heroicon-o-link')
                                     ->schema([
-                                        Forms\Components\TextInput::make('myanimelist')->url()->required(),
-                                        Forms\Components\TextInput::make('mc_name')->label('MC Name'),
-                                        Forms\Components\TextInput::make('mc_wikia')->label('MC Wiki URL')->url(),
-                                    ])
-                                    ->icon(Heroicon::BookOpen),
-                                Tab::make('External Links')
-                                    ->schema([
-                                        Forms\Components\KeyValue::make('external_titles')
+                                        KeyValue::make('external_titles')
+                                            ->label('Details of website streaming links, such as AnimeXin, for crawling purposes.')
                                             ->keyLabel('Name')
                                             ->valueLabel('Description')
-                                            ->reorderable(),
-                                    ])
-                                    ->icon(Heroicon::Link),
+                                            ->reorderable()
+                                            ->default([
+                                                'animexin_title' => '',
+                                                'animexin_url' => '',
+                                                'animekhor_title' => '',
+                                                'animekhor_url' => '',
+                                                'donghuastream_title' => '',
+                                                'donghuastream_url' => '',
+                                                'donghuaworld_title' => '',
+                                                'donghuaworld_url' => '',
+                                            ]),
+                                    ]),
+                                Tab::make('Crawl Index')
+                                    ->icon('heroicon-o-arrow-path')
+                                    ->schema([
+                                        Grid::make()
+                                            ->columns(2)
+                                            ->schema([
+                                                Fieldset::make('AnimeXin')
+                                                    ->columns(1)
+                                                    ->schema([
+                                                        Action::make('runCrawlAx')
+                                                            ->label('Crawl Episode Index')
+                                                            ->icon('heroicon-o-arrow-path')
+                                                            ->color('success')
+                                                            ->action(function ($record) {
+                                                                // Run the command
+                                                                Artisan::call(CrawlIndexPage::class, [
+                                                                    'website'      => 'animexin',
+                                                                    '--donghua_id' => $record->id, // You can pass dynamic IDs here
+                                                                ]);
+
+                                                                // Show a success message
+                                                                Notification::make()
+                                                                    ->title('Crawl completed successfully.')
+                                                                    ->success()
+                                                                    ->send();
+                                                            })
+                                                            ->requiresConfirmation()
+                                                            ->modalHeading('Run Crawler on AnimeXin')
+                                                            ->modalDescription('Are you sure you want to crawl the AnimeXin index? This process might take a few moments.')
+                                                            ->modalSubmitActionLabel('Yes, start crawling')
+                                                            ->modalCancelActionLabel('Cancel'),
+                                                    ]),
+                                                Fieldset::make('AnimeKhor')
+                                                    ->columns(1)
+                                                    ->schema([
+                                                        Action::make('runCrawlAk')
+                                                            ->label('Crawl Episode Index')
+                                                            ->icon('heroicon-o-arrow-path')
+                                                            ->color('info')
+                                                            ->action(function ($record) {
+                                                                // Run the command
+                                                                Artisan::call(CrawlIndexPage::class, [
+                                                                    'website'      => 'animekhor',
+                                                                    '--donghua_id' => $record->id, // You can pass dynamic IDs here
+                                                                ]);
+
+                                                                // Show a success message
+                                                                Notification::make()
+                                                                    ->title('Crawl completed successfully.')
+                                                                    ->success()
+                                                                    ->send();
+                                                            })
+                                                            ->requiresConfirmation()
+                                                            ->modalHeading('Run Crawler on AnimeKhor')
+                                                            ->modalDescription('Are you sure you want to crawl the AnimeKhor index? This process might take a few moments.')
+                                                            ->modalSubmitActionLabel('Yes, start crawling')
+                                                            ->modalCancelActionLabel('Cancel'),
+                                                    ]),
+                                                Fieldset::make('DonghuaStream')
+                                                    ->columns(1)
+                                                    ->schema([
+                                                        Action::make('runCrawlDh')
+                                                            ->label('Crawl Episode Index')
+                                                            ->icon('heroicon-o-arrow-path')
+                                                            ->color('danger')
+                                                            ->action(function ($record) {
+                                                                // Run the command
+                                                                Artisan::call(CrawlIndexPage::class, [
+                                                                    'website'      => 'donghuastream',
+                                                                    '--donghua_id' => $record->id, // You can pass dynamic IDs here
+                                                                ]);
+
+                                                                // Show a success message
+                                                                Notification::make()
+                                                                    ->title('Crawl completed successfully.')
+                                                                    ->success()
+                                                                    ->send();
+                                                            })
+                                                            ->requiresConfirmation()
+                                                            ->modalHeading('Run Crawler on DonghuaStream')
+                                                            ->modalDescription('Are you sure you want to crawl the DonghuaStream index? This process might take a few moments.')
+                                                            ->modalSubmitActionLabel('Yes, start crawling')
+                                                            ->modalCancelActionLabel('Cancel'),
+                                                    ]),
+                                                Fieldset::make('DonghuaWorld')
+                                                    ->columns(1)
+                                                    ->schema([
+                                                        Action::make('runCrawlDw')
+                                                            ->label('Crawl Episode Index')
+                                                            ->icon('heroicon-o-arrow-path')
+                                                            ->color('warning')
+                                                            ->action(function ($record) {
+                                                                // Run the command
+                                                                Artisan::call(CrawlIndexPage::class, [
+                                                                    'website'      => 'donghuaworld',
+                                                                    '--donghua_id' => $record->id, // You can pass dynamic IDs here
+                                                                ]);
+
+                                                                // Show a success message
+                                                                Notification::make()
+                                                                    ->title('Crawl completed successfully.')
+                                                                    ->success()
+                                                                    ->send();
+                                                            })
+                                                            ->requiresConfirmation()
+                                                            ->modalHeading('Run Crawler on DonghuaWorld')
+                                                            ->modalDescription('Are you sure you want to crawl the DonghuaWorld index? This process might take a few moments.')
+                                                            ->modalSubmitActionLabel('Yes, start crawling')
+                                                            ->modalCancelActionLabel('Cancel'),
+                                                    ]),
+                                            ]),
+                                    ]),
                             ]),
                     ]),
             ]);

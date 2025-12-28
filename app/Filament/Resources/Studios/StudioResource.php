@@ -19,6 +19,7 @@ class StudioResource extends Resource
     protected static ?string $model                            = Studio::class;
     protected static string|UnitEnum|null $navigationGroup = 'Settings';
     protected static ?string $recordTitleAttribute             = 'name';
+    protected static ?string $modelLabel                       = 'Studio';
 
     public static function form(Schema $schema): Schema
     {
