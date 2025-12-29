@@ -22,6 +22,7 @@ class EpisodesTable
             ->columns([
                 TextColumn::make('id')->sortable()->label('ID')->toggleable(isToggledHiddenByDefault: false),
                 ImageColumn::make('donghua.image_cover')
+                    ->disk('public')
                     ->label('')
                     ->imageHeight(50)
                     ->alignCenter()
@@ -53,6 +54,7 @@ class EpisodesTable
                     ->searchable(),
                 TextColumn::make('episode_number')->label('# EP')->sortable()->searchable()->alignCenter(),
                 ImageColumn::make('stream.logo')
+                    ->disk('public')
                     ->label('Stream Link')
                     ->sortable()
                     ->searchable()
