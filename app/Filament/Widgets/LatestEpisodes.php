@@ -25,8 +25,8 @@ class LatestEpisodes extends TableWidget
 {
     use InteractsWithTable;
 
-    protected static ?int $sort       = 2;
-    public ?string $filterStatus      = null;
+    protected static ?int $sort  = 2;
+    public ?string $filterStatus = null;
 
     public function table(Table $table): Table
     {
@@ -71,11 +71,19 @@ class LatestEpisodes extends TableWidget
                         return $record->title;
                     }),
                 TextColumn::make('episode_number')->label('# EP')->sortable(),
-                ImageColumn::make('stream.logo')->label('Stream')->imageHeight(28)->alignCenter()
+                ImageColumn::make('stream.logo')
+                    ->label('Stream')
+                    ->disk('public')
+                    ->visibility('public')
+                    ->imageHeight(28)
+                    ->alignCenter()
                     ->url(fn(Episode $record): string => $record->stream_url)
                     ->openUrlInNewTab()
                     ->tooltip('Go to stream URL.'),
-                TextColumn::make('created_at')->label('Added At')->dateTime()->sortable(),
+                TextColumn::make('created_at')
+                    ->label('Added At')
+                    ->dateTime('M d Y, H:i')
+                    ->sortable(),
             ])
             ->filters([
                 SelectFilter::make('stream_id')
@@ -102,6 +110,7 @@ class LatestEpisodes extends TableWidget
                 Action::make('viewVideoSourceUrl')
                     ->label('')
                     ->icon('heroicon-s-play-circle')
+                    ->slideOver()
                     ->modalHeading(fn($record) => $record->title)
                     ->modalDescription(fn($record) => $record->donghua->title_en)
                     ->modalSubmitAction(false)
@@ -116,6 +125,7 @@ class LatestEpisodes extends TableWidget
                 Action::make('viewDetails')
                     ->label('')
                     ->icon('heroicon-s-document-magnifying-glass')
+                    ->slideOver()
                     ->tooltip('Donghua Details')
                     ->modalHeading(fn($record) => $record->donghua->title_en)
                     ->modalDescription(fn($record) => $record->donghua->title_zh)

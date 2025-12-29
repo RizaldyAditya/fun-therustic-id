@@ -16,8 +16,8 @@ use UnitEnum;
 
 class SourceResource extends Resource
 {
-    protected static ?string $model                            = Source::class;
     protected static string|UnitEnum|null $navigationGroup = 'Settings';
+    protected static ?string $model                            = Source::class;
     protected static ?string $recordTitleAttribute             = 'name';
     protected static ?string $modelLabel                       = 'Source';
 

@@ -7,7 +7,7 @@ use Filament\PanelProvider;
 use Filament\Support\Enums\Width;
 use Filament\Support\Colors\Color;
 // use Filament\Widgets\AccountWidget;
-use App\Filament\Pages\Auth\EditProfile;
+use App\Filament\Pages\EditProfile;
 use Filament\Navigation\NavigationGroup;
 // use Filament\Widgets\FilamentInfoWidget;
 use Filament\Http\Middleware\Authenticate;
@@ -62,6 +62,10 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make()
                     ->label('Dashboard')
                     ->icon('heroicon-s-home'),
+                NavigationGroup::make()
+                    ->label('Donghuas')
+                    ->icon('heroicon-s-circle-stack')
+                    ->collapsed(),
                 NavigationGroup::make()
                     ->label('Settings')
                     ->icon('heroicon-o-cog-6-tooth')
