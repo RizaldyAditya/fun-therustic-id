@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Pages\Auth;
+namespace App\Filament\Pages;
 
 use Filament\Auth\Pages\EditProfile as BaseEditProfile;
 use Filament\Forms\Components\FileUpload;

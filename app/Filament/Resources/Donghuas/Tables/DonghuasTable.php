@@ -30,31 +30,29 @@ class DonghuasTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->columns([
-                ColumnGroup::make('Donghua')
-                    ->columns([
-                        ImageColumn::make('image_cover')
-                            ->label('')
-                            ->disk('public')
-                            ->action(
-                                Action::make('preview')
-                                    ->modalHeading(fn($record) => $record->title_en . ' Episode List')
-                                    ->modalDescription(fn($record) => $record->title_zh)
-                                    ->modalWidth('2xl')
-                                    ->modalSubmitAction(false)
-                                    ->schema([
-                                        ViewField::make('image_preview')->view('filament.image-preview')
-                                            ->viewData(fn($record) => [
-                                                'image' => $record?->image_cover,
-                                            ]),
-                                    ])
-                            ),
-                        TextColumn::make('id')->label('ID')->sortable()->toggleable(isToggledHiddenByDefault: true)->toggleable(isToggledHiddenByDefault: true),
-                        TextColumn::make('title_en')->label('Title (EN/CN)')->sortable()->searchable()
-                            ->description(fn($record) => $record->title_zh)
-                            ->width(400)
-                            ->wrap(),
-                    ]),
+            ->columns([               
+                TextColumn::make('id')->label('ID')->sortable()->toggleable(isToggledHiddenByDefault: true)->toggleable(isToggledHiddenByDefault: true),
+                ImageColumn::make('image_cover')
+                    ->label('')
+                    ->disk('public')
+                    ->visibility('public')
+                    ->action(
+                        Action::make('preview')
+                            ->modalHeading(fn($record) => $record->title_en . ' Episode List')
+                            ->modalDescription(fn($record) => $record->title_zh)
+                            ->modalWidth('2xl')
+                            ->modalSubmitAction(false)
+                            ->schema([
+                                ViewField::make('image_preview')->view('filament.image-preview')
+                                    ->viewData(fn($record) => [
+                                        'image' => $record?->image_cover,
+                                    ]),
+                            ])
+                    ),
+                TextColumn::make('title_en')->label('Title (EN/CN)')->sortable()->searchable()
+                    ->description(fn($record) => $record->title_zh)
+                    ->width(400)
+                    ->wrap(),
                 ColumnGroup::make('Watched Episode')
                     ->columns([
                         TextInputColumn::make('episode_watched')
