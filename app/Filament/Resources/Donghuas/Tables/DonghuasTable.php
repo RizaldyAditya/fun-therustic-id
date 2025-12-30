@@ -109,7 +109,7 @@ class DonghuasTable
                     ->icon('heroicon-m-play')
                     ->slideOver()
                     ->modalHeading(fn($record) => "Watching: {$record->title_en}")
-                    ->modalWidth('7xl')
+                    ->modalWidth('full')
                     ->modalSubmitAction(false) // Hide the "Submit" button
                     ->modalCancelActionLabel('Close')
                     ->modalSubmitAction(false)
@@ -250,7 +250,6 @@ class DonghuasTable
                     RestoreBulkAction::make(),
                 ]),
             ])
-
             ->defaultSort('id', 'asc')
             ->recordAction(null)
             ->recordUrl(null)

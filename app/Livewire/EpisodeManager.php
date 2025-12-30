@@ -2,24 +2,27 @@
 namespace App\Livewire;
 
 use App\Models\Episode;
-use Livewire\Component;
-use Filament\Tables\Table;
 use Filament\Actions\Action;
-use Filament\Actions\EditAction;
-use Filament\Support\Enums\Size;
-use Illuminate\Contracts\View\View;
-use Filament\Forms\Contracts\HasForms;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Contracts\HasTable;
-use Filament\Forms\Components\TextInput;
-use Filament\Notifications\Notification;
-use Filament\Tables\Columns\ImageColumn;
-use Illuminate\Database\Eloquent\Builder;
-use Filament\Actions\Contracts\HasActions;
-use Filament\Tables\Columns\TextInputColumn;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Tables\Concerns\InteractsWithTable;
+use Filament\Actions\BulkAction;
 use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
+use Filament\Notifications\Notification;
+use Filament\Support\Enums\Size;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\TextInputColumn;
+use Filament\Tables\Concerns\InteractsWithTable;
+use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Table;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Livewire\Component;
 
 class EpisodeManager extends Component implements HasForms, HasTable, HasActions
 {
@@ -71,9 +74,9 @@ class EpisodeManager extends Component implements HasForms, HasTable, HasActions
             ])
             ->recordActions([
                 Action::make('viewVideoSourceUrl')
-                    ->label('Watch')
-                    ->icon('heroicon-s-play-circle')
-                    ->color('info')
+                    ->label('')
+                    ->icon('heroicon-s-play')
+                    ->color('success')
                     ->size(Size::Large)
                     ->slideOver()
                     ->modalHeading(fn($record) => $record->title)
@@ -86,7 +89,7 @@ class EpisodeManager extends Component implements HasForms, HasTable, HasActions
                         ['url' => $record->video_source_url]
                     )),
                 EditAction::make('editEpisode')
-                    ->label('Edit')
+                    ->label('')
                     ->icon('heroicon-s-pencil')
                     ->color('warning')
                     ->schema([
@@ -115,6 +118,32 @@ class EpisodeManager extends Component implements HasForms, HasTable, HasActions
                         $record->update($data);
                         Notification::make()
                             ->title('Episode data saved successfully.')
+                            ->success() // Green color
+                            ->send();
+                    }),
+                DeleteAction::make('deleteEpisode')
+                    ->label('')
+                    ->icon('heroicon-s-trash')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->action(function (Episode $record) {
+                        $record->delete();
+                        Notification::make()
+                            ->title('Episode deleted successfully.')
+                            ->success() // Green color
+                            ->send();
+                    }),
+            ])
+            ->toolbarActions([
+                BulkAction::make('deleteEpisodes')
+                    ->label('Delete Selected')
+                    ->icon('heroicon-s-trash')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->action(function (Collection $records) {
+                        $records->each->delete();
+                        Notification::make()
+                            ->title('Selected episodes deleted successfully.')
                             ->success() // Green color
                             ->send();
                     }),
