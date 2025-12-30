@@ -21,6 +21,7 @@ return new class extends Migration
             $table->integer('episode_watched')->default(0)->nullable();
             $table->integer('episode_watched_seasonal')->default(0)->nullable();
             $table->integer('episode_total')->default(0)->nullable();
+            $table->integer('episode_dl')->default(0)->nullable();
             $table->integer('status_id')->nullable();
             $table->boolean('airing')->default(0);
             $table->boolean('is_observed')->default(0);

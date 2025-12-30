@@ -36,7 +36,6 @@ class EpisodeManager extends Component implements HasForms, HasTable, HasActions
             ->columns([
                 TextInputColumn::make('episode_number')
                     ->label('# Episode')
-                    ->type('number')
                     ->extraAttributes([
                         'style' => 'width: 50px;', // Sets the width of the cell
                     ])

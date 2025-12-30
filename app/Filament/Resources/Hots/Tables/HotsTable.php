@@ -4,11 +4,13 @@ namespace App\Filament\Resources\Hots\Tables;
 use App\Models\Status;
 use Filament\Tables\Table;
 use Filament\Actions\Action;
+use Filament\Schemas\Components\Tabs;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\ViewField;
 use Filament\Tables\Columns\ColumnGroup;
 use Filament\Tables\Columns\ImageColumn;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -67,26 +69,32 @@ class HotsTable
                             ? 'New episodes available!'
                             : 'Up to date';
                     }),
-                ColumnGroup::make('Watched Episode')
+                ColumnGroup::make('Episode')
                     ->columns([
                         TextInputColumn::make('episode_watched')
-                            ->label('Season')
+                            ->label('# Watched in Season')
                             ->type('number')
                             ->extraInputAttributes(['step' => '1'])
                             ->alignCenter()
                             ->extraHeaderAttributes(['style' => 'width: 200px;']),
                         TextInputColumn::make('episode_watched_seasonal')
-                            ->label('Seasonal')
+                            ->label('# Watched in Total')
                             ->type('number')
                             ->extraInputAttributes(['step' => '1'])
                             ->alignCenter()
                             ->extraHeaderAttributes(['style' => 'width: 200px;']),
                         TextInputColumn::make('episode_latest')
-                            ->label('Latest')
+                            ->label('# Latest')
+                            ->alignCenter()
+                            ->extraHeaderAttributes(['style' => 'width: 200px;']),
+                        TextInputColumn::make('episode_dl')
+                            ->label('# Downloaded')
+                            ->type('number')
+                            ->extraInputAttributes(['step' => '1'])
                             ->alignCenter()
                             ->extraHeaderAttributes(['style' => 'width: 200px;']),
                         TextColumn::make('episode_total')
-                            ->label('Total')
+                            ->label('# Total')
                             ->default(fn($record) => $record->episode_total ?? $record->episode_latest ?? '-')
                             ->alignCenter(),
                     ]),
@@ -107,11 +115,15 @@ class HotsTable
                     ]),
             ])
             ->filters([
+                SelectFilter::make('status_id')
+                    ->label('Status')
+                    ->options(Status::query()->pluck('name', 'id'))
+                    ->searchable(),
                 SelectFilter::make('status')
                     ->label('Watch Status')
                     ->options([
                         'all'       => 'All',
-                        'unwatched' => 'Unwatched',
+                        'unwatched' => 'New Updates',
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query->when(
@@ -134,66 +146,50 @@ class HotsTable
                     ]),
             ])
             ->recordActions([
-                Action::make('watchEpisodeAx')
-                    ->label('AX')
+                Action::make('watchEpisode')
+                    ->label('')
                     ->color('success')
-                    ->icon('heroicon-m-play-circle')
+                    ->icon('heroicon-m-play')
                     ->slideOver()
                     ->modalHeading(fn($record) => "Watching: {$record->title_en}")
                     ->modalWidth('7xl')
                     ->modalSubmitAction(false) // Hide the "Submit" button
                     ->modalCancelActionLabel('Close')
-                    ->modalContent(fn($record) => view('filament.episode-loader', [
-                        'donghuaId' => $record->id,
-                        'streamId'  => 1,
-                    ]))
                     ->modalSubmitAction(false)
-                    ->tooltip('Watch from AnimeXin'),
-                Action::make('watchEpisodeAk')
-                    ->label('AK')
-                    ->color('info')
-                    ->icon('heroicon-m-play-circle')
-                    ->slideOver()
-                    ->modalHeading(fn($record) => "Watching: {$record->title_en}")
-                    ->modalWidth('7xl')
-                    ->modalSubmitAction(false) // Hide the "Submit" button
-                    ->modalCancelActionLabel('Close')
-                    ->modalContent(fn($record) => view('filament.episode-loader', [
-                        'donghuaId' => $record->id,
-                        'streamId'  => 2,
-                    ]))
-                    ->modalSubmitAction(false)
-                    ->tooltip('Watch from AnimeKhor'),
-                Action::make('watchEpisodeDs')
-                    ->label('DH')
-                    ->color('danger')
-                    ->icon('heroicon-m-play-circle')
-                    ->slideOver()
-                    ->modalHeading(fn($record) => "Watching: {$record->title_en}")
-                    ->modalWidth('7xl')
-                    ->modalSubmitAction(false) // Hide the "Submit" button
-                    ->modalCancelActionLabel('Close')
-                    ->modalContent(fn($record) => view('filament.episode-loader', [
-                        'donghuaId' => $record->id,
-                        'streamId'  => 4,
-                    ]))
-                    ->modalSubmitAction(false)
-                    ->tooltip('Watch from DonghuaStream'),
-                Action::make('watchEpisodeDw')
-                    ->label('DW')
-                    ->color('warning')
-                    ->icon('heroicon-m-play-circle')
-                    ->slideOver()
-                    ->modalHeading(fn($record) => "Watching: {$record->title_en}")
-                    ->modalWidth('7xl')
-                    ->modalSubmitAction(false) // Hide the "Submit" button
-                    ->modalCancelActionLabel('Close')
-                    ->modalContent(fn($record) => view('filament.episode-loader', [
-                        'donghuaId' => $record->id,
-                        'streamId'  => 5,
-                    ]))
-                    ->modalSubmitAction(false)
-                    ->tooltip('Watch from DonghuaWorld'),
+                    ->schema([
+                        Tabs::make('Watch')
+                            ->tabs([
+                                Tab::make('AnimeXin')
+                                    ->schema([
+                                        ViewField::make('donghua.episode_loader_ax')->view('filament.episode-loader')->viewData(fn($record) => [
+                                            'donghuaId' => $record->id,
+                                            'streamId'  => 1,
+                                        ]),
+                                    ]),
+                                Tab::make('AnimeKhor')
+                                    ->schema([
+                                        ViewField::make('donghua.episode_loader_ak')->view('filament.episode-loader')->viewData(fn($record) => [
+                                            'donghuaId' => $record->id,
+                                            'streamId'  => 2,
+                                        ]),
+                                    ]),
+                                Tab::make('DonghuaStream')
+                                    ->schema([
+                                        ViewField::make('donghua.episode_loader_ds')->view('filament.episode-loader')->viewData(fn($record) => [
+                                            'donghuaId' => $record->id,
+                                            'streamId'  => 4,
+                                        ]),
+                                    ]),
+                                Tab::make('DonghuaWorld')
+                                    ->schema([
+                                        ViewField::make('donghua.episode_loader_dw')->view('filament.episode-loader')->viewData(fn($record) => [
+                                            'donghuaId' => $record->id,
+                                            'streamId'  => 5,
+                                        ]),
+                                    ]),
+                            ]),
+                    ])
+                    ->tooltip('Watch Episodes'),
                 Action::make('editParent')
                     ->label('')
                     ->icon('heroicon-s-pencil-square')
