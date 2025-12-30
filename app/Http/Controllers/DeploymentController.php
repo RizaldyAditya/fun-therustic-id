@@ -2,13 +2,14 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Process;
 
 class DeploymentController extends Controller
 {
     public function deploy(Request $request)
     {
-        // 1. Validate the GitHub Signature (Security)
+        // Validate the GitHub Signature (Security)
         $signature = $request->header('X-Hub-Signature-256');
         $payload   = $request->getContent();
         $secret    = config('app.deploy_secret');
@@ -19,21 +20,28 @@ class DeploymentController extends Controller
             abort(403, 'Invalid signature');
         }
 
-        // 2. Run the Deployment Commands
-        // We use Laravel 12's Process facade for clean execution
-        $result = Process::path(base_path())
-            ->run([
-                'git', 'fetch', 'origin',
-                'git', 'reset', '--hard', 'origin/main',
-                'composer', 'install', '--no-dev', '--optimize-autoloader',
-                'php', 'artisan', 'migrate', '--force',
-                'php', 'artisan', 'optimize',
+        // 1. Identify where things are
+        $path = base_path();
+
+        // 2. Execute with a simpler approach
+        // We'll use a single string which Laravel 12 converts to a shell command
+        $result = Process::path($path)->run('git fetch origin && git reset --hard origin/main 2>&1');
+
+        if ($result->failed()) {
+            Log::error('Deployment Failed', [
+                'output' => $result->output(),
+                'error'  => $result->errorOutput(),
             ]);
 
-        if ($result->successful()) {
-            return response()->json(['message' => 'Deployed successfully'], 200);
+            return response()->json([
+                'message' => 'Deploy failed',
+                'details' => $result->errorOutput() ?: $result->output(),
+            ], 500);
         }
 
-        return response()->json(['message' => 'Deploy failed', 'error' => $result->errorOutput()], 500);
+        // 3. If git succeeded, run the rest
+        Process::path($path)->run('composer install --no-dev && php artisan migrate --force && php artisan optimize');
+
+        return response()->json(['message' => 'Deployed successfully']);
     }
 }
