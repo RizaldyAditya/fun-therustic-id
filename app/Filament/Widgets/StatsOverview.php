@@ -15,6 +15,11 @@ class StatsOverview extends StatsOverviewWidget
         Here lies the record of every world I've visited, every series on my radar, and those still waiting for a breakthrough.
         Quality over quantity, but the stats tell the true story.";
 
+    protected function getColumns(): int
+    {
+        return 6; 
+    }
+
     protected function getStats(): array
     {
         // get data counts
@@ -26,9 +31,7 @@ class StatsOverview extends StatsOverviewWidget
         $dropped       = Donghua::where('status_id', 6)->count();
 
         return [
-            Stat::make('Airing', $airing)
-                ->color('primary')
-                ->url(fn() => route('filament.admin.pages.dashboard', ['airing' => 'true'])),
+            Stat::make('Airing', $airing)->color('primary'),
             Stat::make('Watching', $watching),
             Stat::make('Plan to Watch', $plan_to_watch),
             Stat::make('Completed', $completed),

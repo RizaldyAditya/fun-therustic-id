@@ -25,8 +25,8 @@ class LatestEpisodes extends TableWidget
 {
     use InteractsWithTable;
 
-    protected static ?int $sort  = 2;
-    public ?string $filterStatus = null;
+    protected static ?int $sort        = 2;
+    public ?string $filterStatus       = null;
 
     public function table(Table $table): Table
     {
@@ -43,19 +43,14 @@ class LatestEpisodes extends TableWidget
             ->emptyStateIcon('heroicon-o-clock')
             ->defaultSort('created_at', 'desc')
             ->columns([
-                IconColumn::make('donghua.is_observed')
-                    ->label('')
-                    ->alignCenter()
-                    ->boolean()
-                    ->trueIcon('heroicon-s-fire')
-                    ->trueColor('warning')
-                    ->falseIcon(''),
                 ImageColumn::make('donghua.image_cover')
                     ->label('')
                     ->disk('public')
+                    ->visibility('public')
+                    ->alignCenter()
                     ->action(
                         Action::make('preview')
-                            ->modalHeading(fn($record) => $record->donghua->title_en . ' Episode List')
+                            ->modalHeading(fn($record) => $record->donghua->title_en)
                             ->modalDescription(fn($record) => $record->donghua->title_zh)
                             ->modalWidth('2xl')
                             ->modalSubmitAction(false)
@@ -87,13 +82,9 @@ class LatestEpisodes extends TableWidget
             ])
             ->filters([
                 SelectFilter::make('stream_id')
-                    ->label('Stream'),
-                TernaryFilter::make('airing')
-                    ->label('Airing')
-                    ->boolean()
-                    ->trueLabel('Airing')
-                    ->falseLabel('Not airing')
-                    ->native(false),
+                    ->label('Stream')
+                    ->relationship('stream', 'name')
+                    ->placeholder('All Streams'),
             ])
             ->headerActions([
                 Action::make('refresh')
@@ -246,6 +237,7 @@ class LatestEpisodes extends TableWidget
             ->extraAttributes([
                 'wire:loading.class' => 'opacity-50 blur-[2px] pointer-events-none',
                 'class'              => 'transition-all duration-300',
-            ]);
+            ])
+            ->poll('20s');
     }
 }

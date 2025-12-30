@@ -17,6 +17,7 @@ use UnitEnum;
 class EpisodesResource extends Resource
 {
     protected static string|UnitEnum|null $navigationGroup = 'Donghuas';
+    protected static ?int $navigationSort                      = 3;
     protected static ?string $model                            = Episode::class;
     protected static ?string $recordTitleAttribute             = 'title';
     protected static ?string $modelLabel                       = 'Episode';
