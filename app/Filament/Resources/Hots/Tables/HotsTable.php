@@ -171,7 +171,7 @@ class HotsTable
                 Action::make('watchEpisode')
                     ->label('')
                     ->color('success')
-                    ->icon('heroicon-m-play')
+                    ->icon('heroicon-s-play')
                     ->slideOver()
                     ->modalHeading(fn($record) => "Watching: {$record->title_en}")
                     ->modalWidth('full')
@@ -224,6 +224,7 @@ class HotsTable
                 //
             ])
             ->paginated(false)
-            ->poll('20s');
+            ->poll('20s')
+            ->defaultSort('title_en', 'asc');
     }
 }
