@@ -51,9 +51,13 @@ class EpisodeManager extends Component implements HasForms, HasTable, HasActions
                 TextInputColumn::make('title')
                     ->label('Episode Title'),
                 ImageColumn::make('stream.logo')
+                    ->disk('public')
+                    ->visibility('public')
                     ->label('Stream')
                     ->alignCenter()
-                    ->width(50),
+                    ->width(50)
+                    ->url(fn($record) => $record->stream_url)
+                    ->openUrlInNewTab(),
             ])
             ->recordActions([
                 Action::make('viewVideoSourceUrl')
