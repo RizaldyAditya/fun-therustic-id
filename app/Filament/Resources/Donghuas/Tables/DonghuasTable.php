@@ -30,12 +30,13 @@ class DonghuasTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->columns([               
+            ->columns([
                 TextColumn::make('id')->label('ID')->sortable()->toggleable(isToggledHiddenByDefault: true)->toggleable(isToggledHiddenByDefault: true),
                 ImageColumn::make('image_cover')
                     ->label('')
                     ->disk('public')
                     ->visibility('public')
+                    ->alignCenter()
                     ->action(
                         Action::make('preview')
                             ->modalHeading(fn($record) => $record->title_en . ' Episode List')
@@ -59,13 +60,17 @@ class DonghuasTable
                             ->label('Season')
                             ->type('number')
                             ->extraInputAttributes(['step' => '1'])
-                            ->alignCenter(),
+                            ->alignCenter()
+                            ->extraHeaderAttributes(['style' => 'width: 200px;']),
                         TextInputColumn::make('episode_watched_seasonal')
                             ->label('Seasonal')
                             ->type('number')
                             ->extraInputAttributes(['step' => '1'])
+                            ->alignCenter()
+                            ->extraHeaderAttributes(['style' => 'width: 200px;']),
+                        TextColumn::make('episode_latest')
+                            ->label('Latest')
                             ->alignCenter(),
-                        TextColumn::make('episode_latest')->label('Latest')->alignCenter(),
                         TextColumn::make('episode_total')
                             ->label('Total')
                             ->default(fn($record) => $record->episode_total ?? $record->episode_latest ?? '-')
@@ -76,7 +81,8 @@ class DonghuasTable
                         SelectColumn::make('status_id')
                             ->label('Status')
                             ->options(Status::query()->pluck('name', 'id'))
-                            ->searchableOptions(),
+                            ->searchableOptions()
+                            ->extraHeaderAttributes(['style' => 'width: 200px; text-align: center;']),
                         ToggleColumn::make('is_observed')
                             ->label('Hot')
                             ->sortable()
@@ -105,7 +111,7 @@ class DonghuasTable
                     ->modalCancelActionLabel('Close')
                     ->modalContent(fn($record) => view('filament.episode-loader', [
                         'donghuaId' => $record->id,
-                        'streamId' => 1
+                        'streamId'  => 1,
                     ]))
                     ->modalSubmitAction(false)
                     // ->closeModalByEscaping(false)
@@ -121,10 +127,9 @@ class DonghuasTable
                     ->modalCancelActionLabel('Close')
                     ->modalContent(fn($record) => view('filament.episode-loader', [
                         'donghuaId' => $record->id,
-                        'streamId' => 2
+                        'streamId'  => 2,
                     ]))
                     ->modalSubmitAction(false)
-                    // ->closeModalByEscaping(false)
                     ->tooltip('Watch from AnimeKhor'),
                 Action::make('watchEpisodeDs')
                     ->label('DH')
@@ -137,10 +142,9 @@ class DonghuasTable
                     ->modalCancelActionLabel('Close')
                     ->modalContent(fn($record) => view('filament.episode-loader', [
                         'donghuaId' => $record->id,
-                        'streamId' => 4
+                        'streamId'  => 4,
                     ]))
                     ->modalSubmitAction(false)
-                    // ->closeModalByEscaping(false)
                     ->tooltip('Watch from DonghuaStream'),
                 Action::make('watchEpisodeDw')
                     ->label('DW')
@@ -153,10 +157,9 @@ class DonghuasTable
                     ->modalCancelActionLabel('Close')
                     ->modalContent(fn($record) => view('filament.episode-loader', [
                         'donghuaId' => $record->id,
-                        'streamId' => 5
+                        'streamId'  => 5,
                     ]))
                     ->modalSubmitAction(false)
-                    // ->closeModalByEscaping(false)
                     ->tooltip('Watch from DonghuaWorld'),
                 Action::make('viewDetails')
                     ->label('')
@@ -263,6 +266,7 @@ class DonghuasTable
             ])
 
             ->defaultSort('id', 'asc')
+            ->recordAction(null)
             ->recordUrl(null)
             ->striped();
     }
