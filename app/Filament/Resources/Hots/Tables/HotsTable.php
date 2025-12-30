@@ -1,14 +1,16 @@
 <?php
 namespace App\Filament\Resources\Hots\Tables;
 
+use App\Models\Status;
 use Filament\Tables\Table;
 use Filament\Actions\Action;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\ViewField;
 use Filament\Tables\Columns\ColumnGroup;
 use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\SelectColumn;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Columns\TextInputColumn;
@@ -45,6 +47,26 @@ class HotsTable
                     })
                     ->searchable()
                     ->sortable(),
+                IconColumn::make('watched')
+                    ->label('Status')
+                    ->alignCenter()
+                    ->state(static function ($record): bool {
+                        // This ensures the column has a value to work with
+                        return $record->episode_watched_seasonal >= $record->episode_latest;
+                    })
+                    ->icons([
+                        'heroicon-s-check-circle'         => fn($record)         => $record->episode_watched_seasonal >= $record->episode_latest,
+                        'heroicon-s-exclamation-triangle' => fn($record) => $record->episode_watched_seasonal < $record->episode_latest,
+                    ])
+                    ->colors([
+                        'success' => fn($record) => $record->episode_watched_seasonal >= $record->episode_latest,
+                        'warning' => fn($record) => $record->episode_watched_seasonal < $record->episode_latest,
+                    ])
+                    ->tooltip(function ($record) {
+                        return $record->episode_watched_seasonal < $record->episode_latest
+                            ? 'New episodes available!'
+                            : 'Up to date';
+                    }),
                 ColumnGroup::make('Watched Episode')
                     ->columns([
                         TextInputColumn::make('episode_watched')
@@ -59,13 +81,29 @@ class HotsTable
                             ->extraInputAttributes(['step' => '1'])
                             ->alignCenter()
                             ->extraHeaderAttributes(['style' => 'width: 200px;']),
-                        TextColumn::make('episode_latest')
+                        TextInputColumn::make('episode_latest')
                             ->label('Latest')
-                            ->alignCenter(),
+                            ->alignCenter()
+                            ->extraHeaderAttributes(['style' => 'width: 200px;']),
                         TextColumn::make('episode_total')
                             ->label('Total')
                             ->default(fn($record) => $record->episode_total ?? $record->episode_latest ?? '-')
                             ->alignCenter(),
+                    ]),
+                ColumnGroup::make('Status')
+                    ->columns([
+                        SelectColumn::make('status_id')
+                            ->label('Status')
+                            ->options(Status::query()->pluck('name', 'id'))
+                            ->searchableOptions()
+                            ->extraHeaderAttributes(['style' => 'width: 200px; text-align: center;']),
+                        ToggleColumn::make('is_observed')
+                            ->label('Hot')
+                            ->sortable()
+                            ->alignEnd(),
+                        ToggleColumn::make('airing')
+                            ->sortable()
+                            ->alignEnd(),
                     ]),
             ])
             ->filters([
@@ -73,7 +111,7 @@ class HotsTable
                     ->label('Watch Status')
                     ->options([
                         'all'       => 'All',
-                        'unwatched' => 'Unwatched'
+                        'unwatched' => 'Unwatched',
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query->when(
@@ -98,7 +136,7 @@ class HotsTable
             ->recordActions([
                 Action::make('watchEpisodeAx')
                     ->label('AX')
-                    ->color('info')
+                    ->color('success')
                     ->icon('heroicon-m-play-circle')
                     ->slideOver()
                     ->modalHeading(fn($record) => "Watching: {$record->title_en}")
@@ -113,7 +151,7 @@ class HotsTable
                     ->tooltip('Watch from AnimeXin'),
                 Action::make('watchEpisodeAk')
                     ->label('AK')
-                    ->color('success')
+                    ->color('info')
                     ->icon('heroicon-m-play-circle')
                     ->slideOver()
                     ->modalHeading(fn($record) => "Watching: {$record->title_en}")
