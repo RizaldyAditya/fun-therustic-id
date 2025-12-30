@@ -20,5 +20,13 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         FilamentTimezone::set('Asia/Jakarta');
+
+        // This will catch the error and log exactly which command was being run
+        if (app()->runningInConsole()) {
+            $cmd = implode(' ', $_SERVER['argv'] ?? []);
+            if (str_contains($cmd, '--columns')) {
+                \Illuminate\Support\Facades\Log::warning('FOUND THE CULPRIT: ' . $cmd);
+            }
+        }
     }
 }

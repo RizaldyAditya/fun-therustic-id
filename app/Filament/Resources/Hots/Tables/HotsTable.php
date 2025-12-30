@@ -1,22 +1,22 @@
 <?php
 namespace App\Filament\Resources\Hots\Tables;
 
+use App\Filament\Resources\Donghuas\DonghuaResource;
 use App\Models\Status;
-use Filament\Tables\Table;
 use Filament\Actions\Action;
-use Filament\Schemas\Components\Tabs;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\ViewField;
-use Filament\Tables\Columns\ColumnGroup;
-use Filament\Tables\Columns\ImageColumn;
+use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Tables\Columns\ColumnGroup;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\SelectColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\TextInputColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Filament\Tables\Columns\TextInputColumn;
-use App\Filament\Resources\Donghuas\DonghuaResource;
 
 class HotsTable
 {
@@ -49,26 +49,48 @@ class HotsTable
                     })
                     ->searchable()
                     ->sortable(),
-                IconColumn::make('watched')
-                    ->label('Status')
-                    ->alignCenter()
-                    ->state(static function ($record): bool {
-                        // This ensures the column has a value to work with
-                        return $record->episode_watched_seasonal >= $record->episode_latest;
-                    })
-                    ->icons([
-                        'heroicon-s-check-circle'         => fn($record)         => $record->episode_watched_seasonal >= $record->episode_latest,
-                        'heroicon-s-exclamation-triangle' => fn($record) => $record->episode_watched_seasonal < $record->episode_latest,
-                    ])
-                    ->colors([
-                        'success' => fn($record) => $record->episode_watched_seasonal >= $record->episode_latest,
-                        'warning' => fn($record) => $record->episode_watched_seasonal < $record->episode_latest,
-                    ])
-                    ->tooltip(function ($record) {
-                        return $record->episode_watched_seasonal < $record->episode_latest
-                            ? 'New episodes available!'
-                            : 'Up to date';
-                    }),
+                ColumnGroup::make('Status')
+                    ->label('')
+                    ->columns([
+                        IconColumn::make('watched')
+                            ->label('')
+                            ->alignCenter()
+                            ->state(static function ($record): bool {
+                                return $record->episode_watched_seasonal >= $record->episode_latest;
+                            })
+                            ->icons([
+                                'heroicon-s-check-circle'               => fn($record)               => $record->episode_watched_seasonal >= $record->episode_latest,
+                                'heroicon-s-exclamation-triangle'       => fn($record)       => $record->episode_watched_seasonal < $record->episode_latest,
+                            ])
+                            ->colors([
+                                'success' => fn($record) => $record->episode_watched_seasonal >= $record->episode_latest,
+                                'warning' => fn($record) => $record->episode_watched_seasonal < $record->episode_latest,
+                            ])
+                            ->tooltip(function ($record) {
+                                return $record->episode_watched_seasonal >= $record->episode_latest
+                                    ? 'All caught up!'
+                                    : 'New episodes available to watch.';
+                            }),
+                        IconColumn::make('downloaded')
+                            ->label('')
+                            ->alignCenter()
+                            ->state(static function ($record): bool {
+                                return $record->episode_dl >= $record->episode_latest;
+                            })
+                            ->icons([
+                                'heroicon-s-check-circle'               => fn($record)               => $record->episode_dl >= $record->episode_latest,
+                                'heroicon-s-arrow-down-on-square-stack' => fn($record) => $record->episode_dl < $record->episode_latest,
+                            ])
+                            ->colors([
+                                'success' => fn($record) => $record->episode_dl >= $record->episode_latest,
+                                'warning' => fn($record) => $record->episode_dl < $record->episode_latest,
+                            ])
+                            ->tooltip(function ($record) {
+                                return $record->episode_dl >= $record->episode_latest
+                                    ? 'All episodes downloaded.'
+                                    : 'New episodes available to download.';
+                            }),
+                    ]),
                 ColumnGroup::make('Episode')
                     ->columns([
                         TextInputColumn::make('episode_watched')
@@ -152,7 +174,7 @@ class HotsTable
                     ->icon('heroicon-m-play')
                     ->slideOver()
                     ->modalHeading(fn($record) => "Watching: {$record->title_en}")
-                    ->modalWidth('7xl')
+                    ->modalWidth('full')
                     ->modalSubmitAction(false) // Hide the "Submit" button
                     ->modalCancelActionLabel('Close')
                     ->modalSubmitAction(false)
@@ -194,7 +216,8 @@ class HotsTable
                     ->label('')
                     ->icon('heroicon-s-pencil-square')
                     ->color('warning')
-                    ->url(fn($record): string => DonghuaResource::getUrl('edit', ['record' => $record->id]))
+                    ->url(fn($record): string => DonghuaResource::getUrl('edit', ['record' => $record]))
+                    ->openUrlInNewTab()
                     ->tooltip('Edit Donghua'),
             ])
             ->toolbarActions([
