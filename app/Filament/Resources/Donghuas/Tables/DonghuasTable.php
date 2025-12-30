@@ -68,9 +68,10 @@ class DonghuasTable
                             ->extraInputAttributes(['step' => '1'])
                             ->alignCenter()
                             ->extraHeaderAttributes(['style' => 'width: 200px;']),
-                        TextColumn::make('episode_latest')
+                        TextInputColumn::make('episode_latest')
                             ->label('Latest')
-                            ->alignCenter(),
+                            ->alignCenter()
+                            ->extraHeaderAttributes(['style' => 'width: 200px;']),
                         TextColumn::make('episode_total')
                             ->label('Total')
                             ->default(fn($record) => $record->episode_total ?? $record->episode_latest ?? '-')
@@ -102,7 +103,7 @@ class DonghuasTable
             ->recordActions([
                 Action::make('watchEpisodeAx')
                     ->label('AX')
-                    ->color('info')
+                    ->color('success')
                     ->icon('heroicon-m-play-circle')
                     ->slideOver()
                     ->modalHeading(fn($record) => "Watching: {$record->title_en}")
@@ -118,7 +119,7 @@ class DonghuasTable
                     ->tooltip('Watch from AnimeXin'),
                 Action::make('watchEpisodeAk')
                     ->label('AK')
-                    ->color('success')
+                    ->color('info')
                     ->icon('heroicon-m-play-circle')
                     ->slideOver()
                     ->modalHeading(fn($record) => "Watching: {$record->title_en}")
