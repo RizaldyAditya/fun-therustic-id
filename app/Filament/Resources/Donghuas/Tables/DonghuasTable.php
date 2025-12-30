@@ -2,28 +2,30 @@
 namespace App\Filament\Resources\Donghuas\Tables;
 
 use App\Models\Status;
+use Filament\Tables\Table;
 use Filament\Actions\Action;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\ForceDeleteBulkAction;
-use Filament\Actions\RestoreBulkAction;
-use Filament\Forms\Components\ViewField;
-use Filament\Infolists\Components\ImageEntry;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Schemas\Components\Grid;
-use Filament\Schemas\Components\Section;
+use Filament\Actions\DeleteAction;
 use Filament\Support\Icons\Heroicon;
+use Filament\Actions\BulkActionGroup;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Tabs;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\RestoreBulkAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\ViewField;
+use Filament\Schemas\Components\Section;
 use Filament\Tables\Columns\ColumnGroup;
 use Filament\Tables\Columns\ImageColumn;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Tables\Columns\SelectColumn;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\TextInputColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
-use Filament\Tables\Table;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Tables\Columns\TextInputColumn;
+use Filament\Infolists\Components\ImageEntry;
 
 class DonghuasTable
 {
@@ -101,67 +103,50 @@ class DonghuasTable
                 TrashedFilter::make(),
             ])
             ->recordActions([
-                Action::make('watchEpisodeAx')
-                    ->label('AX')
+                Action::make('watchEpisode')
+                    ->label('')
                     ->color('success')
-                    ->icon('heroicon-m-play-circle')
+                    ->icon('heroicon-m-play')
                     ->slideOver()
                     ->modalHeading(fn($record) => "Watching: {$record->title_en}")
                     ->modalWidth('7xl')
                     ->modalSubmitAction(false) // Hide the "Submit" button
                     ->modalCancelActionLabel('Close')
-                    ->modalContent(fn($record) => view('filament.episode-loader', [
-                        'donghuaId' => $record->id,
-                        'streamId'  => 1,
-                    ]))
                     ->modalSubmitAction(false)
-                    // ->closeModalByEscaping(false)
-                    ->tooltip('Watch from AnimeXin'),
-                Action::make('watchEpisodeAk')
-                    ->label('AK')
-                    ->color('info')
-                    ->icon('heroicon-m-play-circle')
-                    ->slideOver()
-                    ->modalHeading(fn($record) => "Watching: {$record->title_en}")
-                    ->modalWidth('7xl')
-                    ->modalSubmitAction(false) // Hide the "Submit" button
-                    ->modalCancelActionLabel('Close')
-                    ->modalContent(fn($record) => view('filament.episode-loader', [
-                        'donghuaId' => $record->id,
-                        'streamId'  => 2,
-                    ]))
-                    ->modalSubmitAction(false)
-                    ->tooltip('Watch from AnimeKhor'),
-                Action::make('watchEpisodeDs')
-                    ->label('DH')
-                    ->color('danger')
-                    ->icon('heroicon-m-play-circle')
-                    ->slideOver()
-                    ->modalHeading(fn($record) => "Watching: {$record->title_en}")
-                    ->modalWidth('7xl')
-                    ->modalSubmitAction(false) // Hide the "Submit" button
-                    ->modalCancelActionLabel('Close')
-                    ->modalContent(fn($record) => view('filament.episode-loader', [
-                        'donghuaId' => $record->id,
-                        'streamId'  => 4,
-                    ]))
-                    ->modalSubmitAction(false)
-                    ->tooltip('Watch from DonghuaStream'),
-                Action::make('watchEpisodeDw')
-                    ->label('DW')
-                    ->color('warning')
-                    ->icon('heroicon-m-play-circle')
-                    ->slideOver()
-                    ->modalHeading(fn($record) => "Watching: {$record->title_en}")
-                    ->modalWidth('7xl')
-                    ->modalSubmitAction(false) // Hide the "Submit" button
-                    ->modalCancelActionLabel('Close')
-                    ->modalContent(fn($record) => view('filament.episode-loader', [
-                        'donghuaId' => $record->id,
-                        'streamId'  => 5,
-                    ]))
-                    ->modalSubmitAction(false)
-                    ->tooltip('Watch from DonghuaWorld'),
+                    ->schema([
+                        Tabs::make('Watch')
+                            ->tabs([
+                                Tab::make('AnimeXin')
+                                    ->schema([
+                                        ViewField::make('donghua.episode_loader_ax')->view('filament.episode-loader')->viewData(fn($record) => [
+                                            'donghuaId' => $record->id,
+                                            'streamId'  => 1,
+                                        ]),
+                                    ]),
+                                Tab::make('AnimeKhor')
+                                    ->schema([
+                                        ViewField::make('donghua.episode_loader_ak')->view('filament.episode-loader')->viewData(fn($record) => [
+                                            'donghuaId' => $record->id,
+                                            'streamId'  => 2,
+                                        ]),
+                                    ]),
+                                Tab::make('DonghuaStream')
+                                    ->schema([
+                                        ViewField::make('donghua.episode_loader_ds')->view('filament.episode-loader')->viewData(fn($record) => [
+                                            'donghuaId' => $record->id,
+                                            'streamId'  => 4,
+                                        ]),
+                                    ]),
+                                Tab::make('DonghuaWorld')
+                                    ->schema([
+                                        ViewField::make('donghua.episode_loader_dw')->view('filament.episode-loader')->viewData(fn($record) => [
+                                            'donghuaId' => $record->id,
+                                            'streamId'  => 5,
+                                        ]),
+                                    ]),
+                            ]),
+                    ])
+                    ->tooltip('Watch Episodes'),
                 Action::make('viewDetails')
                     ->label('')
                     ->icon('heroicon-o-document-text')
