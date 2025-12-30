@@ -28,7 +28,8 @@ class Donghua extends Model
         'mc_wikia',
         'studio_id',
         'source_id',
-        'is_active',
+        'is_observed',
+        'is_active'
     ];
 
     protected $casts = [
