@@ -11,12 +11,10 @@ use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Support\Icons\Heroicon;
-use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
 use Illuminate\Contracts\View\View;
@@ -25,8 +23,8 @@ class LatestEpisodes extends TableWidget
 {
     use InteractsWithTable;
 
-    protected static ?int $sort        = 2;
-    public ?string $filterStatus       = null;
+    protected static ?int $sort  = 2;
+    public ?string $filterStatus = null;
 
     public function table(Table $table): Table
     {

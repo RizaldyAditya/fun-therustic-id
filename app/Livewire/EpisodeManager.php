@@ -43,6 +43,7 @@ class EpisodeManager extends Component implements HasForms, HasTable, HasActions
             ->columns([
                 TextInputColumn::make('episode_number')
                     ->label('# Episode')
+                    // ->type('number')
                     ->extraAttributes([
                         'style' => 'width: 50px;',
                     ])
@@ -87,10 +88,26 @@ class EpisodeManager extends Component implements HasForms, HasTable, HasActions
                     ->modalContent(fn($record): View => view(
                         'filament.iframe-field',
                         ['url' => $record->video_source_url]
-                    )),
+                    ))
+                    ->tooltip('Watch Now'),
+                Action::make('copy_url')
+                    ->label('')
+                    ->icon('heroicon-s-clipboard-document-list')
+                    ->color('primary')
+                    ->tooltip('Copy video source URL to clipboard.')
+                    ->action(function ($record, $livewire) {
+                        $livewire->js("
+                            window.navigator.clipboard.writeText('{$record->video_source_url}');
+                            new FilamentNotification()
+                                .title('URL copied to clipboard')
+                                .success()
+                                .send();
+                        ");
+                    }),
                 EditAction::make('editEpisode')
                     ->label('')
-                    ->icon('heroicon-s-pencil')
+                    ->slideOver()
+                    ->icon('heroicon-s-pencil-square')
                     ->color('warning')
                     ->schema([
                         TextInput::make('episode_number')
@@ -120,7 +137,8 @@ class EpisodeManager extends Component implements HasForms, HasTable, HasActions
                             ->title('Episode data saved successfully.')
                             ->success() // Green color
                             ->send();
-                    }),
+                    })
+                    ->tooltip('Edit'),
                 DeleteAction::make('deleteEpisode')
                     ->label('')
                     ->icon('heroicon-s-trash')
@@ -132,7 +150,8 @@ class EpisodeManager extends Component implements HasForms, HasTable, HasActions
                             ->title('Episode deleted successfully.')
                             ->success() // Green color
                             ->send();
-                    }),
+                    })
+                    ->tooltip('Delete'),
             ])
             ->toolbarActions([
                 BulkAction::make('deleteEpisodes')

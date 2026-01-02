@@ -1,0 +1,58 @@
+<?php
+namespace App\Filament\Widgets;
+
+use App\Models\Episode;
+use Filament\Tables\Table;
+use Filament\Widgets\TableWidget;
+use Filament\Actions\BulkActionGroup;
+use Filament\Tables\Columns\Layout\View;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Concerns\InteractsWithTable;
+
+class LatestEpisodeCards extends TableWidget
+{
+    use InteractsWithTable;
+    
+    protected int|string|array $columnSpan = 'full';
+
+    public function table(Table $table): Table
+    {
+        return $table
+            ->query(Episode::query()->with('donghua', 'stream')->latest()->limit(2))
+            ->columns([
+                View::make('filament.donghua-card'),
+            ])
+            ->contentGrid([
+                'default' => 1,
+                'sm'      => 2,
+                'md'      => 4,
+                'lg'      => 5,
+                'xl'      => 6,
+            ])
+            ->heading('Latest Episodes')
+            ->description('Recently added episodes from all streams. Click on a card to go to the episode original page.')
+            ->searchable()
+            ->filters([
+                SelectFilter::make('stream')
+                    ->relationship('stream', 'name')
+                    ->options([
+                        'animexin'      => 'AnimeXin',
+                        'donghuastream' => 'DonghuaStream',
+                    ]),
+            ])
+            ->headerActions([
+                //
+            ])
+            ->recordActions([
+                //
+            ])
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    //
+                ]),
+            ])
+            ->defaultPaginationPageOption(10)
+            ->paginated([10]);
+    }
+}
