@@ -39,10 +39,10 @@ return [
     |
     */
 
-    'start_url' => env('PWA_START_URL', '/admin'),
+    'start_url' => env('PWA_START_URL', '/'),
     'display' => env('PWA_DISPLAY', 'standalone'),
     'orientation' => env('PWA_ORIENTATION', 'portrait-primary'),
-    'scope' => env('PWA_SCOPE', '/admin'),
+    'scope' => env('PWA_SCOPE', '/'),
 
     /*
     |--------------------------------------------------------------------------
