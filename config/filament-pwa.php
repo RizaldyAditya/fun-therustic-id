@@ -41,7 +41,7 @@ return [
 
     'start_url' => env('PWA_START_URL', '/'),
     'display' => env('PWA_DISPLAY', 'standalone'),
-    'orientation' => env('PWA_ORIENTATION', 'portrait-primary'),
+    'orientation' => env('PWA_ORIENTATION', 'any'),
     'scope' => env('PWA_SCOPE', '/'),
 
     /*
