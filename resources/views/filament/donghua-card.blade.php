@@ -10,13 +10,13 @@
                 </div>
             </div>
             
-            <div class="absolute top-2 right-2 z-20">
+            <div class="absolute top-2 right-2 z-10">
                 <span class="bg-black/60 backdrop-blur-md text-white text-[12px] px-2 py-0.5 rounded border border-white/10 font-bold uppercase">
                     S{{ $getRecord()->donghua->season }}
                 </span>
             </div>
 
-            <div class="absolute bottom-2 right-2 z-20">
+            <div class="absolute bottom-2 right-2 z-10">
                 <span class="text-[10px] text-primary-400 font-bold drop-shadow-lg uppercase tracking-wider">
                     {{ $getRecord()->stream->name }}
                 </span>

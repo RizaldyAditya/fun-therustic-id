@@ -40,7 +40,12 @@ class DeploymentController extends Controller
         }
 
         // 3. If git succeeded, run the rest
-        Process::path($path)->run('composer install --no-dev && php artisan migrate --force && php artisan optimize');
+        Process::path($path)->run('
+            composer install --no-dev &&
+            php artisan migrate --force &&
+            php artisan filament:upgrade &&
+            php artisan filament:optimize
+        ');
 
         return response()->json(['message' => 'Deployed successfully']);
     }
