@@ -1,0 +1,20 @@
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+@source '../../../../app/Filament/**/*';
+@source '../../../../resources/views/filament/**/*';
+
+/* Custom Styles for your Donghua Cards */
+.group:hover {
+    box-shadow: 0 0 20px rgba(var(--primary-500), 0.3);
+}
+
+/* Make the grid spacing tighter for a "Wall of Content" feel */
+.fi-ta-content-grid {
+    gap: 1.5rem !important;
+}
+
+/* Hide the PWA installation banner */
+.pwa-install-banner, 
+.filament-pwa-installation-banner {
+    display: none !important;
+}

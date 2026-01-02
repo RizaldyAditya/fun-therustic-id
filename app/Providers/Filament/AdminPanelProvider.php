@@ -6,10 +6,9 @@ use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Enums\Width;
 use Filament\Support\Colors\Color;
-// use Filament\Widgets\AccountWidget;
 use App\Filament\Pages\EditProfile;
 use Filament\Navigation\NavigationGroup;
-// use Filament\Widgets\FilamentInfoWidget;
+use Alareqi\FilamentPwa\FilamentPwaPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -30,6 +29,7 @@ class AdminPanelProvider extends PanelProvider
             ->topNavigation()
             ->id('admin')
             ->path('/')
+            ->viteTheme('resources/css/filament/admin/theme.css')
             ->login()
             ->profile(isSimple: false, page: EditProfile::class)
             ->colors([
@@ -71,6 +71,9 @@ class AdminPanelProvider extends PanelProvider
                     ->icon('heroicon-o-cog-6-tooth')
                     ->collapsed()
             ])
-            ->maxContentWidth(Width::Full);
+            ->maxContentWidth(Width::Full)
+            ->plugins([
+                FilamentPwaPlugin::make(),
+            ]);
     }
 }
