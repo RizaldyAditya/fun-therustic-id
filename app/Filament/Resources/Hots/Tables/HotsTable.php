@@ -211,14 +211,14 @@ class HotsTable
                                     ]),
                             ]),
                     ])
-                    ->tooltip('Watch Episodes'),
+                    ->tooltip('See Episode List & Watch'),
                 Action::make('editParent')
                     ->label('')
                     ->icon('heroicon-s-pencil-square')
                     ->color('warning')
                     ->url(fn($record): string => DonghuaResource::getUrl('edit', ['record' => $record]))
                     ->openUrlInNewTab()
-                    ->tooltip('Edit Donghua'),
+                    ->tooltip('Edit'),
             ])
             ->toolbarActions([
                 //
