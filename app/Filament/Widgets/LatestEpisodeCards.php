@@ -2,27 +2,33 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Episode;
-use Filament\Tables\Table;
-use Filament\Widgets\TableWidget;
 use Filament\Actions\BulkActionGroup;
 use Filament\Tables\Columns\Layout\View;
-use Filament\Tables\Enums\FiltersLayout;
-use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
+use Filament\Widgets\TableWidget;
 
 class LatestEpisodeCards extends TableWidget
 {
     use InteractsWithTable;
-    
+
     protected int|string|array $columnSpan = 'full';
 
     public function table(Table $table): Table
     {
         return $table
-            ->query(Episode::query()->with('donghua', 'stream')->latest()->limit(2))
+            ->query(Episode::query()->with('donghua', 'stream')->latest())
             ->columns([
-                View::make('filament.donghua-card'),
+                TextColumn::make('donghua.title_en')->searchable()->extraAttributes(['style' => 'display: none;']),
+                TextColumn::make('title')->searchable()->extraAttributes(['style' => 'display: none;']),
+                TextColumn::make('stream.name')->searchable()->extraAttributes(['style' => 'display: none;']),
+                View::make('filament.donghua-card')
             ])
+            ->heading('Latest Episodes')
+            ->description('Recently added episodes from all streams. Click on a card to go to the episode original page.')
+            ->searchable()
             ->contentGrid([
                 'default' => 1,
                 'sm'      => 2,
@@ -30,16 +36,8 @@ class LatestEpisodeCards extends TableWidget
                 'lg'      => 5,
                 'xl'      => 6,
             ])
-            ->heading('Latest Episodes')
-            ->description('Recently added episodes from all streams. Click on a card to go to the episode original page.')
-            ->searchable()
             ->filters([
-                SelectFilter::make('stream')
-                    ->relationship('stream', 'name')
-                    ->options([
-                        'animexin'      => 'AnimeXin',
-                        'donghuastream' => 'DonghuaStream',
-                    ]),
+                SelectFilter::make('stream')->relationship('stream', 'name'),
             ])
             ->headerActions([
                 //
@@ -52,7 +50,7 @@ class LatestEpisodeCards extends TableWidget
                     //
                 ]),
             ])
-            ->defaultPaginationPageOption(10)
-            ->paginated([10]);
+            ->defaultPaginationPageOption(12)
+            ->paginated([12]);
     }
 }

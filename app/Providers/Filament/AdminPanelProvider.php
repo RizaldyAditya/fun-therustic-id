@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use Filament\Panel;
+use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\PanelProvider;
 use Filament\Support\Enums\Width;
 use Filament\Support\Colors\Color;
@@ -69,10 +70,15 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make()
                     ->label('Settings')
                     ->icon('heroicon-o-cog-6-tooth')
-                    ->collapsed()
+                    ->collapsed(),
+                NavigationGroup::make()
+                    ->label('Management')
+                    // ->icon('heroicon-s-briefcase')
+                    ->collapsed(),
             ])
             ->maxContentWidth(Width::Full)
             ->plugins([
+                FilamentShieldPlugin::make(),
                 FilamentPwaPlugin::make(),
             ]);
     }
