@@ -43,6 +43,7 @@ class DeploymentController extends Controller
         Process::path($path)->run('
             composer install --no-dev &&
             php artisan migrate --force &&
+            php artisan shield:generate --all &&
             php artisan filament:upgrade &&
             php artisan filament:optimize
         ');
