@@ -31,7 +31,7 @@ class UsersTable
             ->recordActions([
                 EditAction::make()
                     ->label('')
-                    ->tooltip('Edit User'),
+                    ->tooltip('Edit'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

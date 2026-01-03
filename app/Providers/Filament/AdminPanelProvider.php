@@ -36,7 +36,8 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Amber,
             ])
-            ->favicon(asset('favicon.png'))
+            ->favicon(asset('favicon.ico' . '?v=2024-06-03'))
+            // ->brandLogo(asset('favicon-v2.png'))
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([])
@@ -66,6 +67,10 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make()
                     ->label('Donghuas')
                     ->icon('heroicon-s-circle-stack')
+                    ->collapsed(),
+                NavigationGroup::make()
+                    ->label('Visual Novels')
+                    ->icon('heroicon-s-cube-transparent')
                     ->collapsed(),
                 NavigationGroup::make()
                     ->label('Settings')

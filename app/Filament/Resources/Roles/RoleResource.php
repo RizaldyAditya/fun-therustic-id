@@ -124,8 +124,8 @@ class RoleResource extends Resource
                 //
             ])
             ->recordActions([
-                EditAction::make(),
-                DeleteAction::make(),
+                EditAction::make()->label('')->tooltip('Edit'),
+                DeleteAction::make()->label('')->tooltip('Delete'),
             ])
             ->toolbarActions([
                 DeleteBulkAction::make(),
