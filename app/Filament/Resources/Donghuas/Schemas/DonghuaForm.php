@@ -78,6 +78,7 @@ class DonghuaForm
                                                             ->options([
                                                                 '0' => 'Finished',
                                                                 '1' => 'Airing',
+                                                                '2' => 'Coming Soon',
                                                             ])
                                                             ->required(),
                                                     ]),

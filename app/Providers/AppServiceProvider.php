@@ -1,8 +1,9 @@
 <?php
 namespace App\Providers;
 
-use Filament\Support\Facades\FilamentTimezone;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
+use Filament\Support\Facades\FilamentTimezone;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,6 +20,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Gate::before(function ($user, $ability) {
+            return $user->hasRole('super_admin') ? true : null;
+        });
+
         FilamentTimezone::set('Asia/Jakarta');
 
         // This will catch the error and log exactly which command was being run
