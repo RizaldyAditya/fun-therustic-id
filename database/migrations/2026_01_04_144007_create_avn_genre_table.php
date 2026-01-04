@@ -11,8 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('avns', function (Blueprint $table) {
-            $table->softDeletes(); // Adds the deleted_at column
+        Schema::create('avn_genre', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('avn_id')->constrained()->onDelete('cascade');
+            $table->foreignId('genre_id')->constrained()->onDelete('cascade');
+            $table->timestamps();
         });
     }
 
@@ -21,8 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('avns', function (Blueprint $table) {
-            $table->dropSoftDeletes();
-        });
+        Schema::dropIfExists('avn_genre');
     }
 };

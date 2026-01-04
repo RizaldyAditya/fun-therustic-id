@@ -4,32 +4,33 @@ declare (strict_types = 1);
 
 namespace App\Filament\Resources\Roles;
 
-use App\Filament\Resources\Roles\Pages\CreateRole;
-use App\Filament\Resources\Roles\Pages\EditRole;
-use App\Filament\Resources\Roles\Pages\ListRoles;
-use App\Filament\Resources\Roles\Pages\ViewRole;
+use UnitEnum;
 use BackedEnum;
-use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
-use BezhanSalleh\FilamentShield\Support\Utils;
-use BezhanSalleh\FilamentShield\Traits\HasShieldFormComponents;
-use BezhanSalleh\PluginEssentials\Concerns\Resource as Essentials;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
-use Filament\Facades\Filament;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Panel;
-use Filament\Resources\Resource;
-use Filament\Schemas\Components\Grid;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Schema;
-use Filament\Support\Enums\FontWeight;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
+use Filament\Schemas\Schema;
+use Filament\Facades\Filament;
+use Filament\Actions\EditAction;
+use Filament\Resources\Resource;
+use Filament\Actions\DeleteAction;
+use Filament\Forms\Components\Select;
+use Filament\Schemas\Components\Grid;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Support\Enums\FontWeight;
+use Filament\Tables\Columns\TextColumn;
 use Illuminate\Validation\Rules\Unique;
-use UnitEnum;
+use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Section;
+use Illuminate\Contracts\Support\Htmlable;
+use BezhanSalleh\FilamentShield\Support\Utils;
+use App\Filament\Resources\Roles\Pages\EditRole;
+use App\Filament\Resources\Roles\Pages\ViewRole;
+use App\Filament\Resources\Roles\Pages\ListRoles;
+use App\Filament\Resources\Roles\Pages\CreateRole;
+use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
+use BezhanSalleh\FilamentShield\Traits\HasShieldFormComponents;
+use BezhanSalleh\PluginEssentials\Concerns\Resource as Essentials;
 
 class RoleResource extends Resource
 {
@@ -41,8 +42,8 @@ class RoleResource extends Resource
     use HasShieldFormComponents;
 
     protected static string|UnitEnum|null $navigationGroup        = 'Management';
-    protected static string|BackedEnum|null $activeNavigationIcon = '';
-    protected static string|BackedEnum|null $navigationIcon       = '';
+    protected static string|BackedEnum|null $activeNavigationIcon = null;
+    protected static string|BackedEnum|null $navigationIcon       = null;
     protected static ?int $navigationSort                             = 2;
     protected static ?string $recordTitleAttribute                    = 'name';
 
@@ -167,5 +168,15 @@ class RoleResource extends Resource
     public static function getEssentialsPlugin(): ?FilamentShieldPlugin
     {
         return FilamentShieldPlugin::get();
+    }
+
+    public static function getNavigationIcon(): string | Htmlable | null
+    {
+        return null; // This explicitly tells Filament: "No icon, period."
+    }
+
+    public static function getActiveNavigationIcon(): string | Htmlable | null
+    {
+        return null;
     }
 }

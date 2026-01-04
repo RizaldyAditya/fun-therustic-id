@@ -78,7 +78,7 @@ class AdminPanelProvider extends PanelProvider
                     ->collapsed(),
                 NavigationGroup::make()
                     ->label('Management')
-                    // ->icon('heroicon-s-briefcase')
+                    ->icon('heroicon-s-users')
                     ->collapsed(),
             ])
             ->maxContentWidth(Width::Full)

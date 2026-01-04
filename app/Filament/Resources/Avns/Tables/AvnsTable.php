@@ -2,22 +2,22 @@
 namespace App\Filament\Resources\Avns\Tables;
 
 use App\Models\Status;
-use Filament\Tables\Table;
 use Filament\Actions\Action;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\RestoreAction;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\ViewField;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\SelectColumn;
-use Filament\Tables\Filters\TrashedFilter;
-use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\TextInputColumn;
+use Filament\Tables\Filters\TrashedFilter;
+use Filament\Tables\Table;
 
 class AvnsTable
 {
@@ -31,9 +31,6 @@ class AvnsTable
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('title')
                     ->searchable(),
-                TextColumn::make('slug')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('developer')
                     ->searchable()
                     ->toggleable(),
@@ -48,6 +45,17 @@ class AvnsTable
                     ->sortable()
                     ->searchable()
                     ->toggleable(),
+                TextColumn::make('rating')
+                    ->html()
+                    ->formatStateUsing(function ($state) {
+                        if (!$state) {
+                            return '<span class="text-gray-300">No Rating</span>';
+                        }
+                        $stars = str_repeat('⭐', $state);
+                        $emptyCount = 5 - $state;
+                        $empty = '<span class="text-gray-300" style="opacity: 0.5;">' . str_repeat('⭐', $emptyCount) . '</span>';
+                        return '<div class="flex items-center text-lg leading-none">' . $stars . $empty . '</div>';
+                    }),
                 TextColumn::make('itch_io_url')
                     ->label('itch.io Link')
                     ->url(fn($record) => $record->itch_io_url)
@@ -61,7 +69,7 @@ class AvnsTable
                     ->disk('public')
                     ->visibility('public')
                     ->alignCenter()
-                    ->toggleable()
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->action(
                         Action::make('preview')
                             ->modalHeading(fn($record) => $record->title . ' Cover Image')
@@ -80,6 +88,24 @@ class AvnsTable
                     ->date()
                     ->sortable()
                     ->toggleable(),
+                TextInputColumn::make('last_played_version')
+                    ->label('Last Played Version')
+                    ->sortable()
+                    ->toggleable()
+                    ->searchable()
+                    ->extraHeaderAttributes(['style' => 'width: 100px;']),
+                TextColumn::make('saves_file_url')
+                    ->label('Last Saves File')
+                    ->icon('heroicon-o-arrow-top-right-on-square')
+                    ->color('primary')
+                    ->formatStateUsing(fn($state) => $state ? 'Go to GDrive' : 'No File')
+                    ->url(function ($record) {
+                        if (!$record->saves_file_url) {
+                            return null;
+                        }
+                        return "https://drive.google.com/file/d/{$record->saves_file_url}/view?usp=sharing";
+                    })
+                    ->openUrlInNewTab(),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
