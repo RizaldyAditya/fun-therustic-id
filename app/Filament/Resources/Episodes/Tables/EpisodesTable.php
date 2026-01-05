@@ -1,18 +1,21 @@
 <?php
 namespace App\Filament\Resources\Episodes\Tables;
 
+use Filament\Tables\Table;
 use Filament\Actions\Action;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\BulkAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\DeleteAction;
+use Illuminate\Contracts\View\View;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\ViewField;
 use Filament\Tables\Columns\ImageColumn;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
-use Illuminate\Contracts\View\View;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Actions\ForceDeleteBulkAction;
+use Illuminate\Database\Eloquent\Collection;
 
 class EpisodesTable
 {
@@ -68,6 +71,9 @@ class EpisodesTable
                     ->sortable()
                     ->alignCenter(),
             ])
+            ->filters([
+                SelectFilter::make('stream')->relationship('stream', 'name')
+            ])
             ->recordActions([
                 Action::make('viewVideoSourceUrl')
                     ->label('')
@@ -82,25 +88,35 @@ class EpisodesTable
                         ['url' => $record->video_source_url]
                     ))
                     ->color('info')
+                    ->slideover()
                     ->tooltip('Watch Now'),
-                Action::make('copy_url')
-                    ->label('')
-                    ->icon('heroicon-s-clipboard-document-list')
-                    ->color('primary')
-                    ->tooltip('Copy video source URL to clipboard.')
-                    ->action(function ($record, $livewire) {
-                        $livewire->js("
-                            window.navigator.clipboard.writeText('{$record->video_source_url}');
-                            new FilamentNotification()
-                                .title('URL copied to clipboard')
-                                .success()
-                                .send();
-                        ");
-                    }),
                 EditAction::make()->label('')->tooltip('Edit'),
                 DeleteAction::make()->label('')->tooltip('Delete'),
             ])
             ->toolbarActions([
+                BulkAction::make('generate_json')
+                    ->label('Generate JSON')
+                    ->icon('heroicon-o-code-bracket')
+                    ->color('success')
+                    ->modalHeading('Generated Donghua & Episode JSON')
+                    ->modalWidth('3xl')
+                    ->slideOver()
+                    ->modalSubmitAction(false)
+                    ->modalContent(function (Collection $records) {
+                        $grouped = $records->groupBy('donghua_id')->map(function ($episodes) {
+                            $donghua = $episodes->first()->donghua; // Get the parent Donghua info
+
+                            return [
+                                'title'    => $donghua->title_en,
+                                'path'     => $donghua->local_download_path,
+                                'episodes' => $episodes->pluck('video_source_url', 'episode_number')->toArray(),
+                            ];
+                        })->values()->toArray();
+
+                        return view('filament.episode-json-viewer', [
+                            'json' => json_encode($grouped, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES),
+                        ]);
+                    }),
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                     ForceDeleteBulkAction::make(),

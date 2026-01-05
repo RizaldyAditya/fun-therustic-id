@@ -141,6 +141,9 @@ class DonghuaForm
                                                     ->columns(1)
                                                     ->schema([
                                                         TextInput::make('season')->numeric()->required()->inlineLabel(),
+                                                        TextInput::make('local_download_path')
+                                                            ->label('Local Download Path')
+                                                            ->inlineLabel(),
                                                     ]),
                                             ]),
                                     ]),
