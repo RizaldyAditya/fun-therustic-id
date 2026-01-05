@@ -21,6 +21,8 @@ class Donghua extends Model
         'episode_watched',
         'episode_watched_seasonal',
         'episode_total',
+        'episode_dl',
+        'local_download_path',
         'status_id',
         'airing',
         'myanimelist',
