@@ -170,11 +170,11 @@ class AvnForm
                                                     ]),
                                             ]),
                                     ]),
-                                Tab::make('Gallery')
+                                Tab::make('Galleries')
                                     ->icon(Heroicon::Photo)
                                     ->schema([
                                         Repeater::make('gallery')
-                                            ->relationship('gallery')
+                                            ->relationship('galleries')
                                             ->grid(3)
                                             ->reorderable('sort_order')
                                             ->orderColumn('sort_order')
@@ -264,7 +264,7 @@ class AvnForm
                                                 FileUpload::make('file_url')
                                                     ->label('Re/Upload ZIP File')
                                                     ->disk('google')
-                                                    ->directory('Adult Visual Novels [Saves]')
+                                                    ->directory(config('filesystems.disks.google.folderName'))
                                                     ->acceptedFileTypes(['application/zip'])
                                                     ->required(fn($record) => $record === null)
                                                     ->preserveFilenames()

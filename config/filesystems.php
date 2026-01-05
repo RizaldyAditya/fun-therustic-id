@@ -66,6 +66,7 @@ return [
             'clientSecret' => env('GOOGLE_DRIVE_CLIENT_SECRET'),
             'refreshToken' => env('GOOGLE_DRIVE_REFRESH_TOKEN'),
             'folderId'     => env('GOOGLE_DRIVE_FOLDER_ID'), // The ID of the folder where saves will go
+            'folderName'   => env('GOOGLE_DRIVE_FOLDER_NAME'), // The name of the folder where saves will go
         ],
     ],
 
