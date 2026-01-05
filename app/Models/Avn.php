@@ -3,9 +3,9 @@ namespace App\Models;
 
 use App\Models\Status;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 class Avn extends Model
 {
@@ -22,7 +22,7 @@ class Avn extends Model
         'cover_image',
         'genre_id',
         'last_updated_on_itch',
-        'last_played_version'
+        'last_played_version',
     ];
 
     public function status(): BelongsTo
@@ -35,7 +35,7 @@ class Avn extends Model
         return $this->belongsToMany(Genre::class, 'avn_genre');
     }
 
-    public function gallery()
+    public function galleries()
     {
         return $this->hasMany(AvnGallery::class);
     }
@@ -47,14 +47,16 @@ class Avn extends Model
 
     protected static function booted()
     {
-        // Handle file deletion when the entire AVN record is deleted
+        static::deleting(function ($avn) {
+            $avn->saves->each->delete();
+        });
+
         static::deleted(function ($avn) {
             if ($avn->cover_image) {
                 Storage::disk('public')->delete($avn->cover_image);
             }
         });
 
-        // Handle file deletion when the image is updated or removed in the form
         static::updating(function ($avn) {
             if ($avn->isDirty('cover_image') && $avn->getOriginal('cover_image')) {
                 Storage::disk('public')->delete($avn->getOriginal('cover_image'));

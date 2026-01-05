@@ -171,17 +171,16 @@ class AvnsTable
                 Action::make('view_gallery')
                     ->label('')
                     ->icon('heroicon-s-photo')
-                    ->color(fn($record) => $record->galleries_count > 0 ? 'info' : 'danger')
-                    ->icon('heroicon-s-photo')
+                    ->color(fn($record) => $record->galleries()->exists() ? 'info' : 'danger')
                     ->modalHeading(fn($record) => "Gallery: {$record->title}")
                     ->modalWidth('7xl')        // Extra wide for the carousel feel
                     ->modalSubmitAction(false) // Hide the "Submit" button
                     ->modalCancelActionLabel('Close')
                     ->modalContent(fn($record) => view('filament.gallery-carousel', [
-                        'images' => $record->gallery()->orderBy('sort_order')->get(),
+                        'images' => $record->galleries()->orderBy('sort_order')->get(),
                     ]))
                     ->slideOver()
-                    ->tooltip(fn($record) => $record->galleries_count > 0 ? 'View Gallery' : 'No gallery uploaded yet'),
+                    ->tooltip(fn($record) => $record->galleries()->exists() ? 'View Gallery' : 'No gallery uploaded yet'),
                 EditAction::make()
                     ->label('')
                     ->tooltip('Edit'),
