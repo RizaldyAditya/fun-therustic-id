@@ -37,11 +37,14 @@ class DeploymentController extends Controller
         $processResult = Process::path($path)->run('
             composer install --no-dev --optimize-autoloader --no-scripts &&
             php artisan migrate --force &&
-            php artisan shield:install &&
+            php artisan shield:generate --all &&
             php artisan permission:cache-reset &&
             php artisan filament:upgrade &&
+            php artisan optimize:clear &&
             php artisan filament:optimize &&
-            php artisan optimize:clear
+            php artisan config:cache &&
+            php artisan route:cache &&
+            php artisan view:cache
         ');
 
         if ($processResult->failed()) {
