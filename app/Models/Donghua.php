@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -55,5 +56,23 @@ class Donghua extends Model
     public function source(): BelongsTo
     {
         return $this->belongsTo(Source::class);
+    }
+
+    protected static function booted()
+    {
+        static::deleted(function ($donghua) {
+            if ($donghua->image_cover) {
+                Storage::disk('public')->delete($donghua->image_cover);
+            }
+        });
+
+        static::updating(function ($donghua) {
+            if ($donghua->isDirty('image_cover')) {
+                $oldFile = $donghua->getOriginal('image_cover');
+                if ($oldFile) {
+                    Storage::disk('public')->delete($oldFile);
+                }
+            }
+        });
     }
 }

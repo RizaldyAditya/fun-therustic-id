@@ -18,6 +18,9 @@ use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class DonghuaForm
 {
@@ -41,11 +44,46 @@ class DonghuaForm
                                                 Fieldset::make('Uploads')
                                                     ->columns(1)
                                                     ->schema([
+                                                        TextInput::make('cover_external_url')
+                                                            ->label('Fetch Cover from URL')
+                                                            ->placeholder('https://example.com/donghua-cover.jpg')
+                                                            ->suffixAction(
+                                                                Action::make('fetchCover')
+                                                                    ->icon('heroicon-m-arrow-down-tray')
+                                                                    ->color('success')
+                                                                    ->action(function ($state, $set) {
+                                                                        if (empty($state)) {
+                                                                            return;
+                                                                        }
+
+                                                                        try {
+                                                                            $response = Http::get($state);
+                                                                            if (!$response->successful()) {
+                                                                                throw new \Exception('URL unreachable');
+                                                                            }
+
+                                                                            $extension = pathinfo(parse_url($state, PHP_URL_PATH), PATHINFO_EXTENSION) ?: 'jpg';
+                                                                            $filename  = 'img/donghua-covers/' . Str::random(40) . '.' . $extension;
+                                                                            Storage::disk('public')->put($filename, $response->body());
+                                                                            $set('image_cover', $filename);
+                                                                            $set('cover_external_url', null);
+
+                                                                            Notification::make()
+                                                                                ->title('Donghua cover downloaded!')
+                                                                                ->success()
+                                                                                ->send();
+                                                                        } catch (\Exception $e) {
+                                                                            Notification::make()
+                                                                                ->title('Fetch Failed')
+                                                                                ->danger()
+                                                                                ->send();
+                                                                        }
+                                                                    }),
+                                                            ),
                                                         FileUpload::make('image_cover')
                                                             ->label('Cover Image')
                                                             ->disk('public')
-                                                            ->directory('img/covers')
-                                                            ->label('')
+                                                            ->directory('img/donghua-covers')
                                                             ->visibility('public')
                                                             ->image(),
 
@@ -116,7 +154,20 @@ class DonghuaForm
                                                 Fieldset::make('MyAnimeList')
                                                     ->columns(1)
                                                     ->schema([
-                                                        TextInput::make('myanimelist')->url()->inlineLabel(),
+                                                        TextInput::make('myanimelist')
+                                                            ->url()
+                                                            ->inlineLabel()
+                                                            ->prefixIcon('heroicon-m-globe-alt')
+                                                            ->suffixAction(
+                                                                Action::make('open_mal')
+                                                                    ->label('Visit')
+                                                                    ->icon('heroicon-m-arrow-top-right-on-square')
+                                                                    ->color('primary')
+                                                                    ->tooltip('Open MyAnimeList in a new tab')
+                                                                    ->url(fn($state) => $state)
+                                                                    ->openUrlInNewTab()
+                                                                    ->visible(fn($state) => !empty($state))
+                                                            ),
                                                         Select::make('studio_id')
                                                             ->label('Studio')
                                                             ->options(Studio::orderBy('name')->pluck('name', 'id'))
@@ -127,7 +178,7 @@ class DonghuaForm
                                                             ->createOptionForm([
                                                                 TextInput::make('name')->required()->inlineLabel()->autofocus(),
                                                                 TextInput::make('url')->label('URL')->url()->inlineLabel()->autofocus(),
-                                                                Toggle::make('is_active')->label('Active')->required()->default(true)->inlineLabel()
+                                                                Toggle::make('is_active')->label('Active')->required()->default(true)->inlineLabel(),
                                                             ]),
                                                         Select::make('source_id')
                                                             ->label('Source')
@@ -138,7 +189,7 @@ class DonghuaForm
                                                             ->preload()
                                                             ->createOptionForm([
                                                                 TextInput::make('name')->required()->inlineLabel()->autofocus(),
-                                                                Toggle::make('is_active')->label('Active')->required()->default(true)->inlineLabel()
+                                                                Toggle::make('is_active')->label('Active')->required()->default(true)->inlineLabel(),
                                                             ]),
                                                     ]),
                                                 Fieldset::make('Wiki')
@@ -159,14 +210,14 @@ class DonghuaForm
                                             ->valueLabel('Description')
                                             ->reorderable()
                                             ->default([
-                                                'animexin_title' => '',
-                                                'animexin_url' => '',
-                                                'animekhor_title' => '',
-                                                'animekhor_url' => '',
+                                                'animexin_title'      => '',
+                                                'animexin_url'        => '',
+                                                'animekhor_title'     => '',
+                                                'animekhor_url'       => '',
                                                 'donghuastream_title' => '',
-                                                'donghuastream_url' => '',
-                                                'donghuaworld_title' => '',
-                                                'donghuaworld_url' => '',
+                                                'donghuastream_url'   => '',
+                                                'donghuaworld_title'  => '',
+                                                'donghuaworld_url'    => '',
                                             ]),
                                     ]),
                                 Tab::make('Crawl Index')

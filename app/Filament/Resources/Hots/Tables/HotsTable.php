@@ -59,8 +59,8 @@ class HotsTable
                                 return $record->episode_watched_seasonal >= $record->episode_latest;
                             })
                             ->icons([
-                                'heroicon-s-check-circle'               => fn($record)               => $record->episode_watched_seasonal >= $record->episode_latest,
-                                'heroicon-s-exclamation-triangle'       => fn($record)       => $record->episode_watched_seasonal < $record->episode_latest,
+                                'heroicon-s-check-circle'               => fn($record) => $record->episode_watched_seasonal >= $record->episode_latest,
+                                'heroicon-s-exclamation-triangle'       => fn($record) => $record->episode_watched_seasonal < $record->episode_latest,
                             ])
                             ->colors([
                                 'success' => fn($record) => $record->episode_watched_seasonal >= $record->episode_latest,
