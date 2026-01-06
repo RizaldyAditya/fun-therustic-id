@@ -4,6 +4,7 @@ namespace App\Observers;
 use App\Models\Donghua;
 use App\Models\Episode;
 use App\Models\Stream;
+use App\Traits\Utilities;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Support\Facades\Http;
@@ -18,6 +19,8 @@ use Symfony\Component\DomCrawler\Crawler as DomCrawler;
 
 class DonghuastreamObserver extends CrawlObserver
 {
+    use Utilities;
+
     protected $client;
 
     public function __construct()
@@ -64,26 +67,18 @@ class DonghuastreamObserver extends CrawlObserver
                     $episodeTitle = $node->filter('.bsx > a.tip')->attr('title');
 
                     // get episode number
-                    $node_episode = $node->filter('.bsx > a.tip > .limit > .bt > .epx');
-                    if ($node_episode->count() > 0) {
-                        $episodeNumber = $node_episode->text();
-                    } else {
-                        $episodeNumber = 0;
-                    }
-                    preg_match_all('/\[([^\]]*)\]/', $episodeNumber, $episodeNumberMatches);
-                    $episodeNumber = preg_replace('/\[.*?\]/', '', $episodeNumber); // remove [xxx]
-                    $episodeNumber = preg_replace('/\((.*?)\)/', '', $episodeNumber); // remove (xxx)
-                    $episodeNumberPre = $episodeNumber = preg_replace('/[^0-9]/', '', $episodeNumber); // remove non number
-                    if (!empty($episodeNumberMatches[0])) {
-                        $episodeNumber .= ' ' . $episodeNumberMatches[0][0];
-                    }
+                    $node_episode     = $node->filter('.bsx > a.tip > .limit > .bt > .epx');
+                    $rawText          = $node_episode->count() > 0 ? $node_episode->text() : '0';
+                    $parsed           = $this->sanitizeEpisodeNumber($rawText);
+                    $episodeNumberPre = $parsed['int'];
+                    $episodeNumber    = $parsed['display'];
 
                     // get video source url
                     $crawlerEpisodeLink = new DomCrawler($this->client->get($episodeLink)->getBody()->getContents());
                     $videoSourceUrl     = $crawlerEpisodeLink->filter('iframe')->attr('data-litespeed-src');
                     $allEpisodes        = $crawlerEpisodeLink->filter('.nvs.nvsc > a')->attr('href');
 
-                    if (!str_contains($videoSourceUrl, 'youtube')) {                        
+                    if (!str_contains($videoSourceUrl, 'youtube')) {
                         // save episode
                         Episode::firstOrCreate(
                             ['stream_url' => $episodeLink],
@@ -99,7 +94,7 @@ class DonghuastreamObserver extends CrawlObserver
                         // update donghua -> episode_latest
                         if ($donghua->episode_latest < $episodeNumberPre) {
                             Donghua::where('id', $donghua_id)->update([
-                                'episode_latest' => $episodeNumberPre
+                                'episode_latest' => $episodeNumberPre,
                             ]);
                         }
                     }

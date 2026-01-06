@@ -65,6 +65,7 @@ class AvnsTable
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('itch_io_url')
                     ->label('itch.io Link')
+                    ->limit(30)
                     ->url(fn($record) => $record->itch_io_url)
                     ->openUrlInNewTab()
                     ->searchable()
@@ -109,12 +110,12 @@ class AvnsTable
                         return $record->version === $record->last_played_version;
                     })
                     ->icons([
-                        'heroicon-s-check-badge'        => true,  // Shown when state is true
-                        'heroicon-s-exclamation-circle' => false, // Shown when state is false
+                        'heroicon-s-check'        => true,  // Shown when state is true
+                        'heroicon-s-exclamation-triangle' => false, // Shown when state is false
                     ])
                     ->colors([
                         'success' => true,
-                        'warning' => false,
+                        'danger' => false,
                     ])
                     ->tooltip(function ($record) {
                         return $record->version === $record->last_played_version
@@ -135,7 +136,7 @@ class AvnsTable
                     })
                     ->icons([
                         'heroicon-s-cloud-arrow-up'     => true,
-                        'heroicon-s-exclamation-circle' => false,
+                        'heroicon-s-archive-box-x-mark' => false,
                     ])
                     ->colors([
                         'success' => true,
