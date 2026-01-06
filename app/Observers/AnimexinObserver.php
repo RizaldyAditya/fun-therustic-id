@@ -15,9 +15,12 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UriInterface;
 use Spatie\Crawler\CrawlObservers\CrawlObserver;
 use Symfony\Component\DomCrawler\Crawler as DomCrawler;
+use App\Traits\Utilities;
 
 class AnimexinObserver extends CrawlObserver
 {
+    use Utilities;
+    
     protected $client;
 
     public function __construct()
@@ -65,18 +68,10 @@ class AnimexinObserver extends CrawlObserver
 
                     // get episode number
                     $node_episode = $node->filter('.bsx > a.tip > .limit > .egghead > .eggmeta > .eggepisode');
-                    if ($node_episode->count() > 0) {
-                        $episodeNumber = $node_episode->text();
-                    } else {
-                        $episodeNumber = 0;
-                    }
-                    preg_match_all('/\[([^\]]*)\]/', $episodeNumber, $episodeNumberMatches);
-                    $episodeNumber = preg_replace('/\[.*?\]/', '', $episodeNumber); // remove [xxx]
-                    $episodeNumber = preg_replace('/\((.*?)\)/', '', $episodeNumber); // remove (xxx)
-                    $episodeNumberPre = $episodeNumber = preg_replace('/[^0-9]/', '', $episodeNumber); // remove non number
-                    if (!empty($episodeNumberMatches[0])) {
-                        $episodeNumber .= ' ' . $episodeNumberMatches[0][0];
-                    }
+                    $rawText          = $node_episode->count() > 0 ? $node_episode->text() : '0';
+                    $parsed           = $this->sanitizeEpisodeNumber($rawText);
+                    $episodeNumberPre = $parsed['int'];
+                    $episodeNumber    = $parsed['display'];
 
                     // get video source url
                     $crawlerEpisodeLink = new DomCrawler($this->client->get($episodeLink)->getBody()->getContents());

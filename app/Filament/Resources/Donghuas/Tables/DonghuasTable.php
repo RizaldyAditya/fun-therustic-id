@@ -109,7 +109,7 @@ class DonghuasTable
                     ->icon('heroicon-m-play')
                     ->slideOver()
                     ->modalHeading(fn($record) => "Watching: {$record->title_en}")
-                    ->modalWidth('full')
+                    ->modalWidth('7xl')
                     ->modalSubmitAction(false) // Hide the "Submit" button
                     ->modalCancelActionLabel('Close')
                     ->modalSubmitAction(false)
@@ -149,14 +149,14 @@ class DonghuasTable
                     ->tooltip('Watch Episodes'),
                 Action::make('viewDetails')
                     ->label('')
-                    ->icon('heroicon-o-document-text')
+                    ->icon('heroicon-s-clipboard')
                     ->tooltip('Donghua Details')
                     ->slideOver()
                     ->modalHeading(fn($record) => $record->title_en)
                     ->modalDescription(fn($record) => $record->title_zh)
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Close')
-                    ->modalWidth('4xl')
+                    ->modalWidth('7xl')
                     ->color('info')
                     ->schema([
                         Grid::make()
@@ -197,12 +197,13 @@ class DonghuasTable
                             ->icon(Heroicon::PercentBadge)
                             ->schema([
                                 Grid::make()
-                                    ->columns(4)
+                                    ->columns(5)
                                     ->schema([
                                         TextEntry::make('episode_watched')->label('Watched')->color('success'),
                                         TextEntry::make('episode_watched_seasonal')->label('Watched (All)')->color('success'),
                                         TextEntry::make('episode_latest')->label('Latest')->color('success'),
                                         TextEntry::make('episode_total')->label('Total')->color('success'),
+                                        TextEntry::make('episode_dl')->label('Downloaded')->color('success'),
                                     ]),
                             ]),
                         Section::make('Sources')

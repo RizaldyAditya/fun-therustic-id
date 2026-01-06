@@ -30,7 +30,10 @@ class AdminPanelProvider extends PanelProvider
             ->topNavigation()
             ->id('admin')
             ->path('/')
-            ->viteTheme('resources/css/filament/admin/theme.css')
+            ->viteTheme([
+                'resources/css/filament/admin/theme.css',
+                'resources/css/app.css'
+            ])
             ->login()
             ->profile(isSimple: false, page: EditProfile::class)
             ->colors([

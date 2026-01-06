@@ -179,6 +179,7 @@ class AvnForm
                                             ->reorderable('sort_order')
                                             ->orderColumn('sort_order')
                                             ->addActionLabel('Add New Image Uploader')
+                                            ->defaultItems(0)
                                             ->schema([
                                                 TextInput::make('external_url')
                                                     ->label('Fetch Image from URL')
