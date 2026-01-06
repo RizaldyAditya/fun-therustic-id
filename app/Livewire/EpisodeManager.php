@@ -43,12 +43,15 @@ class EpisodeManager extends Component implements HasForms, HasTable, HasActions
             ->columns([
                 TextInputColumn::make('episode_number')
                     ->label('# Episode')
-                    // ->type('number')
+                // ->type('number')
                     ->extraAttributes([
                         'style' => 'width: 50px;',
                     ])
                     ->extraHeaderAttributes([
                         'style' => 'width: 50px;',
+                    ])
+                    ->extraCellAttributes([
+                        'style' => 'vertical-align: top; padding-top: 0.5rem;',
                     ])
                     ->searchable()
                     ->sortable(query: function (Builder $query, string $direction): Builder {
@@ -56,9 +59,7 @@ class EpisodeManager extends Component implements HasForms, HasTable, HasActions
                             ->orderByRaw('CAST(episode_number AS UNSIGNED) ' . $direction);
                     }),
                 TextColumn::make('title')
-                    ->wrap()
-                    ->searchable(),
-                TextColumn::make('notes')
+                    ->description(fn($record) => $record->notes)
                     ->wrap()
                     ->searchable(),
                 ImageColumn::make('stream.logo')
@@ -71,6 +72,9 @@ class EpisodeManager extends Component implements HasForms, HasTable, HasActions
                     ->openUrlInNewTab()
                     ->extraHeaderAttributes([
                         'style' => 'text-align: center; width: 50px;',
+                    ])
+                    ->extraCellAttributes([
+                        'style' => 'vertical-align: top; padding-top: 0.5rem;',
                     ]),
             ])
             ->recordActions([

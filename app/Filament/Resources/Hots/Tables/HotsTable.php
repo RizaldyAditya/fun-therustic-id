@@ -1,22 +1,26 @@
 <?php
 namespace App\Filament\Resources\Hots\Tables;
 
-use App\Filament\Resources\Donghuas\DonghuaResource;
 use App\Models\Status;
+use Filament\Tables\Table;
 use Filament\Actions\Action;
-use Filament\Forms\Components\ViewField;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Tabs;
-use Filament\Schemas\Components\Tabs\Tab;
-use Filament\Tables\Columns\ColumnGroup;
 use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\ImageColumn;
-use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\TextInputColumn;
+use Filament\Forms\Components\ViewField;
+use Filament\Schemas\Components\Section;
+use Filament\Tables\Columns\ColumnGroup;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Tables\Columns\TextInputColumn;
+use Filament\Infolists\Components\ImageEntry;
+use App\Filament\Resources\Donghuas\DonghuaResource;
 
 class HotsTable
 {
@@ -59,12 +63,12 @@ class HotsTable
                                 return $record->episode_watched_seasonal >= $record->episode_latest;
                             })
                             ->icons([
-                                'heroicon-s-check-circle'               => fn($record) => $record->episode_watched_seasonal >= $record->episode_latest,
-                                'heroicon-s-exclamation-triangle'       => fn($record) => $record->episode_watched_seasonal < $record->episode_latest,
+                                'heroicon-s-check'     => fn($record)     => $record->episode_watched_seasonal >= $record->episode_latest,
+                                'heroicon-s-eye-slash' => fn($record) => $record->episode_watched_seasonal < $record->episode_latest,
                             ])
                             ->colors([
                                 'success' => fn($record) => $record->episode_watched_seasonal >= $record->episode_latest,
-                                'warning' => fn($record) => $record->episode_watched_seasonal < $record->episode_latest,
+                                'danger'  => fn($record)  => $record->episode_watched_seasonal < $record->episode_latest,
                             ])
                             ->tooltip(function ($record) {
                                 return $record->episode_watched_seasonal >= $record->episode_latest
@@ -78,7 +82,7 @@ class HotsTable
                                 return $record->episode_dl >= $record->episode_latest;
                             })
                             ->icons([
-                                'heroicon-s-check-circle'               => fn($record)               => $record->episode_dl >= $record->episode_latest,
+                                'heroicon-s-check'                      => fn($record)                      => $record->episode_dl >= $record->episode_latest,
                                 'heroicon-s-arrow-down-on-square-stack' => fn($record) => $record->episode_dl < $record->episode_latest,
                             ])
                             ->colors([
@@ -174,7 +178,7 @@ class HotsTable
                     ->icon('heroicon-s-play')
                     ->slideOver()
                     ->modalHeading(fn($record) => "Watching: {$record->title_en}")
-                    ->modalWidth('full')
+                    ->modalWidth('7xl')
                     ->modalSubmitAction(false) // Hide the "Submit" button
                     ->modalCancelActionLabel('Close')
                     ->modalSubmitAction(false)
@@ -212,12 +216,105 @@ class HotsTable
                             ]),
                     ])
                     ->tooltip('See Episode List & Watch'),
+                Action::make('viewDetails')
+                    ->label('')
+                    ->icon('heroicon-s-clipboard')
+                    ->tooltip('Donghua Details')
+                    ->slideOver()
+                    ->modalHeading(fn($record) => $record->title_en)
+                    ->modalDescription(fn($record) => $record->title_zh)
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Close')
+                    ->modalWidth('7xl')
+                    ->color('info')
+                    ->schema([
+                        Grid::make()
+                            ->columns(2)
+                            ->schema([
+                                Section::make('Cover Image')
+                                    ->icon('heroicon-s-photo')
+                                    ->schema([
+                                        ImageEntry::make('image_cover')
+                                            ->hiddenLabel()
+                                            ->disk('public')
+                                            ->visibility('public')
+                                            ->imageHeight(300)
+                                            ->alignCenter(),
+                                    ]),
+                                Section::make('Airing Status')
+                                    ->icon('heroicon-s-calendar-days')
+                                    ->schema([
+                                        TextEntry::make('status.name')
+                                            ->label('Status')
+                                            ->badge(),
+                                        TextEntry::make('airing')->label('Airing Status')
+                                            ->badge(fn($record) => $record->airing ? 'primary' : 'success')
+                                            ->formatStateUsing(fn($state) => $state ? 'Airing' : 'Completed')
+                                            ->color(fn($state) => $state ? 'primary' : 'success'),
+                                        TextEntry::make('mc_name')
+                                            ->label('MC Name')
+                                            ->color('primary')
+                                            ->placeholder('~'),
+                                        TextEntry::make('mc_wikia')->label('MC Wikia')
+                                            ->url(fn($record) => $record->mc_wikia)
+                                            ->openUrlInNewTab()
+                                            ->color('info')
+                                            ->placeholder('~'),
+                                    ]),
+                            ]),
+                        Section::make('Episode')
+                            ->icon('heroicon-s-percent-badge')
+                            ->schema([
+                                Grid::make()
+                                    ->columns(5)
+                                    ->schema([
+                                        TextEntry::make('episode_watched')->label('Watched')->color('success'),
+                                        TextEntry::make('episode_watched_seasonal')->label('Watched (All)')->color('success'),
+                                        TextEntry::make('episode_latest')->label('Latest')->color('success'),
+                                        TextEntry::make('episode_total')->label('Total')->color('success'),
+                                        TextEntry::make('episode_dl')->label('Downloaded')->color('success'),
+                                    ]),
+                            ]),
+                        Section::make('Sources')
+                            ->icon('heroicon-s-squares-plus')
+                            ->schema([
+                                TextEntry::make('myanimelist')
+                                    ->label('MyAnimeList')
+                                    ->url(fn($record) => $record->myanimelist)
+                                    ->openUrlInNewTab()
+                                    ->color('info')
+                                    ->placeholder('-'),
+                                TextEntry::make('studio.name')
+                                    ->label('Studio')
+                                    ->color('primary')
+                                    ->placeholder('-'),
+                                TextEntry::make('source.name')
+                                    ->label('Source')
+                                    ->color('primary')
+                                    ->placeholder('-'),
+                            ])
+                            ->collapsed(),
+                        Section::make('Data History')
+                            ->icon('heroicon-s-clock')
+                            ->schema([
+                                TextEntry::make('created_at')
+                                    ->dateTime()
+                                    ->color('primary')
+                                    ->icon('heroicon-s-document-plus')
+                                    ->placeholder('-'),
+                                TextEntry::make('updated_at')
+                                    ->dateTime()
+                                    ->color('primary')
+                                    ->icon('heroicon-s-pencil')
+                                    ->placeholder('-'),
+                            ])
+                            ->collapsed(),
+                    ]),
                 Action::make('editParent')
                     ->label('')
                     ->icon('heroicon-s-pencil-square')
                     ->color('warning')
                     ->url(fn($record): string => DonghuaResource::getUrl('edit', ['record' => $record]))
-                    ->openUrlInNewTab()
                     ->tooltip('Edit'),
             ])
             ->toolbarActions([
