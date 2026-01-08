@@ -6,6 +6,7 @@ ini_set('max_execution_time', 0); // no time limit()
 use App\Models\Donghua;
 use App\Models\Episode;
 use App\Models\Stream;
+use App\Traits\Utilities;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Support\Facades\Http;
@@ -20,6 +21,8 @@ use Symfony\Component\DomCrawler\Crawler as DomCrawler;
 
 class DonghuastreamIndexObserver extends CrawlObserver
 {
+    use Utilities;
+
     protected $client;
 
     public function __construct()
@@ -87,7 +90,9 @@ class DonghuastreamIndexObserver extends CrawlObserver
                     $episodeTitle = $node->filter('a > .epl-title')->text();
 
                     // get episode number
-                    $episodeNumber = $node->filter('a > .epl-num')->text();
+                    $episodeNumberText = $node->filter('a > .epl-num')->text();
+                    $parsed            = $this->sanitizeEpisodeNumber($episodeNumberText);
+                    $episodeNumber     = $parsed['display'];
 
                     // get video source url
                     $crawlerEpisodeLink = new DomCrawler($this->client->get($episodeLink)->getBody()->getContents());
@@ -103,7 +108,7 @@ class DonghuastreamIndexObserver extends CrawlObserver
                                 'stream_id'        => $stream->id,
                                 'episode_number'   => $episodeNumber,
                                 'video_source_url' => $videoSourceUrl,
-                                'updated_at'       => now(),
+                                'is_an_update'     => false
                             ]
                         );
                     }
