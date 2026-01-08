@@ -95,7 +95,7 @@ class DonghuaForm
                                                         TextInput::make('title_en')->label('Title (EN)')->required()->inlineLabel(),
                                                         TextInput::make('title_zh')->label('Title (CN / Pinyin)')->required()->inlineLabel(),
                                                         TextInput::make('trending_sort')->label('Trending Sort')->required()->inlineLabel()->default(99)->numeric(),
-                                                        Textarea::make('synopsis')->required()->rows(10),
+                                                        Textarea::make('synopsis')->rows(10),
                                                     ]),
                                                 Fieldset::make('Status')
                                                     ->columns(1)
