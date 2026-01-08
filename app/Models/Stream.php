@@ -24,7 +24,7 @@ class Stream extends Model
         'is_active' => 'boolean'
     ];
 
-    public function streams(): HasMany
+    public function episodes(): HasMany
     {
         return $this->hasMany(Episode::class);
     }

@@ -23,7 +23,7 @@ class StatsOverview extends StatsOverviewWidget
     protected function getStats(): array
     {
         // get data counts
-        $airing        = Donghua::where('airing', 1)->count();
+        $is_airing        = Donghua::where('is_airing', 1)->count();
         $watching      = Donghua::where('status_id', 3)->count();
         $plan_to_watch = Donghua::where('status_id', 2)->count();
         $completed     = Donghua::where('status_id', 5)->count();
@@ -31,7 +31,7 @@ class StatsOverview extends StatsOverviewWidget
         $dropped       = Donghua::where('status_id', 6)->count();
 
         return [
-            Stat::make('Airing', $airing)->color('primary'),
+            Stat::make('Airing', $is_airing)->color('primary'),
             Stat::make('Watching', $watching),
             Stat::make('Plan to Watch', $plan_to_watch),
             Stat::make('Completed', $completed),

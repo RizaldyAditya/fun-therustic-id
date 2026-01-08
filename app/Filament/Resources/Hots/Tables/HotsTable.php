@@ -131,11 +131,12 @@ class HotsTable
                             ->options(Status::query()->pluck('name', 'id'))
                             ->searchableOptions()
                             ->extraHeaderAttributes(['style' => 'width: 200px; text-align: center;']),
-                        ToggleColumn::make('is_observed')
+                        ToggleColumn::make('is_hot')
                             ->label('Hot')
                             ->sortable()
                             ->alignEnd(),
-                        ToggleColumn::make('airing')
+                        ToggleColumn::make('is_airing')
+                            ->label('Airing')
                             ->sortable()
                             ->alignEnd(),
                     ]),
@@ -247,8 +248,8 @@ class HotsTable
                                         TextEntry::make('status.name')
                                             ->label('Status')
                                             ->badge(),
-                                        TextEntry::make('airing')->label('Airing Status')
-                                            ->badge(fn($record) => $record->airing ? 'primary' : 'success')
+                                        TextEntry::make('is_airing')->label('Airing Status')
+                                            ->badge(fn($record) => $record->is_airing ? 'primary' : 'success')
                                             ->formatStateUsing(fn($state) => $state ? 'Airing' : 'Completed')
                                             ->color(fn($state) => $state ? 'primary' : 'success'),
                                         TextEntry::make('mc_name')

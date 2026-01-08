@@ -142,8 +142,8 @@ class LatestEpisodes extends TableWidget
                                         TextEntry::make('donghua.status.name')
                                             ->label('Status')
                                             ->badge(),
-                                        TextEntry::make('donghua.airing')->label('Airing Status')
-                                            ->badge(fn($record) => $record->donghua->airing ? 'primary' : 'success')
+                                        TextEntry::make('donghua.is_airing')->label('Airing Status')
+                                            ->badge(fn($record) => $record->donghua->is_airing ? 'primary' : 'success')
                                             ->formatStateUsing(fn($state) => $state ? 'Airing' : 'Completed')
                                             ->color(fn($state) => $state ? 'primary' : 'success'),
                                         TextEntry::make('donghua.mc_name')
