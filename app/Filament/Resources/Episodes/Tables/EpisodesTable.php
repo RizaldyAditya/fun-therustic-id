@@ -25,7 +25,7 @@ class EpisodesTable
     {
         return $table
             ->columns([
-                TextColumn::make('id')->sortable()->label('ID')->toggleable(isToggledHiddenByDefault: false),
+                TextColumn::make('id')->sortable()->label('ID')->toggleable(),
                 ImageColumn::make('donghua.image_cover')
                     ->disk('public')
                     ->label('')
@@ -46,7 +46,8 @@ class EpisodesTable
                                         'image' => $record->donghua?->image_cover,
                                     ]),
                             ])
-                    ),
+                    )
+                    ->toggleable(),
                 TextColumn::make('title')
                     ->label('Episode Title')
                     ->description(function ($record) {
@@ -59,12 +60,24 @@ class EpisodesTable
                     ->searchable(),
                 TextColumn::make('donghua.title_en')->label('Donghua Title (en)')->searchable()->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('donghua.title_zh')->label('Donghua Title (zh)')->searchable()->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('episode_number')->label('# Episode')->sortable()->searchable()->alignCenter(),
+                TextColumn::make('episode_number')->label('# Episode')->sortable()->searchable()->alignCenter()->toggleable(),
+                TextColumn::make('donghua.episode_watched')
+                    ->label('# Watched')
+                    ->description(function ($record) {
+                        if ($record->donghua) {
+                            return $record->donghua->episode_watched_seasonal;
+                        }
+                        return '-';
+                    })
+                    ->alignCenter()
+                    ->toggleable(),
                 TextInputColumn::make('donghua.episode_dl')
                     ->label('# Downloaded')
+                    ->type('number')
                     ->sortable()
                     ->searchable()
                     ->alignCenter()
+                    ->toggleable()
                     ->extraHeaderAttributes([
                         'style' => 'width: 100px'
                     ]),
@@ -81,7 +94,8 @@ class EpisodesTable
                     ->label('Date & Time')
                     ->isoDate('YYYY-MM-DD HH:mm')
                     ->sortable()
-                    ->alignCenter(),
+                    ->alignCenter()
+                    ->toggleable(),
             ])
             ->filters([
                 SelectFilter::make('stream')->relationship('stream', 'name')
