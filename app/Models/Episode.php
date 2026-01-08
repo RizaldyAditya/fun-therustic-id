@@ -14,7 +14,8 @@ class Episode extends Model
         'stream_id',
         'stream_url',
         'video_source_url',
-        'notes'
+        'notes',
+        'is_an_update'
     ];
 
     public function donghua(): BelongsTo

@@ -48,7 +48,7 @@ class EpisodesTable
                             ])
                     ),
                 TextColumn::make('title')
-                    ->label('Donghua')
+                    ->label('Episode Title')
                     ->description(function ($record) {
                         if ($record->donghua) {
                             return $record->donghua->title_en . ' (' . $record->donghua->title_zh . ')';
@@ -57,6 +57,8 @@ class EpisodesTable
                     })
                     ->sortable()
                     ->searchable(),
+                TextColumn::make('donghua.title_en')->label('Donghua Title (en)')->searchable()->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('donghua.title_zh')->label('Donghua Title (zh)')->searchable()->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('episode_number')->label('# Episode')->sortable()->searchable()->alignCenter(),
                 TextInputColumn::make('donghua.episode_dl')
                     ->label('# Downloaded')

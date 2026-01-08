@@ -19,7 +19,7 @@ class LatestEpisodeCards extends TableWidget
     public function table(Table $table): Table
     {
         return $table
-            ->query(Episode::query()->with('donghua', 'stream')->latest())
+            ->query(Episode::query()->with('donghua', 'stream')->where('is_an_update', true)->latest())
             ->columns([
                 TextColumn::make('donghua.title_en')->searchable()->extraAttributes(['style' => 'display: none;']),
                 TextColumn::make('title')->searchable()->extraAttributes(['style' => 'display: none;']),
