@@ -23,8 +23,8 @@ class HotResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        return static::getModel()::where('airing', true)
-            ->orWhere('is_observed', true)
+        return static::getModel()::where('is_airing', true)
+            ->orWhere('is_hot', true)
             ->count();
     }
 
@@ -58,8 +58,8 @@ class HotResource extends Resource
     {
         return parent::getEloquentQuery()
             ->where(function (Builder $query) {
-                $query->where('airing', true)
-                    ->orWhere('is_observed', true)
+                $query->where('is_airing', true)
+                    ->orWhere('is_hot', true)
                     ->orderBy('title_en', 'asc');
             });
     }

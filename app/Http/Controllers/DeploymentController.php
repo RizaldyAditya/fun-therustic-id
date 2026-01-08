@@ -13,27 +13,20 @@ class DeploymentController extends Controller
         $signature = $request->header('X-Hub-Signature-256');
         $payload   = $request->getContent();
         $secret    = config('app.deploy_secret');
-
-        $hash = 'sha256=' . hash_hmac('sha256', $payload, $secret);
+        $hash      = 'sha256=' . hash_hmac('sha256', $payload, $secret);
 
         if (!hash_equals($hash, $signature)) {
             Log::warning('Deployment attempt with invalid signature');
             abort(403, 'Invalid signature');
         }
 
-        $path = base_path();
-
-        // 1. Pull the code
+        $path      = base_path();
         $gitResult = Process::path($path)->run('git fetch origin && git reset --hard origin/main 2>&1');
-
         if ($gitResult->failed()) {
             Log::error('Git Pull Failed', ['output' => $gitResult->output()]);
             return response()->json(['message' => 'Git failed'], 500);
         }
 
-        // 2. Run the technical updates
-        // Added --no-scripts to prevent the exit code 255 error
-        // Added permission:cache-reset to apply Shield changes
         $processResult = Process::path($path)->run('
             composer install --no-dev --optimize-autoloader --no-scripts &&
             php artisan migrate --force &&

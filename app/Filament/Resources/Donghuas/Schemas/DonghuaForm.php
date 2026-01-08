@@ -1,26 +1,27 @@
 <?php
 namespace App\Filament\Resources\Donghuas\Schemas;
 
-use App\Console\Commands\CrawlIndexPage;
 use App\Models\Source;
 use App\Models\Status;
 use App\Models\Studio;
+use Illuminate\Support\Str;
 use Filament\Actions\Action;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\KeyValue;
+use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Http;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Notifications\Notification;
-use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Tabs;
-use Filament\Schemas\Components\Tabs\Tab;
-use Filament\Schemas\Schema;
+use Filament\Forms\Components\KeyValue;
+use Filament\Forms\Components\Textarea;
 use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
+use App\Console\Commands\CrawlIndexPage;
+use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
+use Filament\Forms\Components\FileUpload;
+use Filament\Schemas\Components\Fieldset;
+use Filament\Schemas\Components\Tabs\Tab;
 
 class DonghuaForm
 {
@@ -93,6 +94,8 @@ class DonghuaForm
                                                     ->schema([
                                                         TextInput::make('title_en')->label('Title (EN)')->required()->inlineLabel(),
                                                         TextInput::make('title_zh')->label('Title (CN / Pinyin)')->required()->inlineLabel(),
+                                                        TextInput::make('trending_sort')->label('Trending Sort')->required()->inlineLabel()->default(99)->numeric(),
+                                                        Textarea::make('synopsis')->required()->rows(10),
                                                     ]),
                                                 Fieldset::make('Status')
                                                     ->columns(1)
@@ -102,7 +105,7 @@ class DonghuaForm
                                                             ->required()
                                                             ->default(true)
                                                             ->onColor('success'),
-                                                        Toggle::make('is_observed')
+                                                        Toggle::make('is_hot')
                                                             ->label('Currently is Hot!')
                                                             ->required()
                                                             ->default(true)
@@ -111,7 +114,7 @@ class DonghuaForm
                                                             ->label('Watch Status')
                                                             ->options(Status::query()->pluck('name', 'id'))
                                                             ->required(),
-                                                        Select::make('airing')
+                                                        Select::make('is_airing')
                                                             ->label('Airing Status')
                                                             ->options([
                                                                 '0' => 'Finished',

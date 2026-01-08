@@ -15,6 +15,7 @@ class Donghua extends Model
     protected $fillable = [
         'title_en',
         'title_zh',
+        'synopsis',
         'external_titles',
         'season',
         'episode_latest',
@@ -24,14 +25,15 @@ class Donghua extends Model
         'episode_dl',
         'local_download_path',
         'status_id',
-        'airing',
+        'is_airing',
         'myanimelist',
         'image_cover',
         'mc_name',
         'mc_wikia',
         'studio_id',
         'source_id',
-        'is_observed',
+        'is_hot',
+        'trending_sort',
         'is_active'
     ];
 
