@@ -17,6 +17,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Tables\Columns\TextInputColumn;
 use Illuminate\Database\Eloquent\Collection;
+use App\Filament\Resources\Donghuas\DonghuaResource;
 
 class EpisodesTable
 {
@@ -99,8 +100,14 @@ class EpisodesTable
                     ->color('info')
                     ->slideover()
                     ->tooltip('Watch Now'),
-                EditAction::make()->label('')->tooltip('Edit'),
-                DeleteAction::make()->label('')->tooltip('Delete'),
+                EditAction::make()->label('')->tooltip('Edit Episode'),
+                Action::make('editParent')
+                    ->label('')
+                    ->icon('heroicon-s-pencil-square')
+                    ->color('success')
+                    ->url(fn($record): string => DonghuaResource::getUrl('edit', ['record' => $record->donghua_id]))
+                    ->tooltip('Edit Donghua'),
+                DeleteAction::make()->label('')->tooltip('Delete Episode'),
             ])
             ->toolbarActions([
                 BulkAction::make('generate_json')
