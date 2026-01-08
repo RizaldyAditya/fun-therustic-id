@@ -15,6 +15,7 @@ use Filament\Forms\Components\ViewField;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Tables\Columns\TextInputColumn;
 use Illuminate\Database\Eloquent\Collection;
 
 class EpisodesTable
@@ -55,7 +56,15 @@ class EpisodesTable
                     })
                     ->sortable()
                     ->searchable(),
-                TextColumn::make('episode_number')->label('# EP')->sortable()->searchable()->alignCenter(),
+                TextColumn::make('episode_number')->label('# Episode')->sortable()->searchable()->alignCenter(),
+                TextInputColumn::make('donghua.episode_dl')
+                    ->label('# Downloaded')
+                    ->sortable()
+                    ->searchable()
+                    ->alignCenter()
+                    ->extraHeaderAttributes([
+                        'style' => 'width: 100px'
+                    ]),
                 ImageColumn::make('stream.logo')
                     ->disk('public')
                     ->label('Stream Link')
@@ -66,7 +75,7 @@ class EpisodesTable
                     ->url(fn($record) => $record->stream_url)
                     ->openUrlInNewTab(),
                 TextColumn::make('created_at')
-                    ->label('Date')
+                    ->label('Date & Time')
                     ->isoDate('YYYY-MM-DD HH:mm')
                     ->sortable()
                     ->alignCenter(),

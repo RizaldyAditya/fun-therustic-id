@@ -23,8 +23,8 @@ return new class extends Migration
             $table->integer('episode_total')->default(0)->nullable();
             $table->integer('episode_dl')->default(0)->nullable();
             $table->integer('status_id')->nullable();
-            $table->boolean('airing')->default(0);
-            $table->boolean('is_observed')->default(0);
+            $table->boolean('is_airing')->default(0);
+            $table->boolean('is_hot')->default(0);
             $table->string('myanimelist')->nullable();
             $table->text('image_cover')->nullable();
             $table->string('mc_name')->nullable();

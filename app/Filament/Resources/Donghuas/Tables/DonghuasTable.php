@@ -86,20 +86,20 @@ class DonghuasTable
                             ->options(Status::query()->pluck('name', 'id'))
                             ->searchableOptions()
                             ->extraHeaderAttributes(['style' => 'width: 200px; text-align: center;']),
-                        ToggleColumn::make('is_observed')
+                        ToggleColumn::make('is_hot')
                             ->label('Hot')
                             ->sortable()
                             ->alignEnd(),
-                        ToggleColumn::make('airing')
+                        ToggleColumn::make('is_airing')
                             ->sortable()
                             ->alignEnd(),
                     ]),
             ])
             ->filters([
-                // filter is_observed
-                SelectFilter::make('is_observed')->label('Hot 🔥')->options(['1' => 'Yes', '0' => 'No']),
+                // filter is_hot
+                SelectFilter::make('is_hot')->label('Hot 🔥')->options(['1' => 'Yes', '0' => 'No']),
                 SelectFilter::make('status_id')->label('Status')->options(Status::query()->pluck('name', 'id')),
-                SelectFilter::make('airing')->label('Airing Status')->options(['1' => 'Airing', '0' => 'Completed']),
+                SelectFilter::make('is_airing')->label('Airing Status')->options(['1' => 'Airing', '0' => 'Completed']),
                 TrashedFilter::make(),
             ])
             ->recordActions([
@@ -178,8 +178,8 @@ class DonghuasTable
                                         TextEntry::make('status.name')
                                             ->label('Status')
                                             ->badge(),
-                                        TextEntry::make('airing')->label('Airing Status')
-                                            ->badge(fn($record) => $record->airing ? 'primary' : 'success')
+                                        TextEntry::make('is_airing')->label('Airing Status')
+                                            ->badge(fn($record) => $record->is_airing ? 'primary' : 'success')
                                             ->formatStateUsing(fn($state) => $state ? 'Airing' : 'Completed')
                                             ->color(fn($state) => $state ? 'primary' : 'success'),
                                         TextEntry::make('mc_name')
@@ -192,6 +192,11 @@ class DonghuasTable
                                             ->color('info')
                                             ->placeholder('~'),
                                     ]),
+                            ]),
+                        Section::make('Description')
+                            ->icon(Heroicon::InformationCircle)
+                            ->schema([
+                                TextEntry::make('synopsis')->color('info')->placeholder('-'),
                             ]),
                         Section::make('Episode')
                             ->icon(Heroicon::PercentBadge)
