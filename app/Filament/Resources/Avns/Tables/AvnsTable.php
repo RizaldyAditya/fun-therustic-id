@@ -45,9 +45,9 @@ class AvnsTable
                     ->searchable()
                     ->toggleable()
                     ->extraHeaderAttributes(['style' => 'width: 100px;']),
-                SelectColumn::make('status.name')
+                SelectColumn::make('status_id')
                     ->label('Status')
-                    ->options(Status::query()->pluck('name', 'id'))
+                    ->options(Status::all()->pluck('name', 'id'))
                     ->searchableOptions()
                     ->sortable()
                     ->searchable()
