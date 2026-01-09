@@ -19,6 +19,10 @@ class AvnSave extends Model
 
     protected static function booted()
     {
+        static::addGlobalScope('order', function ($builder) {
+            $builder->orderBy('sort', 'asc');
+        });
+
         static::saving(function ($save) {
             if (is_null($save->file_url) && $save->getOriginal('file_url')) {
                 $save->file_url  = $save->getOriginal('file_url');

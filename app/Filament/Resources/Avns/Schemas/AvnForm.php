@@ -100,6 +100,9 @@ class AvnForm
                                                             ->inlineLabel()
                                                             ->required(),
                                                         TextInput::make('version')
+                                                            ->required()
+                                                            ->inlineLabel(),
+                                                        TextInput::make('last_played_version')
                                                             ->inlineLabel(),
                                                         TextInput::make('itch_io_url')
                                                             ->label('itch.io URL')
@@ -166,7 +169,7 @@ class AvnForm
                                                     ->schema([
                                                         Textarea::make('description')
                                                             ->label('Description / Short Synopsis')
-                                                            ->rows(12),
+                                                            ->rows(10),
                                                     ]),
                                             ]),
                                     ]),
@@ -177,6 +180,7 @@ class AvnForm
                                             ->relationship('galleries')
                                             ->grid(3)
                                             ->reorderable('sort_order')
+                                            ->reorderableWithButtons()
                                             ->orderColumn('sort_order')
                                             ->addActionLabel('Add New Image Uploader')
                                             ->defaultItems(0)
@@ -229,7 +233,9 @@ class AvnForm
                                             ->relationship('saves', function ($query) {
                                                 return $query->orderBy('version', 'desc');
                                             })
-                                            ->reorderable(false)
+                                            ->reorderable('sort')
+                                            ->orderColumn('sort')
+                                            ->reorderableWithButtons()
                                             ->defaultItems(0)
                                             ->schema([
                                                 TextInput::make('version')
@@ -270,6 +276,7 @@ class AvnForm
                                                     ->required(fn($record) => $record === null)
                                                     ->preserveFilenames()
                                                     ->live()
+                                                    ->hidden(fn($record) => !empty($record?->file_url))
                                                     ->dehydrateStateUsing(function ($state) {
                                                         if (blank($state)) {
                                                             return null;
