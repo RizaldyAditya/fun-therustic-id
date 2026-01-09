@@ -8,8 +8,8 @@ class CreateAvn extends CreateRecord
 {
     protected static string $resource = AvnResource::class;
 
-    protected function getRedirectUrl(): string
-    {
-        return $this->getResource()::getUrl('index');
-    }
+    // protected function getRedirectUrl(): string
+    // {
+    //     return $this->getResource()::getUrl('index');
+    // }
 }
