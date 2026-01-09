@@ -33,9 +33,11 @@ class AvnsTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('title')
+                    ->sortable()
                     ->searchable(),
                 TextColumn::make('developer')
                     ->searchable()
+                    ->sortable()
                     ->toggleable(),
                 TextInputColumn::make('version')
                     ->label('Latest Version')
@@ -147,7 +149,7 @@ class AvnsTable
                         if (!$latestSave) {
                             return "No save files uploaded yet.";
                         }
-                        return $record->last_played_version === $latestSave->label
+                        return trim($record->last_played_version) === ($latestSave->version)
                             ? "Cloud save is up to date ({$latestSave->version})"
                             : "Cloud save ({$latestSave->version}) is older than your last played version ({$record->last_played_version})";
                     }),
