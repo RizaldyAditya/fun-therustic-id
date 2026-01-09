@@ -14,6 +14,7 @@ class AvnSave extends Model
         'file_path',
         'label',
         'version',
+        'sort',
         'completed_at',
     ];
 

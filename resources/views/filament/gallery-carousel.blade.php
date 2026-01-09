@@ -41,9 +41,10 @@
 
             <div class="flex gap-2">
                 @foreach($images as $index => $image)
-                    <button @click="active = {{ $index }}" 
+                    <button type="button" @click="active = {{ $index }}" 
                         :class="active === {{ $index }} ? 'bg-primary-500 w-4' : 'bg-gray-300 dark:bg-gray-600 w-2'"
-                        class="h-2 rounded-full transition-all duration-300"></button>
+                        class="h-2 rounded-full transition-all duration-300"
+                        loading="lazy"></button>
                 @endforeach
             </div>
 

@@ -42,7 +42,7 @@ class Avn extends Model
 
     public function saves()
     {
-        return $this->hasMany(AvnSave::class);
+        return $this->hasMany(AvnSave::class)->orderBy('sort', 'asc');
     }
 
     protected static function booted()
