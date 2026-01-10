@@ -139,6 +139,7 @@ class DonghuaForm
                                                         TextInput::make('episode_watched')->label('# Watched (Season)')->numeric()->inlineLabel(),
                                                         TextInput::make('episode_watched_seasonal')->label('# Watches (Overall)')->numeric()->inlineLabel(),
                                                         TextInput::make('episode_total')->label('# Total')->numeric()->inlineLabel(),
+                                                        TextInput::make('episode_dl')->label('# Downloaded')->numeric()->inlineLabel(),
                                                     ]),
                                                 Fieldset::make('Others')
                                                     ->columns(1)

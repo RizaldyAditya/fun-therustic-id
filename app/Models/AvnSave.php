@@ -14,6 +14,7 @@ class AvnSave extends Model
         'file_path',
         'label',
         'version',
+        'description',
         'sort',
         'completed_at',
     ];
@@ -34,8 +35,14 @@ class AvnSave extends Model
             if (str_contains($save->file_url, '/')) {
                 try {
                     $save->file_path = $save->file_url;
-                    $url             = Storage::disk('google')->url($save->file_url);
-                    parse_str(parse_url($url, PHP_URL_QUERY), $queryArray);
+
+                    /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
+                    $disk = Storage::disk('google');
+                    if (!$disk->exists($save->file_url)) {
+                        return $save->file_url;
+                    }
+                    $fullUrl = $disk->url($save->file_url);
+                    parse_str(parse_url($fullUrl, PHP_URL_QUERY), $queryArray);
 
                     if (isset($queryArray['id'])) {
                         $save->file_url = $queryArray['id'];
