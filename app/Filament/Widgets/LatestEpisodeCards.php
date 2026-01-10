@@ -32,8 +32,8 @@ class LatestEpisodeCards extends TableWidget
             ->contentGrid([
                 'default' => 1,
                 'sm'      => 2,
-                'md'      => 4,
-                'lg'      => 5,
+                'md'      => 3,
+                'lg'      => 6,
                 'xl'      => 6,
             ])
             ->filters([
@@ -51,6 +51,7 @@ class LatestEpisodeCards extends TableWidget
                 ]),
             ])
             ->defaultPaginationPageOption(12)
+            ->poll('60s')
             ->paginated([12]);
     }
 }

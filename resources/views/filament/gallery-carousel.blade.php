@@ -20,7 +20,7 @@
                     x-transition:enter-end="opacity-100 transform scale-100"
                     class="absolute transition-all duration-500 ease-in-out cursor-pointer"
                     :class="{
-                        'z-30 scale-110 shadow-2xl border-4 border-white dark:border-gray-800 rounded-xl': active === {{ $index }},
+                        'z-30 scale-110 border border-white dark:border-gray-800 rounded-xl': active === {{ $index }},
                         'z-20 opacity-60 translate-x-[-70%] scale-90 blur-[1px]': active === {{ $index }} + 1,
                         'z-20 opacity-60 translate-x-[70%] scale-90 blur-[1px]': active === {{ $index }} - 1,
                         'z-10 opacity-30 translate-x-[-120%] scale-75 blur-[2px]': active === {{ $index }} + 2,
@@ -29,27 +29,49 @@
                     }"
                     @click="active = {{ $index }}"
                 >
-                    <img src="{{ Storage::disk('public')->url($image->image_url) }}" class="w-[700px] md:w-[850px] h-[400px] object-cover rounded-xl shadow-lg border border-white/10">
+                    <div class="relative group overflow-hidden rounded-xl">
+                        <img src="{{ Storage::disk('public')->url($image->image_url) }}" 
+                             class="w-[700px] md:w-[850px] h-[400px] object-cover border-2 border-white/10">
+                        
+                        @if($image->description)
+                            <div 
+                                x-show="active === {{ $index }}"
+                                x-transition:enter="transition ease-out delay-300 duration-500"
+                                x-transition:enter-start="opacity-0 translate-y-4"
+                                x-transition:enter-end="opacity-100 translate-y-0"
+                                class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 via-black/40 to-transparent text-white"
+                            >
+                                <p class="text-sm md:text-base font-medium leading-relaxed drop-shadow-md line-clamp-2 max-w-[90%]">
+                                    {{ $image->description }}
+                                </p>
+                            </div>
+                        @endif
+                    </div>
                 </div>
             @endforeach
         </div>
 
-        <div class="flex justify-center items-center gap-4 mt-8">
-            <button type="button" @click="active = active > 0 ? active - 1 : images.length - 1" class="p-2 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700">
-                <x-heroicon-m-chevron-left class="w-6 h-6"/>
+        <div class="flex justify-center items-center gap-4 mt-2 relative z-40">
+            <button type="button" 
+                @click.stop="active = active > 0 ? active - 1 : images.length - 1" 
+                class="p-2 rounded-full bg-gray-200/50 hover:bg-gray-300/50 dark:bg-white/5 dark:hover:bg-white/10 transition-colors"
+            >
+                <x-heroicon-m-chevron-left class="w-6 h-6 text-gray-700 dark:text-gray-300"/>
             </button>
 
-            <div class="flex gap-2">
+            <div class="flex gap-2 px-3 py-2 bg-gray-200/30 dark:bg-white/5 rounded-full">
                 @foreach($images as $index => $image)
-                    <button type="button" @click="active = {{ $index }}" 
-                        :class="active === {{ $index }} ? 'bg-primary-500 w-4' : 'bg-gray-300 dark:bg-gray-600 w-2'"
-                        class="h-2 rounded-full transition-all duration-300"
-                        loading="lazy"></button>
+                    <button type="button" @click.stop="active = {{ $index }}" 
+                        :class="active === {{ $index }} ? 'bg-primary-500 w-4' : 'bg-gray-400 dark:bg-gray-600 w-2'"
+                        class="h-2 rounded-full transition-all duration-300"></button>
                 @endforeach
             </div>
 
-            <button type="button" @click="active = active < images.length - 1 ? active + 1 : 0" class="p-2 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700">
-                <x-heroicon-m-chevron-right class="w-6 h-6"/>
+            <button type="button" 
+                @click.stop="active = active < images.length - 1 ? active + 1 : 0" 
+                class="p-2 rounded-full bg-gray-200/50 hover:bg-gray-300/50 dark:bg-white/5 dark:hover:bg-white/10 transition-colors"
+            >
+                <x-heroicon-m-chevron-right class="w-6 h-6 text-gray-700 dark:text-gray-300"/>
             </button>
         </div>
     </div>

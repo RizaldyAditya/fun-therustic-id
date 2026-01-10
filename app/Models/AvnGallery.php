@@ -9,6 +9,7 @@ class AvnGallery extends Model
     protected $fillable = [
         'avn_id',
         'image_url',
+        'description',
         'sort_order',
     ];
 
