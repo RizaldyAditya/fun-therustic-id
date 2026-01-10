@@ -103,6 +103,7 @@ class AvnForm
                                                             ->required()
                                                             ->inlineLabel(),
                                                         TextInput::make('last_played_version')
+                                                            ->label('Last Played Version')
                                                             ->inlineLabel(),
                                                         TextInput::make('itch_io_url')
                                                             ->label('itch.io URL')
@@ -128,8 +129,7 @@ class AvnForm
                                                                 2 => '⭐⭐ (Poor)',
                                                                 1 => '⭐ (Terrible)',
                                                             ])
-                                                            ->default(3)
-                                                            ->required()
+                                                            ->default(4)
                                                             ->inlineLabel()
                                                             ->native(false),
                                                         Select::make('genre_id')
@@ -156,8 +156,6 @@ class AvnForm
                                                             ->required(),
                                                         DatePicker::make('last_updated_on_itch')
                                                             ->label('Last Updated on itch.io')
-                                                            ->native(false)
-                                                            ->displayFormat('Y-m-d')
                                                             ->inlineLabel(),
                                                     ]),
                                             ]),
@@ -178,7 +176,7 @@ class AvnForm
                                     ->schema([
                                         Repeater::make('gallery')
                                             ->relationship('galleries')
-                                            ->grid(3)
+                                            ->grid(4)
                                             ->reorderable('sort_order')
                                             ->reorderableWithButtons()
                                             ->orderColumn('sort_order')
@@ -216,7 +214,9 @@ class AvnForm
                                                                 }
                                                             })
                                                     ),
-
+                                                TextInput::make('description')
+                                                    ->label('Image Description')
+                                                    ->placeholder('e.g. Chapter 1 Start'),
                                                 FileUpload::make('image_url')
                                                     ->label('Gallery Image')
                                                     ->disk('public')
@@ -248,8 +248,6 @@ class AvnForm
                                                 DatePicker::make('completed_at')
                                                     ->label('Completed On')
                                                     ->required()
-                                                    ->native(false)
-                                                    ->displayFormat('Y-m-d')
                                                     ->inlineLabel(),
                                                 TextInput::make('google_drive_id')
                                                     ->label('Google Drive ID')
@@ -268,6 +266,7 @@ class AvnForm
                                                             ->openUrlInNewTab()
                                                             ->visible(fn($state) => !empty($state))
                                                     ),
+                                                Textarea::make('description')->rows(3),
                                                 FileUpload::make('file_url')
                                                     ->label('Re/Upload ZIP File')
                                                     ->disk('google')
@@ -287,7 +286,7 @@ class AvnForm
                                                         return $state;
                                                     }),
                                             ])
-                                            ->grid(2)
+                                            ->grid(3)
                                             ->addActionLabel('Add New Save File Uploader'),
                                     ]),
                             ]),
@@ -302,13 +301,13 @@ class AvnForm
         }
 
         try {
-            if (!Storage::disk('google')->exists($state)) {
+            /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
+            $disk = Storage::disk('google');
+            if (!$disk->exists($state)) {
                 return $state;
             }
-
-            $fullUrl = Storage::disk('google')->url($state);
+            $fullUrl = $disk->url($state);
             parse_str(parse_url($fullUrl, PHP_URL_QUERY), $queryArray);
-
             return $queryArray['id'] ?? $state;
         } catch (\Exception $e) {
             return $state;

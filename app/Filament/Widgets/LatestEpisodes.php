@@ -18,6 +18,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
 use Illuminate\Contracts\View\View;
+use Filament\Tables\Enums\FiltersLayout;
 
 class LatestEpisodes extends TableWidget
 {
@@ -83,7 +84,7 @@ class LatestEpisodes extends TableWidget
                     ->label('Stream')
                     ->relationship('stream', 'name')
                     ->placeholder('All Streams'),
-            ])
+            ], layout: FiltersLayout::AboveContent)
             ->headerActions([
                 Action::make('refresh')
                     ->label('Reload')
@@ -204,20 +205,6 @@ class LatestEpisodes extends TableWidget
                             ])
                             ->collapsed(),
                     ]),
-                Action::make('copy_url')
-                    ->label('')
-                    ->icon('heroicon-s-clipboard-document-list')
-                    ->color('primary')
-                    ->tooltip('Copy video source URL to clipboard.')
-                    ->action(function ($record, $livewire) {
-                        $livewire->js("
-                            window.navigator.clipboard.writeText('{$record->video_source_url}');
-                            new FilamentNotification()
-                                .title('URL copied to clipboard')
-                                .success()
-                                .send();
-                        ");
-                    }),
                 Action::make('editParent')
                     ->label('')
                     ->icon('heroicon-s-pencil-square')
@@ -236,6 +223,6 @@ class LatestEpisodes extends TableWidget
                 'wire:loading.class' => 'opacity-50 blur-[2px] pointer-events-none',
                 'class'              => 'transition-all duration-300',
             ])
-            ->poll('20s');
+            ->poll('60s');
     }
 }

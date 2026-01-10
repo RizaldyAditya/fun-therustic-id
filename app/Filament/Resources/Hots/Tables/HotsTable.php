@@ -1,26 +1,26 @@
 <?php
 namespace App\Filament\Resources\Hots\Tables;
 
+use App\Filament\Resources\Donghuas\DonghuaResource;
 use App\Models\Status;
-use Filament\Tables\Table;
 use Filament\Actions\Action;
-use Filament\Schemas\Components\Grid;
-use Filament\Schemas\Components\Tabs;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\ViewField;
+use Filament\Infolists\Components\ImageEntry;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
-use Filament\Tables\Columns\ColumnGroup;
-use Filament\Tables\Columns\ImageColumn;
+use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Tables\Columns\ColumnGroup;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\SelectColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\TextInputColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Tables\Columns\TextInputColumn;
-use Filament\Infolists\Components\ImageEntry;
-use App\Filament\Resources\Donghuas\DonghuaResource;
 
 class HotsTable
 {
@@ -33,6 +33,7 @@ class HotsTable
                     ->disk('public')
                     ->visibility('public')
                     ->alignCenter()
+                    ->tooltip('View Cover Image')
                     ->action(
                         Action::make('preview')
                             ->modalHeading(fn($record) => $record->title_en)
@@ -73,7 +74,7 @@ class HotsTable
                             ->tooltip(function ($record) {
                                 return $record->episode_watched_seasonal >= $record->episode_latest
                                     ? 'All caught up!'
-                                    : 'New episodes available to watch.';
+                                    : ($record->episode_latest - $record->episode_watched_seasonal) . ' New episodes available to watch.';
                             }),
                         IconColumn::make('downloaded')
                             ->label('')
@@ -91,8 +92,8 @@ class HotsTable
                             ])
                             ->tooltip(function ($record) {
                                 return $record->episode_dl >= $record->episode_latest
-                                    ? 'All episodes downloaded.'
-                                    : 'New episodes available to download.';
+                                ? 'All latest episodes downloaded.'
+                                : ($record->episode_latest - $record->episode_dl) . ' New episodes available to download.';
                             }),
                     ]),
                 ColumnGroup::make('Episode')
@@ -102,27 +103,32 @@ class HotsTable
                             ->type('number')
                             ->extraInputAttributes(['step' => '1'])
                             ->alignCenter()
+                            ->tooltip('# Watched in Season')
                             ->extraHeaderAttributes(['style' => 'width: 200px;']),
                         TextInputColumn::make('episode_watched_seasonal')
                             ->label('# Watched in Total')
                             ->type('number')
                             ->extraInputAttributes(['step' => '1'])
                             ->alignCenter()
+                            ->tooltip('# Watched in Total')
                             ->extraHeaderAttributes(['style' => 'width: 200px;']),
                         TextInputColumn::make('episode_latest')
                             ->label('# Latest')
                             ->alignCenter()
+                            ->tooltip('# Latest')
                             ->extraHeaderAttributes(['style' => 'width: 200px;']),
                         TextInputColumn::make('episode_dl')
                             ->label('# Downloaded')
                             ->type('number')
                             ->extraInputAttributes(['step' => '1'])
                             ->alignCenter()
+                            ->tooltip('# Downloaded')
                             ->extraHeaderAttributes(['style' => 'width: 200px;']),
                         TextColumn::make('episode_total')
                             ->label('# Total')
                             ->default(fn($record) => $record->episode_total ?? $record->episode_latest ?? '-')
-                            ->alignCenter(),
+                            ->alignCenter()
+                            ->tooltip('# Total'),
                     ]),
                 ColumnGroup::make('Status')
                     ->columns([
@@ -134,11 +140,13 @@ class HotsTable
                         ToggleColumn::make('is_hot')
                             ->label('Hot')
                             ->sortable()
-                            ->alignEnd(),
+                            ->alignEnd()
+                            ->tooltip('Hot'),
                         ToggleColumn::make('is_airing')
                             ->label('Airing')
                             ->sortable()
-                            ->alignEnd(),
+                            ->alignEnd()
+                            ->tooltip('Airing'),
                     ]),
             ])
             ->filters([
@@ -316,7 +324,7 @@ class HotsTable
                     ->icon('heroicon-s-pencil-square')
                     ->color('warning')
                     ->url(fn($record): string => DonghuaResource::getUrl('edit', ['record' => $record]))
-                    ->tooltip('Edit'),
+                    ->tooltip('Edit Donghua'),
             ])
             ->toolbarActions([
                 //
