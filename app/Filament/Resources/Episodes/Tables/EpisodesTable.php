@@ -1,23 +1,24 @@
 <?php
 namespace App\Filament\Resources\Episodes\Tables;
 
-use Filament\Tables\Table;
+use App\Filament\Resources\Donghuas\DonghuaResource;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
-use Illuminate\Contracts\View\View;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\RestoreBulkAction;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Forms\Components\ViewField;
-use Filament\Tables\Columns\ImageColumn;
-use Filament\Tables\Filters\SelectFilter;
+use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreBulkAction;
+use Filament\Forms\Components\ViewField;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\TextInputColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
-use App\Filament\Resources\Donghuas\DonghuaResource;
 
 class EpisodesTable
 {
@@ -60,6 +61,25 @@ class EpisodesTable
                     ->searchable(),
                 TextColumn::make('donghua.title_en')->label('Donghua Title (en)')->searchable()->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('donghua.title_zh')->label('Donghua Title (zh)')->searchable()->toggleable(isToggledHiddenByDefault: true),
+                IconColumn::make('downloaded')
+                    ->label('')
+                    ->alignCenter()
+                    ->state(static function ($record): bool {
+                        return $record->donghua->episode_dl >= $record->donghua->episode_latest;
+                    })
+                    ->icons([
+                        'heroicon-s-check' => fn($record) => $record->donghua->episode_dl >= $record->donghua->episode_latest,
+                        'heroicon-s-arrow-down-on-square-stack' => fn($record) => $record->donghua->episode_dl < $record->donghua->episode_latest,
+                    ])
+                    ->colors([
+                        'success' => fn($record) => $record->donghua->episode_dl >= $record->donghua->episode_latest,
+                        'warning' => fn($record) => $record->donghua->episode_dl < $record->donghua->episode_latest,
+                    ])
+                    ->tooltip(function ($record) {
+                        return $record->donghua->episode_dl >= $record->donghua->episode_latest
+                        ? 'All latest episodes downloaded.'
+                        : ($record->donghua->episode_latest - $record->donghua->episode_dl) . ' New episodes available to download.';
+                    }),
                 TextColumn::make('episode_number')->label('# Episode')->sortable()->searchable()->alignCenter()->toggleable(),
                 TextColumn::make('donghua.episode_watched')
                     ->label('# Watched')
@@ -79,7 +99,7 @@ class EpisodesTable
                     ->alignCenter()
                     ->toggleable()
                     ->extraHeaderAttributes([
-                        'style' => 'width: 100px'
+                        'style' => 'width: 100px',
                     ]),
                 ImageColumn::make('stream.logo')
                     ->disk('public')
@@ -98,7 +118,7 @@ class EpisodesTable
                     ->toggleable(),
             ])
             ->filters([
-                SelectFilter::make('stream')->relationship('stream', 'name')
+                SelectFilter::make('stream')->relationship('stream', 'name'),
             ])
             ->recordActions([
                 Action::make('viewVideoSourceUrl')
@@ -139,8 +159,8 @@ class EpisodesTable
                             $donghua = $episodes->first()->donghua; // Get the parent Donghua info
 
                             return [
-                                'title'    => $donghua->title_en,
-                                'path'     => $donghua->local_download_path,
+                                'title' => $donghua->title_en,
+                                'path' => $donghua->local_download_path,
                                 'episodes' => $episodes->pluck('video_source_url', 'episode_number')->toArray(),
                             ];
                         })->values()->toArray();

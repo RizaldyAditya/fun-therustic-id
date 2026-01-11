@@ -41,8 +41,28 @@ trait Utilities
         $displayVal = $cleanNumber . ($brackets ? ' ' . $brackets : '');
 
         return [
-            'int'     => $intVal,
+            'int' => $intVal,
             'display' => $displayVal,
         ];
+    }
+
+    public function apiDonghuaDetail($data)
+    {
+        return $data->map(fn($donghua) => [
+            'id' => $donghua->id,
+            'title' => $donghua->title_en ?? '',
+            'title_cn' => $donghua->title_zh ?? '',
+            'synopsis' => $donghua->synopsis ?? '',
+            'poster' => asset('storage/' . $donghua->image_cover),
+            'season' => (int) $donghua->season ?? '',
+            'episode_latest' => (int) $donghua->episode_latest ?? '',
+            'episode_total' => (int) $donghua->episode_total ?? '',
+            'is_airing' => (bool) $donghua->is_airing,
+            'is_hot' => (bool) $donghua->is_hot,
+            'studio' => $donghua->studio->name ?? '',
+            'source' => $donghua->source->name ?? '',
+            'trending_sort' => $donghua->trending_sort ?? 99,
+            'created_at' => $donghua->created_at ? $donghua->created_at->diffForHumans() : '',
+        ]);
     }
 }

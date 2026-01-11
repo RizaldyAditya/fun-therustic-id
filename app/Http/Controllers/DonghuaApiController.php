@@ -5,10 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\Donghua;
 use App\Models\Episode;
 use App\Models\Stream;
+use App\Traits\Utilities;
 use Illuminate\Http\Request;
 
 class DonghuaApiController extends Controller
 {
+    use Utilities;
+
     /**
      * Search for donghua by title.
      *
@@ -21,7 +24,7 @@ class DonghuaApiController extends Controller
         if (empty($query)) {
             return response()->json([
                 'status' => 'success',
-                'data'   => [],
+                'data' => [],
             ]);
         }
 
@@ -32,13 +35,7 @@ class DonghuaApiController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'data'   => $results->map(fn($donghua) => [
-                'id'             => $donghua->id,
-                'title'          => $donghua->title_en,
-                'image_cover'    => asset('storage/' . $donghua->image_cover),
-                'season'         => $donghua->season,
-                'latest_episode' => $donghua->episode_latest,
-            ]),
+            'data' => $this->apiDonghuaDetail($results),
         ]);
     }
 
@@ -56,12 +53,7 @@ class DonghuaApiController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'data'   => $forYou->map(fn($donghua) => [
-                'id'          => $donghua->id,
-                'title'       => $donghua->title_en,
-                'image_cover' => asset('storage/' . $donghua->image_cover),
-                'season'      => $donghua->season,
-            ]),
+            'data' => $this->apiDonghuaDetail($forYou),
         ]);
     }
 
@@ -81,13 +73,7 @@ class DonghuaApiController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'data'   => $episodes->map(fn($ep) => [
-                'id'             => $ep->donghua->id,
-                'title'          => $ep->donghua->title_en,
-                'episode_number' => $ep->episode_number,
-                'image_cover'    => asset('storage/' . $ep->donghua->image_cover),
-                'created_at'     => $ep->created_at->diffForHumans(),
-            ]),
+            'data' => $this->apiDonghuaDetail($episodes),
         ]);
     }
 
@@ -107,12 +93,7 @@ class DonghuaApiController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'data'   => $trendings->map(fn($donghua) => [
-                'id'          => $donghua->id,
-                'title'       => $donghua->title_en,
-                'image_cover' => asset('storage/' . $donghua->image_cover),
-                'season'      => $donghua->season,
-            ]),
+            'data' => $this->apiDonghuaDetail($trendings),
         ]);
     }
 
@@ -128,11 +109,11 @@ class DonghuaApiController extends Controller
         if (empty($id)) {
             return response()->json([
                 'status' => 'success',
-                'data'   => [],
+                'data' => [],
             ]);
         }
 
-        $donghua          = Donghua::findOrFail($id);
+        $donghua          = Donghua::where('id', $id)->get();
         $streamingSources = Stream::whereHas('episodes', function ($query) use ($id) {
             $query->where('donghua_id', $id);
         })->with(['episodes' => function ($query) use ($id) {
@@ -140,21 +121,13 @@ class DonghuaApiController extends Controller
         }])->get();
 
         return response()->json([
-            'status'            => 'success',
-            'donghua'           => [
-                'title_en'       => $donghua->title_en,
-                'title_zh'       => $donghua->title_zh,
-                'synopsis'       => '',
-                'image_cover'    => asset('storage/' . $donghua->image_cover),
-                'is_airing'      => $donghua->is_airing,
-                'season'         => $donghua->season,
-                'latest_episode' => $donghua->episode_latest,
-            ],
+            'status' => 'success',
+            'donghua' => $this->apiDonghuaDetail($donghua)->first(),
             'streaming_sources' => $streamingSources->map(fn($stream) => [
-                'source'   => $stream->name,
+                'source' => $stream->name,
                 'episodes' => $stream->episodes->map(fn($ep) => [
-                    'number'     => $ep->episode_number,
-                    'url'        => $ep->video_source_url,
+                    'number' => $ep->episode_number,
+                    'url' => $ep->video_source_url,
                     'created_at' => $ep->created_at->format('F d, Y'),
                 ]),
             ])->values(),
