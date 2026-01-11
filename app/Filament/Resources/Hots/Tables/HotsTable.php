@@ -64,17 +64,17 @@ class HotsTable
                                 return $record->episode_watched_seasonal >= $record->episode_latest;
                             })
                             ->icons([
-                                'heroicon-s-check'     => fn($record)     => $record->episode_watched_seasonal >= $record->episode_latest,
+                                'heroicon-s-check' => fn($record) => $record->episode_watched_seasonal >= $record->episode_latest,
                                 'heroicon-s-eye-slash' => fn($record) => $record->episode_watched_seasonal < $record->episode_latest,
                             ])
                             ->colors([
                                 'success' => fn($record) => $record->episode_watched_seasonal >= $record->episode_latest,
-                                'danger'  => fn($record)  => $record->episode_watched_seasonal < $record->episode_latest,
+                                'danger' => fn($record) => $record->episode_watched_seasonal < $record->episode_latest,
                             ])
                             ->tooltip(function ($record) {
                                 return $record->episode_watched_seasonal >= $record->episode_latest
-                                    ? 'All caught up!'
-                                    : ($record->episode_latest - $record->episode_watched_seasonal) . ' New episodes available to watch.';
+                                ? 'All caught up!'
+                                : ($record->episode_latest - $record->episode_watched_seasonal) . ' New episodes available to watch.';
                             }),
                         IconColumn::make('downloaded')
                             ->label('')
@@ -83,7 +83,7 @@ class HotsTable
                                 return $record->episode_dl >= $record->episode_latest;
                             })
                             ->icons([
-                                'heroicon-s-check'                      => fn($record)                      => $record->episode_dl >= $record->episode_latest,
+                                'heroicon-s-check' => fn($record) => $record->episode_dl >= $record->episode_latest,
                                 'heroicon-s-arrow-down-on-square-stack' => fn($record) => $record->episode_dl < $record->episode_latest,
                             ])
                             ->colors([
@@ -157,7 +157,7 @@ class HotsTable
                 SelectFilter::make('status')
                     ->label('Watch Status')
                     ->options([
-                        'all'       => 'All',
+                        'all' => 'All',
                         'unwatched' => 'New Updates',
                     ])
                     ->query(function (Builder $query, array $data): Builder {
@@ -177,7 +177,7 @@ class HotsTable
                     ->action(fn($livewire) => $livewire->dispatch('$refresh'))
                     ->extraAttributes([
                         'wire:loading.attr' => 'disabled',
-                        'wire:target'       => 'refresh',
+                        'wire:target' => 'refresh',
                     ]),
             ])
             ->recordActions([
@@ -198,28 +198,28 @@ class HotsTable
                                     ->schema([
                                         ViewField::make('donghua.episode_loader_ax')->view('filament.episode-loader')->viewData(fn($record) => [
                                             'donghuaId' => $record->id,
-                                            'streamId'  => 1,
+                                            'streamId' => 1,
                                         ]),
                                     ]),
                                 Tab::make('AnimeKhor')
                                     ->schema([
                                         ViewField::make('donghua.episode_loader_ak')->view('filament.episode-loader')->viewData(fn($record) => [
                                             'donghuaId' => $record->id,
-                                            'streamId'  => 2,
+                                            'streamId' => 2,
                                         ]),
                                     ]),
                                 Tab::make('DonghuaStream')
                                     ->schema([
                                         ViewField::make('donghua.episode_loader_ds')->view('filament.episode-loader')->viewData(fn($record) => [
                                             'donghuaId' => $record->id,
-                                            'streamId'  => 4,
+                                            'streamId' => 4,
                                         ]),
                                     ]),
                                 Tab::make('DonghuaWorld')
                                     ->schema([
                                         ViewField::make('donghua.episode_loader_dw')->view('filament.episode-loader')->viewData(fn($record) => [
                                             'donghuaId' => $record->id,
-                                            'streamId'  => 5,
+                                            'streamId' => 5,
                                         ]),
                                     ]),
                             ]),

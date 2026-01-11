@@ -44,8 +44,13 @@ class StreamForm
                             ]),
                         Section::make('')
                             ->schema([
+                                Toggle::make('is_cover_image')
+                                    ->label('Poster Fetch')
+                                    ->default(false)
+                                    ->required(),
                                 Toggle::make('is_crawlable')
                                     ->label('Crawlable')
+                                    ->default(false)
                                     ->required(),
                                 Toggle::make('is_active')
                                     ->label('Active')

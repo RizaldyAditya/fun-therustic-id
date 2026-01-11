@@ -2,25 +2,26 @@
 namespace App\Filament\Resources\Avns\Tables;
 
 use App\Models\Status;
+use Filament\Tables\Table;
 use Filament\Actions\Action;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\ForceDeleteAction;
-use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\RestoreAction;
+use Filament\Tables\Filters\Filter;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\RestoreBulkAction;
-use Filament\Forms\Components\ViewField;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\ViewField;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\SelectColumn;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\TextInputColumn;
-use Filament\Tables\Filters\Filter;
-use Filament\Tables\Filters\TrashedFilter;
-use Filament\Tables\Table;
+use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Tables\Filters\TrashedFilter;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Tables\Columns\TextInputColumn;
 
 class AvnsTable
 {
@@ -45,6 +46,40 @@ class AvnsTable
                     ->searchable()
                     ->toggleable()
                     ->extraHeaderAttributes(['style' => 'width: 100px;']),
+                IconColumn::make('play_status')
+                    ->label('')
+                    ->alignCenter()
+                    ->state(function ($record) {
+                        return $record->status->slug ?? 'awaiting-update';
+                    })
+                    ->icons([
+                        'heroicon-s-arrow-down-on-square-stack' => 'to-download',
+                        'heroicon-s-arrow-left-end-on-rectangle' => 'plan-to-play',
+                        'heroicon-s-play' => 'playing',
+                        'heroicon-s-play-pause' => 'on-hold',
+                        'heroicon-s-arrow-up-on-square-stack' => 'waiting-for-update',
+                        'heroicon-s-check' => 'completed',
+                        'heroicon-s-x-mark' => 'dropped',
+                        'heroicon-s-trash' => 'abandoned',
+                    ])
+                    ->color(fn(string $state): string => match ($state) {
+                        'to-download', 'playing' => 'info',
+                        'plan-to-play', 'on-hold' => 'warning',
+                        'waiting-for-update', 'completed' => 'success',
+                        'dropped', 'abandoned' => 'danger',
+                        default => 'gray',
+                    })
+                    ->tooltip(fn(string $state): string => match ($state) {
+                        'to-download' => 'To Download',
+                        'plan-to-play' => 'Plan to Play',
+                        'playing' => 'Playing',
+                        'on-hold' => 'On Hold',
+                        'waiting-for-update' => 'Waiting Update for New Version',
+                        'completed' => 'You Completed this AVN',
+                        'dropped' => 'You Dropped this AVN',
+                        'abandoned' => 'This AVN has been abandoned',
+                        default => '',
+                    }),
                 SelectColumn::make('status_id')
                     ->label('Status')
                     ->options(Status::all()->pluck('name', 'id'))
@@ -73,14 +108,14 @@ class AvnsTable
                     ->searchable()
                     ->badge()
                     ->color('info')
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 ImageColumn::make('cover_image')
                     ->label('Cover Image')
                     ->disk('public')
                     ->visibility('public')
                     ->imageHeight(29)
                     ->alignCenter()
-                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->toggleable()
                     ->action(
                         Action::make('preview')
                             ->modalHeading(fn($record) => $record->title . ' Cover Image')
@@ -112,7 +147,7 @@ class AvnsTable
                         return $record->version === $record->last_played_version;
                     })
                     ->icons([
-                        'heroicon-s-check'        => true,  // Shown when state is true
+                        'heroicon-s-check' => true,                 // Shown when state is true
                         'heroicon-s-exclamation-triangle' => false, // Shown when state is false
                     ])
                     ->colors([
@@ -121,8 +156,8 @@ class AvnsTable
                     ])
                     ->tooltip(function ($record) {
                         return $record->version === $record->last_played_version
-                            ? "You've caught up! ({$record->version})"
-                            : "There is an update! (Played: {$record->last_played_version} -> Latest: {$record->version})";
+                        ? "You've caught up! ({$record->version})"
+                        : "There is an update! (Played: {$record->last_played_version} -> Latest: {$record->version})";
                     }),
                 IconColumn::make('save_status')
                     ->label('')
@@ -137,12 +172,12 @@ class AvnsTable
                         return $played === $saved;
                     })
                     ->icons([
-                        'heroicon-s-cloud-arrow-up'     => true,
+                        'heroicon-s-cloud-arrow-up' => true,
                         'heroicon-s-archive-box-x-mark' => false,
                     ])
                     ->colors([
                         'success' => true,
-                        'danger'  => false,
+                        'danger' => false,
                     ])
                     ->tooltip(function ($record) {
                         $latestSave = $record->saves()->latest('version')->first();
@@ -150,8 +185,8 @@ class AvnsTable
                             return "No save files uploaded yet.";
                         }
                         return trim($record->last_played_version) === ($latestSave->version)
-                            ? "Cloud save is up to date ({$latestSave->version})"
-                            : "Cloud save ({$latestSave->version}) is older than your last played version ({$record->last_played_version})";
+                        ? "Cloud save is up to date ({$latestSave->version})"
+                        : "Cloud save ({$latestSave->version}) is older than your last played version ({$record->last_played_version})";
                     }),
                 TextColumn::make('created_at')
                     ->dateTime()
@@ -168,9 +203,19 @@ class AvnsTable
                     ->query(function (Builder $query) {
                         return $query->whereColumn('version', '!=', 'last_played_version');
                     }),
+                SelectFilter::make('status_id')->relationship('status', 'name'),
                 TrashedFilter::make(),
             ])
             ->recordActions([
+                // a button to open itch.io url to new tab
+                Action::make('view_itch_io')
+                    ->label('')
+                    ->icon('heroicon-s-arrow-up-right')
+                    ->color('success')
+                    ->url(fn($record) => $record->itch_io_url)
+                    ->openUrlInNewTab()
+                    ->tooltip('Open AVN on itch.io'),
+
                 Action::make('view_gallery')
                     ->label('')
                     ->icon('heroicon-s-photo')
@@ -183,13 +228,13 @@ class AvnsTable
                         'images' => $record->galleries()->orderBy('sort_order')->get(),
                     ]))
                     ->slideOver()
-                    ->tooltip(fn($record) => $record->galleries()->exists() ? 'View Gallery' : 'No gallery uploaded yet'),
+                    ->tooltip(fn($record) => $record->galleries()->exists() ? 'View AVN Gallery' : 'No gallery uploaded yet.'),
                 EditAction::make()
                     ->label('')
-                    ->tooltip('Edit'),
+                    ->tooltip('Edit AVN'),
                 DeleteAction::make()
                     ->label('')
-                    ->tooltip('Delete'),
+                    ->tooltip('Delete AVN'),
                 RestoreAction::make(),
                 ForceDeleteAction::make(),
             ])
