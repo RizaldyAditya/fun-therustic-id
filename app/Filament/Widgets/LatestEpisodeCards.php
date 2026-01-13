@@ -1,7 +1,9 @@
 <?php
+
 namespace App\Filament\Widgets;
 
 use App\Models\Episode;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Tables\Columns\Layout\View;
 use Filament\Tables\Columns\TextColumn;
@@ -9,6 +11,7 @@ use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
+use Illuminate\Support\Facades\Artisan;
 
 class LatestEpisodeCards extends TableWidget
 {
@@ -16,10 +19,28 @@ class LatestEpisodeCards extends TableWidget
 
     protected int|string|array $columnSpan = 'full';
 
+    public function crawlAllStreams(): void
+    {
+        $commands = [
+            'app:crawl-updates animexin',
+            'app:crawl-updates donghuastream',
+            'app:crawl-updates animekhor',
+            'app:crawl-updates donghuaworld',
+        ];
+
+        foreach ($commands as $command) {
+            Artisan::call($command);
+        }
+    }
+
     public function table(Table $table): Table
     {
         return $table
-            ->query(Episode::query()->with('donghua', 'stream')->where('is_an_update', true)->latest())
+            ->query(Episode::query()->with('donghua', 'stream')
+                ->where('is_an_update', true)
+                ->where('created_at', '>=', now()->subDays(2))
+                ->latest()
+            )
             ->columns([
                 TextColumn::make('donghua.title_en')->searchable()->extraAttributes(['style' => 'display: none;']),
                 TextColumn::make('title')->searchable()->extraAttributes(['style' => 'display: none;']),
@@ -40,7 +61,17 @@ class LatestEpisodeCards extends TableWidget
                 SelectFilter::make('stream')->relationship('stream', 'name'),
             ])
             ->headerActions([
-                //
+                Action::make('crawlLatestEpisodes')
+                    ->label('Crawl for Latest Episodes')
+                    ->icon('heroicon-o-sparkles')
+                    ->color('primary')
+                    ->slideOver()
+                    ->modalHeading('Manual Crawl')
+                    ->modalDescription('Would you like to do manual Crawl for Latest Episodes right now on all available stream websites?')
+                    ->modalContent(view('filament.crawl-confirmation'))
+                    ->action(function () {
+                        $this->crawlAllStreams();
+                    }),
             ])
             ->recordActions([
                 //

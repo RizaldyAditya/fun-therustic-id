@@ -1,7 +1,11 @@
 <div class="relative group rounded-xl bg-gray-900 overflow-hidden shadow-lg transition-all hover:-translate-y-1 border border-white/5">
     <div class="relative aspect-[3/4] w-full overflow-hidden">
         <a href="{{ $getRecord()->stream_url }}" class="absolute inset-0 z-11" target="_blank"></a>
-            <img src="{{ asset('storage/' . $getRecord()->donghua->image_cover) }}" 
+            @php
+                $imagePath = 'storage/' . $getRecord()->donghua->image_cover;
+                $hasImage = !empty($getRecord()->donghua->image_cover) && file_exists(public_path($imagePath));
+            @endphp
+            <img src="{{ $hasImage ? asset($imagePath) : asset('storage/no-image.webp') }}" 
                 class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
             <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-80"></div>
             <div class="absolute top-0 left-0 z-10">
