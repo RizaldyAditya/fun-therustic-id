@@ -65,4 +65,15 @@ trait Utilities
             'created_at' => $donghua->created_at ? $donghua->created_at->diffForHumans() : '',
         ]);
     }
+
+    public function apiDonghuaEpisode($data)
+    {
+        return $data->map(fn($episode) => [
+            'id' => $episode->id,
+            'title' => $episode->donghua->title_en ?? '',
+            'episode_number' => (int) $episode->episode_number,
+            'created_at' => $episode->created_at ? $episode->created_at->diffForHumans() : $episode->created_at->format('F d, Y'),
+            'donghua' => $this->apiDonghuaDetail(collect([$episode->donghua]))->first(),
+        ]);
+    }
 }
