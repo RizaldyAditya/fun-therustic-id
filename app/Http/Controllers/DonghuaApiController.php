@@ -73,7 +73,7 @@ class DonghuaApiController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'data' => $this->apiDonghuaDetail($episodes),
+            'data' => $this->apiDonghuaEpisode($episodes),
         ]);
     }
 
