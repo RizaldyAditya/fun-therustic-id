@@ -45,6 +45,11 @@ class Avn extends Model
         return $this->hasMany(AvnSave::class)->orderBy('sort', 'asc');
     }
 
+    public function walkthroughs()
+    {
+        return $this->hasMany(AvnWalkthrough::class);
+    }
+
     protected static function booted()
     {
         static::deleting(function ($avn) {
