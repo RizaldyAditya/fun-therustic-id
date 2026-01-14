@@ -224,7 +224,7 @@ class AvnForm
                                                     ->image()
                                                     ->imageEditor()
                                                     ->columnSpanFull(),
-                                            ])
+                                            ]),
                                     ]),
                                 Tab::make('Saves')
                                     ->icon(Heroicon::FolderOpen)
@@ -289,28 +289,60 @@ class AvnForm
                                             ->grid(3)
                                             ->addActionLabel('Add New Save File Uploader'),
                                     ]),
+                                Tab::make('Walkthroughs')
+                                    ->icon('heroicon-m-book-open')
+                                    ->schema([
+                                        Repeater::make('walkthroughs')
+                                            ->relationship('walkthroughs')
+                                            ->reorderable('sort')
+                                            ->orderColumn('sort')
+                                            ->reorderableWithButtons()
+                                            ->defaultItems(0)
+                                            ->schema([
+                                                TextInput::make('label')
+                                                    ->placeholder('e.g. Chapter 1 Start')
+                                                    ->inlineLabel(),
+                                                TextInput::make('google_drive_id')
+                                                    ->label('Google Drive ID')
+                                                    ->placeholder('ID will appear after saving...')
+                                                    ->formatStateUsing(fn($record) => $record?->file_url)
+                                                    ->readOnly()
+                                                    ->hidden(fn($state) => empty($state))
+                                                    ->prefixIcon(fn($state) => $state ? 'heroicon-m-check-badge' : null)
+                                                    ->prefixIconColor('success')
+                                                    ->suffixAction(
+                                                        Action::make('open_drive')
+                                                            ->icon('heroicon-m-arrow-top-right-on-square')
+                                                            ->color('primary')
+                                                            ->tooltip('View on Google Drive')
+                                                            ->url(fn($state) => $state ? "https://drive.google.com/file/d/{$state}/view" : null)
+                                                            ->openUrlInNewTab()
+                                                            ->visible(fn($state) => !empty($state))
+                                                    ),
+                                                FileUpload::make('file_url')
+                                                    ->label('Re/Upload ZIP File')
+                                                    ->disk('google')
+                                                    ->directory(config('filesystems.disks.google.folderName'))
+                                                    ->acceptedFileTypes(['application/pdf'])
+                                                    ->required(fn($record) => $record === null)
+                                                    ->preserveFilenames()
+                                                    ->live()
+                                                    ->hidden(fn($record) => !empty($record?->file_url))
+                                                    ->dehydrateStateUsing(function ($state) {
+                                                        if (blank($state)) {
+                                                            return null;
+                                                        }
+                                                        if (!str_contains($state, '/')) {
+                                                            return $state;
+                                                        }
+                                                        return $state;
+                                                    }),
+                                            ])
+                                            ->grid(3)
+                                            ->addActionLabel('Add New Walkthrough File Uploader'),
+                                    ]),
                             ]),
                     ]),
             ]);
-    }
-
-    protected static function extractGoogleId($state)
-    {
-        if (empty($state) || !is_string($state)) {
-            return $state;
-        }
-
-        try {
-            /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
-            $disk = Storage::disk('google');
-            if (!$disk->exists($state)) {
-                return $state;
-            }
-            $fullUrl = $disk->url($state);
-            parse_str(parse_url($fullUrl, PHP_URL_QUERY), $queryArray);
-            return $queryArray['id'] ?? $state;
-        } catch (\Exception $e) {
-            return $state;
-        }
     }
 }
