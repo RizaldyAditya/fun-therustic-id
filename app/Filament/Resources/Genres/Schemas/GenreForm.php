@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Genres\Schemas;
 
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
 class GenreForm
@@ -11,9 +12,10 @@ class GenreForm
     {
         return $schema
             ->components([
-                TextInput::make('name')
-                    ->required()
-                    ->unique(),
+                Section::make('')
+                    ->schema([
+                        TextInput::make('name')->required()->unique(),
+                    ]),
             ]);
     }
 }

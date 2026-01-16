@@ -41,7 +41,6 @@ class StatusesTable
                     ->requiresConfirmation()
                     ->action(fn(Collection $records) => $records->each->delete()),
             ])
-            ->defaultSort('order', 'asc')
-            ->recordUrl(null);
+            ->defaultSort('order', 'asc');
     }
 }
