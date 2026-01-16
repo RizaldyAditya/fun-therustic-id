@@ -5,28 +5,23 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Episode extends Model
+class AnimeEpisode extends Model
 {
-    protected $table = 'donghua_episodes';
     protected $fillable = [
-        'donghua_id',
-        'title',
+        'anime_id',
         'episode_number',
+        'title',
         'stream_id',
         'stream_url',
-        'video_source_url',
+        'video_url',
+        'subtitle_lang',
         'notes',
-        'is_an_update'
+        'is_active'
     ];
 
-    protected $casts = [
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime'
-    ];
-
-    public function donghua(): BelongsTo
+    public function anime(): BelongsTo
     {
-        return $this->belongsTo(Donghua::class);
+        return $this->belongsTo(Anime::class);
     }
 
     public function stream(): BelongsTo

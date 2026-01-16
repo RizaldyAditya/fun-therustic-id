@@ -14,11 +14,11 @@
         </div>
     </div>
 
-    <p class="text-sm text-gray-600 dark:text-gray-400">
+    <p class="text-sm text-gray-700 dark:text-gray-400">
         The following streams will be crawled:
     </p>
 
-    <ul class="list-disc list-inside text-sm text-gray-600 dark:text-gray-400 space-y-1">
+    <ul class="list-disc list-inside text-sm text-gray-700 dark:text-gray-400 space-y-1">
         <li>AnimeXin</li>
         <li>AnimeKhor</li>
         <li>DonghuaStream</li>

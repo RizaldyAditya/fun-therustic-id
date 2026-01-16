@@ -5,12 +5,12 @@ use App\Models\Donghua;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
-class StatsOverview extends StatsOverviewWidget
+class DonghuaStatsOverview extends StatsOverviewWidget
 {
     protected static ?int $sort        = 1;
     protected static bool $isLazy      = false;
     protected ?string $pollingInterval = null;
-    protected ?string $heading         = 'Donghua Watch Stats';
+    protected ?string $heading         = 'Watch Stats';
     protected ?string $description     = "Tracking my path from a mortal viewer to a donghua sage.
         Here lies the record of every world I've visited, every series on my radar, and those still waiting for a breakthrough.
         Quality over quantity, but the stats tell the true story.";

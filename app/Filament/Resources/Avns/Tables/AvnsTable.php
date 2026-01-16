@@ -247,7 +247,6 @@ class AvnsTable
                     ]),
                 ]),
             ])
-            ->recordUrl(null)
             ->defaultSort('title');
     }
 }

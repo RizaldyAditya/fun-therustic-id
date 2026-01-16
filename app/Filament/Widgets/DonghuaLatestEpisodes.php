@@ -4,28 +4,34 @@ namespace App\Filament\Widgets;
 use App\Filament\Resources\Donghuas\DonghuaResource;
 use App\Models\Episode;
 use Filament\Actions\Action;
-use Filament\Actions\BulkActionGroup;
+use Filament\Actions\BulkAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\ViewField;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\TextInputColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
+use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
 use Illuminate\Contracts\View\View;
-use Filament\Tables\Enums\FiltersLayout;
+use Illuminate\Database\Eloquent\Collection;
 
-class LatestEpisodes extends TableWidget
+class DonghuaLatestEpisodes extends TableWidget
 {
     use InteractsWithTable;
 
     protected static ?int $sort  = 2;
     public ?string $filterStatus = null;
+    protected int|string|array $columnSpan = 'full';
 
     public function table(Table $table): Table
     {
@@ -35,7 +41,7 @@ class LatestEpisodes extends TableWidget
                     ->whereDate('created_at', '>=', now()->subDays(2))
                     ->with(['donghua', 'stream']);
             })
-            ->heading('Today\'s Latest Episodes')
+            ->heading('')
             ->description('This list updates automatically as the crawler finds new content.')
             ->emptyStateHeading('No new episodes yet')
             ->emptyStateDescription('Check back later or run the manual crawler.')
@@ -60,11 +66,39 @@ class LatestEpisodes extends TableWidget
                                     ]),
                             ])
                     ),
-                TextColumn::make('donghua.title_en')->searchable()->sortable()
+                TextColumn::make('donghua.title_en')
+                    ->label('Title')
                     ->description(function ($record) {
                         return $record->title;
+                    })
+                    ->searchable()
+                    ->sortable(),
+                IconColumn::make('downloaded')
+                    ->label('')
+                    ->alignCenter()
+                    ->state(static function ($record): bool {
+                        return $record->donghua->episode_dl >= $record->donghua->episode_latest;
+                    })
+                    ->icons([
+                        'heroicon-s-check' => fn($record) => $record->donghua->episode_dl >= $record->donghua->episode_latest,
+                        'heroicon-s-arrow-down-on-square-stack' => fn($record) => $record->donghua->episode_dl < $record->donghua->episode_latest,
+                    ])
+                    ->colors([
+                        'success' => fn($record) => $record->donghua->episode_dl >= $record->donghua->episode_latest,
+                        'warning' => fn($record) => $record->donghua->episode_dl < $record->donghua->episode_latest,
+                    ])
+                    ->tooltip(function ($record) {
+                        return ($record->donghua->episode_dl >= $record->donghua->episode_latest)
+                        ? 'All latest episodes downloaded.'
+                        : ($record->donghua->episode_latest - $record->donghua->episode_dl) . ' New episodes available to download.';
                     }),
                 TextColumn::make('episode_number')->label('# EP')->sortable(),
+                TextInputColumn::make('donghua.episode_dl')
+                    ->label('# Downloaded')
+                    ->type('number')
+                    ->sortable()
+                    ->alignCenter()
+                    ->width(100),
                 ImageColumn::make('stream.logo')
                     ->label('Stream')
                     ->disk('public')
@@ -77,7 +111,9 @@ class LatestEpisodes extends TableWidget
                 TextColumn::make('created_at')
                     ->label('Added At')
                     ->dateTime('M d Y, H:i')
-                    ->sortable(),
+                    ->sortable(query: function ($query, string $direction) {
+                        return $query->orderBy('created_at', $direction);
+                    }),
             ])
             ->filters([
                 SelectFilter::make('stream_id')
@@ -93,7 +129,7 @@ class LatestEpisodes extends TableWidget
                     ->action(fn() => $this->dispatch('$refresh'))
                     ->extraAttributes([
                         'wire:loading.attr' => 'disabled',
-                        'wire:target'       => 'refresh',
+                        'wire:target' => 'refresh',
                     ]),
             ])
             ->recordActions([
@@ -205,24 +241,46 @@ class LatestEpisodes extends TableWidget
                             ])
                             ->collapsed(),
                     ]),
+                EditAction::make()->label('')->tooltip('Edit Episode'),
                 Action::make('editParent')
                     ->label('')
                     ->icon('heroicon-s-pencil-square')
-                    ->color('warning')
+                    ->color('success')
                     ->url(fn($record): string => DonghuaResource::getUrl('edit', ['record' => $record->donghua_id]))
                     ->openUrlInNewTab()
                     ->tooltip('Edit Donghua'),
-
+                DeleteAction::make()->label('')->tooltip('Delete Episode'),
             ])
             ->toolbarActions([
-                BulkActionGroup::make([
-                    //
-                ]),
+                BulkAction::make('generate_json')
+                    ->label('Generate JSON')
+                    ->icon('heroicon-o-code-bracket')
+                    ->color('success')
+                    ->modalHeading('Generated Donghua & Episode JSON')
+                    ->modalWidth('3xl')
+                    ->slideOver()
+                    ->modalSubmitAction(false)
+                    ->modalContent(function (Collection $records) {
+                        $grouped = $records->groupBy('donghua_id')->map(function ($episodes) {
+                            $donghua = $episodes->first()->donghua; // Get the parent Donghua info
+
+                            return [
+                                'title' => $donghua->title_en,
+                                'path' => $donghua->local_download_path,
+                                'episodes' => $episodes->pluck('video_source_url', 'episode_number')->toArray(),
+                            ];
+                        })->values()->toArray();
+
+                        return view('filament.episode-json-viewer', [
+                            'json' => json_encode($grouped, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES),
+                        ]);
+                    }),
             ])
             ->extraAttributes([
                 'wire:loading.class' => 'opacity-50 blur-[2px] pointer-events-none',
-                'class'              => 'transition-all duration-300',
+                'class' => 'transition-all duration-300',
             ])
+            ->recordUrl(false)
             ->poll('60s');
     }
 }

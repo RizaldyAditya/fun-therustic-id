@@ -38,7 +38,6 @@ class StudiosTable
                     ->requiresConfirmation()
                     ->action(fn(Collection $records) => $records->each->delete()),
             ])
-            ->defaultSort('name', 'asc')
-            ->recordUrl(null);
+            ->defaultSort('name', 'asc');
     }
 }
