@@ -68,7 +68,7 @@ class AdminPanelProvider extends PanelProvider
                     ->label('Dashboard')
                     ->icon('heroicon-s-home'),
                 NavigationGroup::make()
-                    ->label('Donghuas')
+                    ->label('Movies')
                     ->icon('heroicon-s-circle-stack')
                     ->collapsed(),
                 NavigationGroup::make()

@@ -2,6 +2,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Genre extends Model
 {
@@ -9,7 +10,12 @@ class Genre extends Model
         'name',
     ];
 
-    public function avns()
+    public function animes(): BelongsToMany
+    {
+        return $this->belongsToMany(Anime::class);
+    }
+
+    public function avns(): BelongsToMany
     {
         return $this->belongsToMany(Avn::class);
     }

@@ -1,12 +1,17 @@
 <?php
 namespace App\Filament\Resources\Streams\Schemas;
 
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\TextInput;
+use Illuminate\Support\Str;
+use Filament\Actions\Action;
+use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Http;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
+use Illuminate\Support\Facades\Storage;
+use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Section;
-use Filament\Schemas\Schema;
+use Filament\Forms\Components\FileUpload;
 
 class StreamForm
 {
@@ -35,10 +40,50 @@ class StreamForm
                                     ->required()
                                     ->inlineLabel()
                                     ->placeholder('https://animexin.dev/'),
+                                TextInput::make('fetchStreamLogo')
+                                    ->label('Fetch Website Streaming Logo from URL')
+                                    ->placeholder('https://example.com/cover.jpg')
+                                    ->helperText('Paste a URL and click the download icon to set as cover.')
+                                    ->inlinelabel()
+                                    ->suffixAction(
+                                        Action::make('fetchCover')
+                                            ->icon('heroicon-m-arrow-down-tray')
+                                            ->color('success')
+                                            ->action(function ($state, $set) {
+                                                if (empty($state)) {
+                                                    return;
+                                                }
+
+                                                try {
+                                                    $response = Http::get($state);
+                                                    if (!$response->successful()) {
+                                                        throw new \Exception('URL unreachable');
+                                                    }
+
+                                                    $extension = pathinfo(parse_url($state, PHP_URL_PATH), PATHINFO_EXTENSION) ?: 'jpg';
+                                                    $filename  = 'img/logos/' . Str::random(40) . '.' . $extension;
+                                                    Storage::disk('public')->put($filename, $response->body());
+                                                    $set('logo', $filename);
+                                                    $set('fetchStreamLogo', null);
+
+                                                    Notification::make()
+                                                        ->title('Stream Logo downloaded!')
+                                                        ->success()
+                                                        ->send();
+
+                                                } catch (\Exception $e) {
+                                                    Notification::make()
+                                                        ->title('Fetch Stream Logo Failed')
+                                                        ->body($e->getMessage())
+                                                        ->danger()
+                                                        ->send();
+                                                }
+                                            }),
+                                    ),
                                 FileUpload::make('logo')
                                     ->disk('public')
-                                    ->directory('img/logos')
                                     ->visibility('public')
+                                    ->directory('img/logos')
                                     ->image()
                                     ->inlineLabel(),
                             ]),

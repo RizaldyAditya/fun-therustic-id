@@ -16,11 +16,12 @@ use UnitEnum;
 
 class EpisodesResource extends Resource
 {
-    protected static string|UnitEnum|null $navigationGroup = 'Donghuas';
+    protected static string|UnitEnum|null $navigationGroup = 'Movies';
     protected static ?int $navigationSort                      = 3;
+    protected static ?string $navigationLabel                  = 'Donghua Episodes';
     protected static ?string $model                            = Episode::class;
     protected static ?string $recordTitleAttribute             = 'title';
-    protected static ?string $modelLabel                       = 'Episode';
+    protected static ?string $modelLabel                       = 'Donghua Episode';
 
     public static function form(Schema $schema): Schema
     {
@@ -42,9 +43,9 @@ class EpisodesResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index'  => ListEpisodes::route('/'),
+            'index' => ListEpisodes::route('/'),
             'create' => CreateEpisodes::route('/create'),
-            'edit'   => EditEpisodes::route('/{record}/edit'),
+            'edit' => EditEpisodes::route('/{record}/edit'),
         ];
     }
 

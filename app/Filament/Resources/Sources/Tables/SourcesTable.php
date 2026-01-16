@@ -28,7 +28,6 @@ class SourcesTable
                     ->requiresConfirmation()
                     ->action(fn(Collection $records) => $records->each->delete()),
             ])
-            ->defaultSort('id', 'asc')
-            ->recordUrl(null);
+            ->defaultSort('id', 'asc');
     }
 }

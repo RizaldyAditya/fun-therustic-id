@@ -77,7 +77,6 @@ class StreamsTable
                 EditAction::make()->label('')->tooltip('Edit'),
             ])
             ->toolbarActions([])
-            ->defaultSort('name', 'asc')
-            ->recordUrl(null);
+            ->defaultSort('name', 'asc');
     }
 }

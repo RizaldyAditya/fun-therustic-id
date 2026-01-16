@@ -13,7 +13,7 @@ use UnitEnum;
 
 class HotResource extends Resource
 {
-    protected static string|UnitEnum|null $navigationGroup = 'Donghuas';
+    protected static string|UnitEnum|null $navigationGroup = 'Movies';
     protected static ?int $navigationSort                      = 1;
     protected static ?string $model                            = Donghua::class;
     protected static ?string $recordTitleAttribute             = 'title_en';

@@ -3,17 +3,18 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Episode;
-use Filament\Actions\Action;
-use Filament\Actions\BulkActionGroup;
-use Filament\Tables\Columns\Layout\View;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Concerns\InteractsWithTable;
-use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Filament\Actions\Action;
 use Filament\Widgets\TableWidget;
+use Filament\Actions\BulkActionGroup;
+use Filament\Tables\Columns\TextColumn;
 use Illuminate\Support\Facades\Artisan;
+use Filament\Tables\Columns\Layout\View;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Concerns\InteractsWithTable;
 
-class LatestEpisodeCards extends TableWidget
+class DonghuaLatestEpisodeCards extends TableWidget
 {
     use InteractsWithTable;
 
@@ -47,7 +48,7 @@ class LatestEpisodeCards extends TableWidget
                 TextColumn::make('stream.name')->searchable()->extraAttributes(['style' => 'display: none;']),
                 View::make('filament.donghua-card')
             ])
-            ->heading('Latest Episodes')
+            ->heading('Latest Donghua Episodes')
             ->description('Recently added episodes from all streams. Click on a card to go to the episode original page.')
             ->searchable()
             ->contentGrid([
@@ -67,8 +68,11 @@ class LatestEpisodeCards extends TableWidget
                     ->color('primary')
                     ->slideOver()
                     ->modalHeading('Manual Crawl')
+                    ->modalIcon('heroicon-o-sparkles')
+                    ->modalWidth('sm')
                     ->modalDescription('Would you like to do manual Crawl for Latest Episodes right now on all available stream websites?')
                     ->modalContent(view('filament.crawl-confirmation'))
+                    ->modalSubmitActionLabel('Go!')
                     ->action(function () {
                         $this->crawlAllStreams();
                     }),

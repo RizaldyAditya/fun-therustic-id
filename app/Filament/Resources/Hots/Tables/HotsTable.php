@@ -114,6 +114,7 @@ class HotsTable
                             ->extraHeaderAttributes(['style' => 'width: 200px;']),
                         TextInputColumn::make('episode_latest')
                             ->label('# Latest')
+                            ->type('number')
                             ->alignCenter()
                             ->tooltip('# Latest')
                             ->extraHeaderAttributes(['style' => 'width: 200px;']),

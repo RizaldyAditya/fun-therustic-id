@@ -169,7 +169,6 @@ class DonghuaForm
                                                                 Action::make('open_mal')
                                                                     ->label('Visit')
                                                                     ->icon('heroicon-m-arrow-top-right-on-square')
-                                                                    ->color('primary')
                                                                     ->tooltip('Open MyAnimeList in a new tab')
                                                                     ->url(fn($state) => $state)
                                                                     ->openUrlInNewTab()

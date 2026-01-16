@@ -119,7 +119,12 @@ class EpisodesTable
                     ->toggleable(),
             ])
             ->filters([
-                SelectFilter::make('stream')->relationship('stream', 'name'),
+                SelectFilter::make('stream')
+                    ->relationship('stream', 'name')
+                    ->multiple()
+                    ->searchable()
+                    ->preload()
+                    ->placeholder('All'),
             ])
             ->filtersLayout(FiltersLayout::AboveContent)
             ->recordActions([
@@ -177,7 +182,6 @@ class EpisodesTable
                     RestoreBulkAction::make(),
                 ]),
             ])
-            ->defaultSort('created_at', 'desc')
-            ->recordUrl(null);
+            ->defaultSort('created_at', 'desc');
     }
 }

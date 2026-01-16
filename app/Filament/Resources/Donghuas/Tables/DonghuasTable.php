@@ -33,7 +33,7 @@ class DonghuasTable
     {
         return $table
             ->columns([
-                TextColumn::make('id')->label('ID')->sortable()->toggleable(isToggledHiddenByDefault: true)->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('id')->label('ID')->sortable()->toggleable(isToggledHiddenByDefault: true),
                 ImageColumn::make('image_cover')
                     ->label('')
                     ->disk('public')
@@ -72,12 +72,14 @@ class DonghuasTable
                             ->extraHeaderAttributes(['style' => 'width: 200px;']),
                         TextInputColumn::make('episode_latest')
                             ->label('Latest')
+                            ->type('number')
                             ->alignCenter()
                             ->extraHeaderAttributes(['style' => 'width: 200px;']),
                         TextColumn::make('episode_total')
                             ->label('Total')
                             ->default(fn($record) => $record->episode_total ?? $record->episode_latest ?? '-')
-                            ->alignCenter(),
+                            ->alignCenter()
+                            ->width(100),
                     ]),
                 ColumnGroup::make('Status')
                     ->columns([
@@ -85,14 +87,18 @@ class DonghuasTable
                             ->label('Status')
                             ->options(Status::query()->pluck('name', 'id'))
                             ->searchableOptions()
-                            ->extraHeaderAttributes(['style' => 'width: 200px; text-align: center;']),
+                            ->extraHeaderAttributes(['style' => 'width: 200px; text-align: center;'])
+                            ->width(100),
                         ToggleColumn::make('is_hot')
                             ->label('Hot')
                             ->sortable()
-                            ->alignEnd(),
+                            ->alignEnd()
+                            ->width(100),
                         ToggleColumn::make('is_airing')
+                            ->label('Airing')
                             ->sortable()
-                            ->alignEnd(),
+                            ->alignEnd()
+                            ->width(100),
                     ]),
             ])
             ->filters([
@@ -257,8 +263,6 @@ class DonghuasTable
                 ]),
             ])
             ->defaultSort('id', 'asc')
-            ->recordAction(null)
-            ->recordUrl(null)
-            ->striped();
+            ->recordAction(null);
     }
 }
