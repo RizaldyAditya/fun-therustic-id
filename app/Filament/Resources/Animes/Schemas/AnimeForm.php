@@ -116,7 +116,6 @@ class AnimeForm
                                                                     ->openUrlInNewTab()
                                                             )
                                                             ->inlineLabel()
-                                                            ->default('https://myanimelist.net/anime/60058/Oshi_no_Ko_3rd_Season?q=oshi%20no%20ko&cat=anime')
                                                             ->placeholder('https://myanimelist.net/anime/xxx/...?q=...&cat=...')
                                                             ->suffixAction(
                                                                 Action::make('openMyanimelistOfThisAnime')
@@ -214,12 +213,8 @@ class AnimeForm
                                                             ),
                                                         TextInput::make('title')->label('Title (EN)')->required()->inlineLabel()->autofocus(),
                                                         TextInput::make('title_jp')->label('Title (JP)')->inlineLabel(),
-                                                        Textarea::make('synopsis')
-                                                            ->columnSpanFull()
-                                                            ->rows(6)
-                                                            ->inlineLabel(),
                                                         Select::make('type')
-                                                            ->options(['TV' => 'TV', 'Movie' => 'Movie', 'OVA' => 'OVA'])
+                                                            ->options(config('constant.anime_type'))
                                                             ->default('TV')
                                                             ->required()
                                                             ->inlineLabel(),
@@ -247,6 +242,9 @@ class AnimeForm
                                                         Toggle::make('is_active')
                                                             ->label('Status')
                                                             ->default(true),
+                                                        Textarea::make('synopsis')
+                                                            ->columnSpanFull()
+                                                            ->rows(12),
                                                     ]),
                                                 Fieldset::make('Uploads & Sources')
                                                     ->columns(1)
@@ -298,7 +296,7 @@ class AnimeForm
                                                     ->columns(1)
                                                     ->schema([
                                                         Select::make('season')
-                                                            ->options(['winter' => 'Winter', 'spring' => 'Spring', 'summer' => 'Summer', 'fall' => 'Fall'])
+                                                            ->options(config('constant.season_name'))
                                                             ->default('Spring')
                                                             ->inlineLabel(),
                                                         TextInput::make('year')

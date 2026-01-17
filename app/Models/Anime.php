@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Anime extends Model
 {
+    protected $primaryKey = 'id';
     protected $fillable = [
         'title',
         'title_jp',
@@ -36,6 +37,7 @@ class Anime extends Model
 
     protected $casts = [
         'attributes' => 'array',
+        'air_date' => 'date'
     ];
 
     public function status(): BelongsTo
