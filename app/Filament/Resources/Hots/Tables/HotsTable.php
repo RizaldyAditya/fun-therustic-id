@@ -46,7 +46,8 @@ class HotsTable
                                         'image' => $record->image_cover,
                                     ]),
                             ])
-                    ),
+                    )
+                    ->toggleable(),
                 TextColumn::make('title_en')
                     ->label('Title')
                     ->description(function ($record) {
@@ -104,7 +105,8 @@ class HotsTable
                             ->extraInputAttributes(['step' => '1'])
                             ->alignCenter()
                             ->tooltip('# Watched in Season')
-                            ->extraHeaderAttributes(['style' => 'width: 200px;']),
+                            ->extraHeaderAttributes(['style' => 'width: 200px;'])
+                            ->toggleable(),
                         TextInputColumn::make('episode_watched_seasonal')
                             ->label('# Watched in Total')
                             ->type('number')
@@ -129,7 +131,8 @@ class HotsTable
                             ->label('# Total')
                             ->default(fn($record) => $record->episode_total ?? $record->episode_latest ?? '-')
                             ->alignCenter()
-                            ->tooltip('# Total'),
+                            ->tooltip('# Total')
+                            ->toggleable(),
                     ]),
                 ColumnGroup::make('Status')
                     ->columns([
@@ -137,17 +140,20 @@ class HotsTable
                             ->label('Status')
                             ->options(Status::query()->pluck('name', 'id'))
                             ->searchableOptions()
+                            ->sortable()
                             ->extraHeaderAttributes(['style' => 'width: 200px; text-align: center;']),
                         ToggleColumn::make('is_hot')
                             ->label('Hot')
                             ->sortable()
                             ->alignEnd()
-                            ->tooltip('Hot'),
+                            ->tooltip('Hot')
+                            ->toggleable(isToggledHiddenByDefault: true),
                         ToggleColumn::make('is_airing')
                             ->label('Airing')
                             ->sortable()
                             ->alignEnd()
-                            ->tooltip('Airing'),
+                            ->tooltip('Airing')
+                            ->toggleable(isToggledHiddenByDefault: true),
                     ]),
             ])
             ->filters([

@@ -3,14 +3,17 @@
 namespace App\Filament\Resources\Animes\Tables;
 
 use App\Models\Status;
+use App\Services\JikanService;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ViewField;
 use Filament\Infolists\Components\KeyValueEntry;
+use Filament\Notifications\Notification;
 use Filament\Tables\Columns\ColumnGroup;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\SelectColumn;
@@ -53,7 +56,9 @@ class AnimesTable
                     ->description(fn($record) => $record->title_jp)
                     ->sortable()
                     ->searchable()
-                    ->alignStart(),
+                    ->alignStart()
+                    ->wrap()
+                    ->extraAttributes(['style' => 'width: 300px;']),
                 TextColumn::make('type')->badge()->sortable()->alignCenter()->toggleable(),
                 SelectColumn::make('status_id')
                     ->label('Status')
@@ -62,18 +67,18 @@ class AnimesTable
                     ->sortable()
                     ->alignCenter()
                     ->extraHeaderAttributes(['style' => 'width: 200px; text-align: center;']),
-                TextColumn::make('season')
-                    ->sortable()
-                    ->alignCenter()
-                    ->formatStateUsing(function ($record) {
-                        return match ($record->season) {
-                            'winter' => 'Winter' . ' ' . $record->year,
-                            'spring' => 'Spring' . ' ' . $record->year,
-                            'summer' => 'Summer' . ' ' . $record->year,
-                            'fall' => 'Fall' . ' ' . $record->year,
-                        };
-                    })
-                    ->toggleable(),
+                ColumnGroup::make('Season')
+                    ->columns([
+                        TextColumn::make('season')
+                            ->sortable()
+                            ->alignCenter()
+                            ->formatStateUsing(fn($record) => config('constant.season_name')[$record->season] ?? 'N/A')
+                            ->toggleable(),
+                        TextColumn::make('year')
+                            ->sortable()
+                            ->alignCenter()
+                            ->toggleable(),
+                    ]),
                 ColumnGroup::make('Episode')
                     ->columns([
                         TextColumn::make('episode_total')->label('# Total')->sortable()->alignCenter()->toggleable(),
@@ -123,18 +128,9 @@ class AnimesTable
             ])
             ->filters([
                 SelectFilter::make('type')
-                    ->options([
-                        'TV' => 'TV',
-                        'OVA' => 'OVA',
-                        'Movie' => 'Movie',
-                    ]),
+                    ->options(config('constant.anime_type')),
                 SelectFilter::make('season')
-                    ->options([
-                        'winter' => 'Winter',
-                        'spring' => 'Spring',
-                        'summer' => 'Summer',
-                        'fall' => 'Fall',
-                    ]),
+                    ->options(config('constant.season_name')),
                 Filter::make('year_filter')
                     ->schema([
                         TextInput::make('year')
@@ -190,10 +186,65 @@ class AnimesTable
                 EditAction::make()->label('')->tooltip('Edit Anime'),
                 DeleteAction::make()->label('')->tooltip('Delete Anime'),
             ])
+            ->headerActions([
+                Action::make('import')
+                    ->label('Fetch Season Anime')
+                    ->icon('heroicon-s-folder-arrow-down')
+                    ->color('info')
+                    ->modalWidth('md')
+                    ->modalHeading('Fetch Season Anime')
+                    ->slideOver()
+                    ->schema([
+                        ViewField::make('warning')->view('filament.season-import-confirmation')
+                            ->columnSpanFull(),
+                        Select::make('season')
+                            ->label('Season')
+                            ->options(config('constant.season_name'))
+                            ->required(),
+                        TextInput::make('year')
+                            ->label('Year')
+                            ->numeric()
+                            ->required()
+                            ->maxLength(4)
+                            ->placeholder('YYYY')
+                            ->default(date('Y')),
+                    ])
+                    ->action(function (array $data) {
+                        $jikanService = new JikanService();
+                        $result       = $jikanService->getSeasonData($data['season'], (int) $data['year']);
+                        if ($result) {
+                            Notification::make()->success()->title('Season Anime Fetched Successfully')->send();
+                        } else {
+                            Notification::make()->danger()->title('Failed to Fetch Season Anime')->send();
+                        }
+                    })
+                    ->tooltip('Fetch Season Anime'),
+                Action::make('getGenres')
+                    ->label('Fetch Genres')
+                    ->icon('heroicon-s-folder-arrow-down')
+                    ->color('info')
+                    ->modalWidth('md')
+                    ->modalHeading('Fetch Genres')
+                    ->schema([
+                        ViewField::make('warning')->view('filament.genre-import-confirmation')
+                            ->columnSpanFull(),
+                    ])
+                    ->slideOver()
+                    ->action(function () {
+                        $jikanService = new JikanService();
+                        $result       = $jikanService->getGenres();
+                        if ($result) {
+                            Notification::make()->success()->title('Genres Fetched Successfully')->send();
+                        } else {
+                            Notification::make()->danger()->title('Failed to Fetch Genres')->send();
+                        }
+                    }),
+            ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->defaultSort('title', 'asc');
     }
 }
