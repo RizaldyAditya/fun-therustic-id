@@ -76,7 +76,9 @@ class AnimekhorObserver extends CrawlObserver
 
                     // get video source url
                     $crawlerEpisodeLink = new DomCrawler($this->client->get($episodeLink)->getBody()->getContents());
-                    $videoSourceUrl     = $crawlerEpisodeLink->filter('iframe')->attr('src');
+                    $iframe_div     = $crawlerEpisodeLink->filter('#pembed')->html();
+                    $crawler = new DomCrawler($iframe_div);
+                    $videoSourceUrl = $crawler->filter('iframe')->attr('src');
                     $allEpisodes        = $crawlerEpisodeLink->filter('.nvs.nvsc > a')->attr('href');
 
                     if (!str_contains($videoSourceUrl, 'youtube')) {

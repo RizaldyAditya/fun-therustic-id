@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9cbbb40ff6e624d61e68959b247e026d",
+    "content-hash": "f01af73a869490eb96f0cdb77c4cb2ee",
     "packages": [
         {
             "name": "alareqi/filament-pwa",

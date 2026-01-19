@@ -1,45 +1,48 @@
 <?php
 namespace App\Filament\Widgets;
 
-use App\Filament\Resources\Donghuas\DonghuaResource;
 use App\Models\Episode;
+use Filament\Tables\Table;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
-use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
-use Filament\Forms\Components\ViewField;
-use Filament\Infolists\Components\ImageEntry;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Schemas\Components\Grid;
-use Filament\Schemas\Components\Section;
+use Filament\Widgets\TableWidget;
+use Filament\Actions\DeleteAction;
+use Illuminate\Contracts\View\View;
 use Filament\Support\Icons\Heroicon;
+use Filament\Forms\Components\Select;
+use Filament\Schemas\Components\Form;
+use Filament\Schemas\Components\Grid;
+use Filament\Forms\Components\Textarea;
 use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\TextInputColumn;
-use Filament\Tables\Concerns\InteractsWithTable;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\ViewField;
+use Filament\Schemas\Components\Section;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Table;
-use Filament\Widgets\TableWidget;
-use Illuminate\Contracts\View\View;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Tables\Columns\TextInputColumn;
 use Illuminate\Database\Eloquent\Collection;
+use Filament\Infolists\Components\ImageEntry;
+use Filament\Tables\Concerns\InteractsWithTable;
+use App\Filament\Resources\Donghuas\DonghuaResource;
+use App\Filament\Resources\Episodes\Schemas\EpisodesForm;
 
 class DonghuaLatestEpisodes extends TableWidget
 {
     use InteractsWithTable;
 
-    protected static ?int $sort  = 2;
-    public ?string $filterStatus = null;
+    protected static ?int $sort                = 2;
+    public ?string $filterStatus               = null;
     protected int|string|array $columnSpan = 'full';
 
     public function table(Table $table): Table
     {
         return $table
             ->query(function () {
-                return Episode::query()
-                    ->whereDate('created_at', '>=', now()->subDays(2))
-                    ->with(['donghua', 'stream']);
+                return Episode::query()->with(['donghua', 'stream']);
             })
             ->heading('')
             ->description('This list updates automatically as the crawler finds new content.')
@@ -241,13 +244,39 @@ class DonghuaLatestEpisodes extends TableWidget
                             ])
                             ->collapsed(),
                     ]),
-                EditAction::make()->label('')->tooltip('Edit Episode'),
+                EditAction::make()
+                    ->label('')
+                    ->tooltip('Edit Episode')
+                    ->slideOver()
+                    ->modalHeading('Edit Episode')
+                    ->modalWidth('5xl')
+                    ->color('warning')
+                    ->schema([
+                        TextInput::make('title')->required()->inlineLabel(),
+                        Select::make('donghua_id')
+                            ->relationship('donghua', 'title_en')
+                            ->required()
+                            ->inlineLabel()
+                            ->searchable()
+                            ->preload(false),
+                        TextInput::make('episode_number')->numeric()->required()->inlineLabel(),
+                        Select::make('stream_id')
+                            ->relationship('stream', 'name')
+                            ->required()
+                            ->searchable()
+                            ->preload()
+                            ->inlineLabel(),
+                        TextInput::make('stream_url')->required()->inlineLabel(),
+                        TextInput::make('video_source_url')->required()->inlineLabel(),
+                        Textarea::make('notes')->rows(4),
+                    ]),
                 Action::make('editParent')
                     ->label('')
                     ->icon('heroicon-s-pencil-square')
                     ->color('success')
                     ->url(fn($record): string => DonghuaResource::getUrl('edit', ['record' => $record->donghua_id]))
                     ->openUrlInNewTab()
+                    ->slideOver()
                     ->tooltip('Edit Donghua'),
                 DeleteAction::make()->label('')->tooltip('Delete Episode'),
             ])
