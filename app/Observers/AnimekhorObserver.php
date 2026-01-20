@@ -68,7 +68,7 @@ class AnimekhorObserver extends CrawlObserver
                     $episodeTitle = $node->filter('.bsx > a.tip')->attr('title');
 
                     // get episode number
-                    $node_episode = $node->filter('.bsx > a.tip > .limit > .bt > .epx');
+                    $node_episode     = $node->filter('.bsx > a.tip > .limit > .bt > .epx');
                     $rawText          = $node_episode->count() > 0 ? $node_episode->text() : '0';
                     $parsed           = $this->sanitizeEpisodeNumber($rawText);
                     $episodeNumberPre = $parsed['int'];
@@ -76,20 +76,25 @@ class AnimekhorObserver extends CrawlObserver
 
                     // get video source url
                     $crawlerEpisodeLink = new DomCrawler($this->client->get($episodeLink)->getBody()->getContents());
-                    $iframe_div     = $crawlerEpisodeLink->filter('#pembed')->html();
-                    $crawler = new DomCrawler($iframe_div);
-                    $videoSourceUrl = $crawler->filter('iframe')->attr('src');
-                    $allEpisodes        = $crawlerEpisodeLink->filter('.nvs.nvsc > a')->attr('href');
+                    $iframe_div         = $crawlerEpisodeLink->filter('#pembed')->html();
+                    $crawler            = new DomCrawler($iframe_div);
+                    $videoSourceUrl     = $crawler->filter('iframe')->attr('src');
+                    if (str_starts_with($videoSourceUrl, '//')) {
+                        $videoSourceUrl = 'https:' . $videoSourceUrl;
+                    }
+
+                    // get all episodes
+                    $allEpisodes = $crawlerEpisodeLink->filter('.nvs.nvsc > a')->attr('href');
 
                     if (!str_contains($videoSourceUrl, 'youtube')) {
                         // save episode
                         Episode::firstOrCreate(
                             ['stream_url' => $episodeLink],
                             [
-                                'donghua_id'       => $donghua_id,
-                                'title'            => trim($episodeTitle),
-                                'stream_id'        => $stream->id,
-                                'episode_number'   => $episodeNumber,
+                                'donghua_id' => $donghua_id,
+                                'title' => trim($episodeTitle),
+                                'stream_id' => $stream->id,
+                                'episode_number' => $episodeNumber,
                                 'video_source_url' => $videoSourceUrl,
                             ]
                         );

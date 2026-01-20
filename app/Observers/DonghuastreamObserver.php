@@ -76,17 +76,22 @@ class DonghuastreamObserver extends CrawlObserver
                     // get video source url
                     $crawlerEpisodeLink = new DomCrawler($this->client->get($episodeLink)->getBody()->getContents());
                     $videoSourceUrl     = $crawlerEpisodeLink->filter('iframe')->attr('data-litespeed-src');
-                    $allEpisodes        = $crawlerEpisodeLink->filter('.nvs.nvsc > a')->attr('href');
+                    if (str_starts_with($videoSourceUrl, '//')) {
+                        $videoSourceUrl = 'https:' . $videoSourceUrl;
+                    }
+
+                    // get all episode link
+                    $allEpisodes = $crawlerEpisodeLink->filter('.nvs.nvsc > a')->attr('href');
 
                     if (!str_contains($videoSourceUrl, 'youtube')) {
                         // save episode
                         Episode::firstOrCreate(
                             ['stream_url' => $episodeLink],
                             [
-                                'donghua_id'       => $donghua_id,
-                                'title'            => trim($episodeTitle),
-                                'stream_id'        => $stream->id,
-                                'episode_number'   => $episodeNumber,
+                                'donghua_id' => $donghua_id,
+                                'title' => trim($episodeTitle),
+                                'stream_id' => $stream->id,
+                                'episode_number' => $episodeNumber,
                                 'video_source_url' => $videoSourceUrl,
                             ]
                         );
