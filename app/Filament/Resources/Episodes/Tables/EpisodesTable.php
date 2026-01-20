@@ -27,7 +27,10 @@ class EpisodesTable
     {
         return $table
             ->columns([
-                TextColumn::make('id')->sortable()->label('ID')->toggleable(),
+                TextColumn::make('id')
+                    ->label('ID')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 ImageColumn::make('donghua.image_cover')
                     ->disk('public')
                     ->label('')

@@ -28,6 +28,11 @@ class HotsTable
     {
         return $table
             ->columns([
+                TextColumn::make('id')
+                    ->label('ID')
+                    ->sortable()
+                    ->alignCenter()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 ImageColumn::make('image_cover')
                     ->label('')
                     ->disk('public')
