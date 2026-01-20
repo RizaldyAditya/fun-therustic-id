@@ -111,6 +111,16 @@ class DonghuaLatestEpisodes extends TableWidget
                     ->url(fn(Episode $record): string => $record->stream_url)
                     ->openUrlInNewTab()
                     ->tooltip('Go to stream URL.'),
+                TextColumn::make('stream_url')
+                    ->label('Stream URL')
+                    ->url(fn(Episode $record): string => $record->stream_url)
+                    ->openUrlInNewTab()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('video_source_url')
+                    ->label('Video Source URL')
+                    ->url(fn(Episode $record): string => $record->video_source_url)
+                    ->openUrlInNewTab()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->label('Added At')
                     ->dateTime('M d Y, H:i')
