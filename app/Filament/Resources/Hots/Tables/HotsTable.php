@@ -198,7 +198,7 @@ class HotsTable
                     ->color('success')
                     ->icon('heroicon-s-play')
                     ->slideOver()
-                    ->modalHeading(fn($record) => "Watching: {$record->title_en}")
+                    ->modalHeading(fn($record) => "{$record->title_en} Episode List")
                     ->modalWidth('7xl')
                     ->modalSubmitAction(false) // Hide the "Submit" button
                     ->modalCancelActionLabel('Close')
