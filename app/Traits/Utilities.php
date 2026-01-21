@@ -16,9 +16,9 @@ trait Utilities
         preg_match_all('/\[([^\]]*)\]/', $episodeNumber, $matches);
         $brackets = !empty($matches[0]) ? $matches[0][0] : '';
 
-        // 2. Handle "Ep 476 to 477" -> Take 477
+        // 2. Handle "Ep 476 to 477" -> Take 476
         if (preg_match('/(\d+)\s+to\s+(\d+)/i', $episodeNumber, $toMatches)) {
-            $episodeNumber = $toMatches[2];
+            $episodeNumber = $toMatches[1];
         }
 
         // 3. Handle "Ep 143, 144 Preview" -> Take 143 (Remove after comma)
@@ -26,9 +26,9 @@ trait Utilities
             $episodeNumber = explode(',', $episodeNumber)[0];
         }
 
-        // 4. Handle Merged Episodes (e.g., 144-145) -> Take 145
+        // 4. Handle Merged Episodes (e.g., 144-145) -> Take 144
         if (preg_match('/(\d+)\s*[\-\~]\s*(\d+)/', $episodeNumber, $rangeMatches)) {
-            $episodeNumber = $rangeMatches[2];
+            $episodeNumber = $rangeMatches[1];
         }
 
         // 5. Cleanup strings and non-numeric junk
