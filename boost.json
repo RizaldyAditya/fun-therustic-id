@@ -2,5 +2,8 @@
     "agents": [
         "gemini"
     ],
+    "editors": [
+        "vscode"
+    ],
     "guidelines": []
 }
