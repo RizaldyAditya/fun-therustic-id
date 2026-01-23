@@ -51,6 +51,10 @@ class DonghuaLatestEpisodes extends TableWidget
             ->emptyStateIcon('heroicon-o-clock')
             ->defaultSort('created_at', 'desc')
             ->columns([
+                TextColumn::make('id')
+                    ->label('ID')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 ImageColumn::make('donghua.image_cover')
                     ->label('')
                     ->disk('public')

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id()->autoIncrement();
             $table->integer('donghua_id')->nullable();
             $table->string('title')->nullable();
-            $table->string('episode_number')->nullable();
+            $table->integer('episode_number')->nullable();
             $table->integer('stream_id')->nullable();
             $table->string('stream_url')->nullable();
             $table->string('video_source_url')->nullable(); 
