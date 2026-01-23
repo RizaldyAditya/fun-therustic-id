@@ -133,4 +133,131 @@ class DonghuaApiController extends Controller
             ])->values(),
         ]);
     }
+
+    /**
+     * Return a paginated list of latest episodes.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function latestEpisodes(Request $request)
+    {
+        // Validate pageSize - must be one of: 10, 20, 50, 100
+        $pageSize = (int) $request->get('page_size', 10);
+        $allowedPageSizes = [10, 20, 50, 100];
+        if (!in_array($pageSize, $allowedPageSizes)) {
+            $pageSize = 10;
+        }
+
+        // Get search query
+        $search = $request->get('q', '');
+
+        // Get sort parameters
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortOrder = strtolower($request->get('sort_order', 'desc')) === 'asc' ? 'asc' : 'desc';
+
+        // Validate sort_by column
+        $allowedSortColumns = ['created_at', 'episode_number', 'donghua_id'];
+        if (!in_array($sortBy, $allowedSortColumns)) {
+            $sortBy = 'created_at';
+        }
+
+        // Build query with eager loading
+        $query = Episode::with(['donghua', 'stream'])
+            ->when($search, function ($q) use ($search) {
+                $q->whereHas('donghua', function ($subQuery) use ($search) {
+                    $subQuery->where('title_en', 'LIKE', "%{$search}%")
+                        ->orWhere('title_zh', 'LIKE', "%{$search}%");
+                });
+            })
+            ->orderBy($sortBy, $sortOrder);
+
+        // Paginate results
+        $episodes = $query->paginate($pageSize);
+
+        // Format response
+        $data = $episodes->getCollection()->map(function ($episode) {
+            return [
+                'id' => $episode->id,
+                'title' => $episode->donghua->title_en ?? '',
+                'donghua_id' => $episode->donghua->id ?? null,
+                'episode_number' => (int) $episode->episode_number,
+                'episode_dl' => $episode->donghua->episode_dl ?? '',
+                'stream_name' => $episode->stream->name ?? null,
+                'created_at' => $episode->created_at ? $episode->created_at->format('Y-m-d H:i:s') : null,
+            ];
+        });
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $data->values(),
+            'pagination' => [
+                'current_page' => $episodes->currentPage(),
+                'per_page' => $episodes->perPage(),
+                'total' => $episodes->total(),
+                'last_page' => $episodes->lastPage(),
+            ],
+        ]);
+    }
+
+    public function downloaderJson(Request $request)
+    {
+        // Get episode IDs from request - support both JSON body array and query parameter
+        $episodeIds = $request->input('episode_ids');
+        
+        // If episode_ids is a string, try to decode it as JSON
+        if (is_string($episodeIds)) {
+            $decoded = json_decode($episodeIds, true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $episodeIds = $decoded;
+            }
+        }
+        
+        // If no episode_ids in request body, check query parameters
+        if (empty($episodeIds)) {
+            $episodeIds = $request->query('episode_ids');
+            
+            // If query param is a string representation of array, decode it
+            if (is_string($episodeIds)) {
+                $decoded = json_decode($episodeIds, true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    $episodeIds = $decoded;
+                }
+            }
+        }
+        
+        // Ensure we have an array of IDs
+        if (empty($episodeIds) || !is_array($episodeIds)) {
+            return response()->json([]);
+        }
+        
+        // Fetch episodes with their associated donghua
+        $episodes = Episode::whereIn('id', $episodeIds)
+            ->with('donghua')
+            ->get();
+        
+        // Group episodes by donghua
+        $donghuaMap = [];
+        
+        foreach ($episodes as $episode) {
+            $donghua = $episode->donghua;
+            if (!$donghua) continue;
+            
+            $donghuaId = $donghua->id;
+            
+            // Initialize donghua entry if not exists
+            if (!isset($donghuaMap[$donghuaId])) {
+                $donghuaMap[$donghuaId] = [
+                    'title' => $donghua->title_en,
+                    'path' => $donghua->local_download_path,
+                    'episodes' => []
+                ];
+            }
+            
+            // Map episode_number to video_source_url
+            $donghuaMap[$donghuaId]['episodes'][$episode->episode_number] = $episode->video_source_url;
+        }
+        
+        return response()->json(array_values($donghuaMap));
+    }
 }
