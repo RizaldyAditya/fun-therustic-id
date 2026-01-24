@@ -142,12 +142,8 @@ class DonghuaApiController extends Controller
      */
     public function latestEpisodes(Request $request)
     {
-        // Validate pageSize - must be one of: 10, 20, 50, 100
-        $pageSize = (int) $request->get('page_size', 10);
-        $allowedPageSizes = [10, 20, 50, 100];
-        if (!in_array($pageSize, $allowedPageSizes)) {
-            $pageSize = 10;
-        }
+        // Validate pageSize
+        $pageSize = (int) $request->get('page_size', 50);
 
         // Get search query
         $search = $request->get('q', '');
