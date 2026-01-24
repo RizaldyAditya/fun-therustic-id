@@ -14,7 +14,8 @@ Route::prefix('v1')->group(function () {
     Route::get('/trending', [DonghuaApiController::class, 'trending']);
     Route::get('/donghua', [DonghuaApiController::class, 'show']);
     
-    // download swiftUI app
+    // swiftUI downloader app
     Route::get('/latest-donghua-episodes', [DonghuaApiController::class, 'latestEpisodes']);
     Route::post('/downloader-json', [DonghuaApiController::class, 'downloaderJson']);
+    Route::post('/update/episode-dl', [DonghuaApiController::class, 'updateEpisodeDL']);
 });
