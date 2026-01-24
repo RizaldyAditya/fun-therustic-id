@@ -151,6 +151,7 @@ class DonghuaApiController extends Controller
 
         // Get search query
         $search = $request->get('q', '');
+        $stream_id = $request->get('stream_id', null);
 
         // Get sort parameters
         $sortBy = $request->get('sort_by', 'created_at');
@@ -169,6 +170,9 @@ class DonghuaApiController extends Controller
                     $subQuery->where('title_en', 'LIKE', "%{$search}%")
                         ->orWhere('title_zh', 'LIKE', "%{$search}%");
                 });
+            })
+            ->when(!empty($stream_id) && is_numeric($stream_id), function ($q) use ($stream_id) {
+                $q->where('stream_id', $stream_id);
             })
             ->orderBy($sortBy, $sortOrder);
 
@@ -200,6 +204,12 @@ class DonghuaApiController extends Controller
         ]);
     }
 
+    /**
+     * Return JSON data for the downloader app.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function downloaderJson(Request $request)
     {
         // Get episode IDs from request - support both JSON body array and query parameter
@@ -259,5 +269,29 @@ class DonghuaApiController extends Controller
         }
         
         return response()->json(array_values($donghuaMap));
+    }
+
+    /**
+     * Update the episode_dl field of a donghua.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateEpisodeDL(Request $request) 
+    {
+        $donghuaId = $request->post('donghua_id');
+        $episodeDl = $request->post('episode_dl');
+
+        if (empty($donghuaId) || empty($episodeDl)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Missing donghua_id or episode_dl',
+            ]);
+        }
+
+        Donghua::where('id', $donghuaId)->update(['episode_dl' => $episodeDl]);
+        return response()->json([
+            'status' => 'success',
+        ]);
     }
 }

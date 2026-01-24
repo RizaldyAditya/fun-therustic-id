@@ -114,8 +114,12 @@ class EpisodesTable
                     ->alignCenter()
                     ->url(fn($record) => $record->stream_url)
                     ->openUrlInNewTab(),
+                TextColumn::make('video_source_url')
+                    ->label('Video Source URL')
+                    ->url(fn($record) => $record->video_source_url)
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
-                    ->label('Date & Time')
+                    ->label('Release Date')
                     ->isoDate('YYYY-MM-DD HH:mm')
                     ->sortable()
                     ->alignCenter()
