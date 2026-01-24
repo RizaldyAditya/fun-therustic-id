@@ -126,7 +126,7 @@ class DonghuaLatestEpisodes extends TableWidget
                     ->openUrlInNewTab()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
-                    ->label('Added At')
+                    ->label('Release Date')
                     ->dateTime('M d Y, H:i')
                     ->sortable(query: function ($query, string $direction) {
                         return $query->orderBy('created_at', $direction);
