@@ -263,6 +263,7 @@ class DonghuasTable
                 ]),
             ])
             ->defaultSort('id', 'asc')
+            ->paginated([20, 30, 50])
             ->recordAction(null);
     }
 }

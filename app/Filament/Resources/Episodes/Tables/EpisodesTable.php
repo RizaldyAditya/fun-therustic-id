@@ -133,7 +133,7 @@ class EpisodesTable
                     ->preload()
                     ->placeholder('All'),
             ])
-            ->filtersLayout(FiltersLayout::AboveContent)
+            // ->filtersLayout(FiltersLayout::AboveContent)
             ->recordActions([
                 Action::make('viewVideoSourceUrl')
                     ->label('')
@@ -189,6 +189,7 @@ class EpisodesTable
                     RestoreBulkAction::make(),
                 ]),
             ])
-            ->defaultSort('created_at', 'desc');
+            ->defaultSort('created_at', 'desc')
+            ->paginated([20, 30, 50]);
     }
 }
