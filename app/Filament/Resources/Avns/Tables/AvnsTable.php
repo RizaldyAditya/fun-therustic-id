@@ -279,6 +279,7 @@ class AvnsTable
                     ]),
                 ]),
             ])
-            ->defaultSort('title');
+            ->defaultSort('title')
+            ->paginated([20, 30, 50]);
     }
 }
