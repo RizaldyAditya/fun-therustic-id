@@ -1,11 +1,12 @@
 <?php
 namespace App\Filament\Resources\Episodes\Schemas;
 
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Components\Grid;
-use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Forms\Components\Select;
+use Filament\Schemas\Components\Grid;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Section;
 
 class EpisodesForm
 {
@@ -35,6 +36,12 @@ class EpisodesForm
                                 TextInput::make('stream_url')->label('Stream URL')->required(),
                                 TextInput::make('video_source_url')->label('Video Source URL')->required(),
                             ]),
+                        Section::make('Notes')
+                            ->schema([
+                                Textarea::make('notes')
+                                    ->label('Episode Notes')
+                                    ->rows(5),
+                            ])
                     ]),
             ]);
     }

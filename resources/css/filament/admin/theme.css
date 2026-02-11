@@ -1,4 +1,4 @@
-@import '../../../../vendor/filament/filament/resources/css/theme.css';
+@import "../../../../vendor/filament/filament/resources/css/theme.css";
 
 @source '../../../../app/Filament/**/*';
 @source '../../../../resources/views/filament/**/*';
@@ -14,7 +14,22 @@
 }
 
 /* Hide the PWA installation banner */
-.pwa-install-banner, 
+.pwa-install-banner,
 .filament-pwa-installation-banner {
     display: none !important;
+}
+
+/* Fix SelectColumn clear button positioning */
+.fi-ta-select-column {
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+}
+
+.fi-ta-select-column .choices {
+    flex: 1 !important;
+}
+
+.fi-ta-select-column button[type="button"] {
+    flex-shrink: 0 !important;
 }

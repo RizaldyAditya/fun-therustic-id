@@ -238,6 +238,38 @@ class AvnsTable
                 RestoreAction::make(),
                 ForceDeleteAction::make(),
             ])
+            ->headerActions([
+                Action::make('filterPlaying')
+                    ->label('Playing')
+                    ->icon('heroicon-s-play')
+                    ->color('info')
+                    ->action(function ($livewire) {
+                        $playingStatus = Status::where('slug', 'playing')->first();
+                        if ($playingStatus) {
+                            $livewire->tableFilters['status_id']['value'] = $playingStatus->id;
+                        }
+                    })
+                    ->tooltip('Filter AVNs with Playing status'),
+                Action::make('filterPlanToPlay')
+                    ->label('Plan to Play')
+                    ->icon('heroicon-s-arrow-left-end-on-rectangle')
+                    ->color('warning')
+                    ->action(function ($livewire) {
+                        $planToPlayStatus = Status::where('slug', 'plan-to-play')->first();
+                        if ($planToPlayStatus) {
+                            $livewire->tableFilters['status_id']['value'] = $planToPlayStatus->id;
+                        }
+                    })
+                    ->tooltip('Filter AVNs with Plan to Play status'),
+                Action::make('clearFilters')
+                    ->label('Clear Filters')
+                    ->icon('heroicon-s-x-mark')
+                    ->color('gray')
+                    ->action(function ($livewire) {
+                        $livewire->tableFilters['status_id']['value'] = null;
+                    })
+                    ->tooltip('Clear status filters'),
+            ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     BulkActionGroup::make([

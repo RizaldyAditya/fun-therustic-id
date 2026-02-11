@@ -7,6 +7,7 @@ use App\Models\Episode;
 use App\Models\Stream;
 use App\Traits\Utilities;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DonghuaApiController extends Controller
 {
@@ -146,11 +147,11 @@ class DonghuaApiController extends Controller
         $pageSize = (int) $request->get('page_size', 50);
 
         // Get search query
-        $search = $request->get('q', '');
+        $search    = $request->get('q', '');
         $stream_id = $request->get('stream_id', null);
 
         // Get sort parameters
-        $sortBy = $request->get('sort_by', 'created_at');
+        $sortBy    = $request->get('sort_by', 'created_at');
         $sortOrder = strtolower($request->get('sort_order', 'desc')) === 'asc' ? 'asc' : 'desc';
 
         // Validate sort_by column
@@ -166,6 +167,7 @@ class DonghuaApiController extends Controller
                     $subQuery->where('title_en', 'LIKE', "%{$search}%")
                         ->orWhere('title_zh', 'LIKE', "%{$search}%");
                 });
+                $q->orWhere('title', 'LIKE', "%{$search}%");
             })
             ->when(!empty($stream_id) && is_numeric($stream_id), function ($q) use ($stream_id) {
                 $q->where('stream_id', $stream_id);
@@ -179,10 +181,12 @@ class DonghuaApiController extends Controller
         $data = $episodes->getCollection()->map(function ($episode) {
             return [
                 'id' => $episode->id,
-                'title' => $episode->donghua->title_en ?? '',
-                'donghua_id' => $episode->donghua->id ?? null,
+                'title' => $episode->title ?? '',
+                'donghua_id' => (int) $episode->donghua->id ?? 0,
+                'donghua_title' => $episode->donghua->title_en ?? '',
                 'episode_number' => (int) $episode->episode_number,
-                'episode_dl' => $episode->donghua->episode_dl ?? '',
+                'episode_dl' => (int) $episode->donghua->episode_dl ?? 0,
+                'video_source_url' => $episode->video_source_url ?? null,
                 'stream_name' => $episode->stream->name ?? null,
                 'created_at' => $episode->created_at ? $episode->created_at->format('Y-m-d H:i:s') : null,
             ];
@@ -210,7 +214,7 @@ class DonghuaApiController extends Controller
     {
         // Get episode IDs from request - support both JSON body array and query parameter
         $episodeIds = $request->input('episode_ids');
-        
+
         // If episode_ids is a string, try to decode it as JSON
         if (is_string($episodeIds)) {
             $decoded = json_decode($episodeIds, true);
@@ -218,11 +222,11 @@ class DonghuaApiController extends Controller
                 $episodeIds = $decoded;
             }
         }
-        
+
         // If no episode_ids in request body, check query parameters
         if (empty($episodeIds)) {
             $episodeIds = $request->query('episode_ids');
-            
+
             // If query param is a string representation of array, decode it
             if (is_string($episodeIds)) {
                 $decoded = json_decode($episodeIds, true);
@@ -231,40 +235,84 @@ class DonghuaApiController extends Controller
                 }
             }
         }
-        
+
         // Ensure we have an array of IDs
         if (empty($episodeIds) || !is_array($episodeIds)) {
             return response()->json([]);
         }
-        
+
         // Fetch episodes with their associated donghua
         $episodes = Episode::whereIn('id', $episodeIds)
             ->with('donghua')
             ->get();
-        
+
         // Group episodes by donghua
         $donghuaMap = [];
-        
+
         foreach ($episodes as $episode) {
             $donghua = $episode->donghua;
-            if (!$donghua) continue;
-            
+            if (!$donghua) {
+                continue;
+            }
+
             $donghuaId = $donghua->id;
-            
+
             // Initialize donghua entry if not exists
             if (!isset($donghuaMap[$donghuaId])) {
                 $donghuaMap[$donghuaId] = [
                     'title' => $donghua->title_en,
                     'path' => $donghua->local_download_path,
-                    'episodes' => []
+                    'episodes' => [],
                 ];
             }
-            
+
             // Map episode_number to video_source_url
             $donghuaMap[$donghuaId]['episodes'][$episode->episode_number] = $episode->video_source_url;
         }
-        
+
         return response()->json(array_values($donghuaMap));
+    }
+
+    /**
+     * Update an episode.
+     *
+     * @param Request $request
+     * @param Episode $episode
+     * @return \Illuminate\Http\JsonResponse
+     **/
+    public function updateEpisode(Request $request, Episode $episode)
+    {
+        return DB::transaction(function () use ($request, $episode) {
+            // 1. Filter Episode Data
+            // This removes null, 0, false, and ""
+            $episodeData = array_filter($request->only([
+                'title',
+                'episode_number',
+                'stream_id',
+                'stream_url',
+                'video_source_url',
+                'notes',
+            ]));
+
+            if (!empty($episodeData)) {
+                $episode->update($episodeData);
+            }
+
+            // 2. Filter Donghua Data
+            if ($request->has('donghua')) {
+                $donghuaData = array_filter($request->input('donghua'));
+
+                if (!empty($donghuaData)) {
+                    // This updates the related Donghua model directly
+                    $episode->donghua()->update($donghuaData);
+                }
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $episode->fresh('donghua'),
+            ]);
+        });
     }
 
     /**
@@ -273,7 +321,7 @@ class DonghuaApiController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function updateEpisodeDL(Request $request) 
+    public function updateEpisodeDL(Request $request)
     {
         $donghuaId = $request->post('donghua_id');
         $episodeDl = $request->post('episode_dl');
