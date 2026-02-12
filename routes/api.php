@@ -18,5 +18,6 @@ Route::prefix('v1')->group(function () {
     Route::get('/latest-donghua-episodes', [DonghuaApiController::class, 'latestEpisodes']);
     Route::post('/downloader-json', [DonghuaApiController::class, 'downloaderJson']);
     Route::post('/update/episode-dl', [DonghuaApiController::class, 'updateEpisodeDL']);
+    Route::get('/episode/{id}', [DonghuaApiController::class, 'show']);
     Route::put('/episodes/{episode}', [DonghuaApiController::class, 'updateEpisode']);
 });
