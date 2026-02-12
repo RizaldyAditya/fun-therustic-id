@@ -152,14 +152,20 @@ class DonghuaApiController extends Controller
             $sortBy = 'created_at';
         }
 
-        // Build query with eager loading
+        // Build query with eager loading - use JOIN instead of whereHas for better performance
         $query = Episode::with(['donghua', 'stream'])
             ->when($search, function ($q) use ($search) {
-                $q->whereHas('donghua', function ($subQuery) use ($search) {
-                    $subQuery->where('title_en', 'LIKE', "%{$search}%")
-                        ->orWhere('title_zh', 'LIKE', "%{$search}%");
-                });
-                $q->orWhere('title', 'LIKE', "%{$search}%");
+                // Join with donghuas table for searching on donghua titles
+                $q->join('donghuas', 'donghua_episodes.donghua_id', '=', 'donghuas.id')
+                    ->where(function ($q) use ($search) {
+                        $q->where('donghuas.title_en', 'LIKE', "%{$search}%")
+                            ->orWhere('donghuas.title_zh', 'LIKE', "%{$search}%")
+                            ->orWhere('donghua_episodes.title', 'LIKE', "%{$search}%");
+                    })
+                    ->select('donghua_episodes.*'); // Ensure we select from episodes table
+            }, function ($q) {
+                // When no search, still select from episodes
+                $q->select('donghua_episodes.*');
             })
             ->when(!empty($stream_id) && is_numeric($stream_id), function ($q) use ($stream_id) {
                 $q->where('stream_id', $stream_id);
