@@ -184,13 +184,28 @@ class DonghuaApiController extends Controller
                 'title' => $episode->title ?? '',
                 'donghua_id' => (int) $episode->donghua->id ?? 0,
                 'donghua_title' => $episode->donghua->title_en ?? '',
+                'donghua_cover_image' => $episode->donghua->image_cover ?? '',
+                'season' => (int) $episode->donghua->season ?? 0,
                 'episode_number' => (int) $episode->episode_number,
+                'episode_watched' => (int) $episode->donghua->episode_watched ?? 0,
+                'episode_watched_seasonal' => (int) $episode->donghua->episode_watched_seasonal ?? 0,
+                'episode_latest' => (int) $episode->donghua->episode_latest ?? 0,
                 'episode_dl' => (int) $episode->donghua->episode_dl ?? 0,
                 'video_source_url' => $episode->video_source_url ?? null,
+                'stream_id' => $episode->stream->id ?? null,
                 'stream_name' => $episode->stream->name ?? null,
+                'stream_url' => $episode->stream_url ?? null,
+                'mc_name' => $episode->donghua->mc_name ?? null,
+                'notes' => $episode->notes ?? null,
+                'airing_status' => $episode->donghua->is_airing ?? 0,
+                'is_hot' => $episode->donghua->is_hot ?? 0,
+                'synopsis' => $episode->donghua->synopsis ?? '',
+                'studio' => $episode->donghua->studio->name ?? '',
+                'local_download_path' => $episode->donghua->local_download_path ?? '',
                 'created_at' => $episode->created_at ? $episode->created_at->format('Y-m-d H:i:s') : null,
+                'donghua' => $this->apiDonghuaDetail(collect([$episode->donghua]))->first(),
             ];
-        });
+        }); 
 
         return response()->json([
             'status' => 'success',
