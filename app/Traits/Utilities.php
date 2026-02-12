@@ -51,18 +51,22 @@ trait Utilities
         return $data->map(fn($donghua) => [
             'id' => $donghua->id,
             'title' => $donghua->title_en ?? '',
-            'title_cn' => $donghua->title_zh ?? '',
+            'titleCn' => $donghua->title_zh ?? '',
             'synopsis' => $donghua->synopsis ?? '',
             'poster' => asset('storage/' . $donghua->image_cover),
             'season' => (int) $donghua->season ?? '',
+            'episode_watched' => (int) $donghua->episode_watched ?? '',
+            'episode_watched_seasonal' => (int) $donghua->episode_watched_seasonal ?? '',
             'episode_latest' => (int) $donghua->episode_latest ?? '',
             'episode_total' => (int) $donghua->episode_total ?? '',
+            'episode_dl' => (int) $donghua->episode_dl ?? '',
+            'local_download_path' => $donghua->local_download_path ?? '',
             'is_airing' => (bool) $donghua->is_airing,
             'is_hot' => (bool) $donghua->is_hot,
             'studio' => $donghua->studio->name ?? '',
             'source' => $donghua->source->name ?? '',
             'trending_sort' => $donghua->trending_sort ?? 99,
-            'created_at' => $donghua->created_at ? $donghua->created_at->diffForHumans() : '',
+            'created_at' => $donghua->created_at,
         ]);
     }
 
