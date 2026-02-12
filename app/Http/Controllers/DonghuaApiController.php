@@ -106,7 +106,7 @@ class DonghuaApiController extends Controller
      */
     public function show(Request $request)
     {
-        $id = $request->get('id');
+        $id = $request->route('id');
         if (empty($id)) {
             return response()->json([
                 'status' => 'success',
@@ -114,24 +114,16 @@ class DonghuaApiController extends Controller
             ]);
         }
 
-        $donghua          = Donghua::where('id', $id)->get();
-        $streamingSources = Stream::whereHas('episodes', function ($query) use ($id) {
-            $query->where('donghua_id', $id);
-        })->with(['episodes' => function ($query) use ($id) {
-            $query->where('donghua_id', $id)->latest('episode_number');
-        }])->get();
+        $episode = Episode::where('id', $id)->with(['donghua', 'stream', 'donghua.studio'])->get();
+        // $streamingSources = Stream::whereHas('episodes', function ($query) use ($id) {
+        //     $query->where('donghua_id', $id);
+        // })->with(['episodes' => function ($query) use ($id) {
+        //     $query->where('donghua_id', $id)->latest('episode_number');
+        // }])->get();
 
         return response()->json([
             'status' => 'success',
-            'donghua' => $this->apiDonghuaDetail($donghua)->first(),
-            'streaming_sources' => $streamingSources->map(fn($stream) => [
-                'source' => $stream->name,
-                'episodes' => $stream->episodes->map(fn($ep) => [
-                    'number' => $ep->episode_number,
-                    'url' => $ep->video_source_url,
-                    'created_at' => $ep->created_at->format('F d, Y'),
-                ]),
-            ])->values(),
+            'data' => $this->apiDonghuaEpisode(collect($episode))->first(),
         ]);
     }
 
@@ -184,7 +176,7 @@ class DonghuaApiController extends Controller
                 'title' => $episode->title ?? '',
                 'donghua_id' => (int) $episode->donghua->id ?? 0,
                 'donghua_title' => $episode->donghua->title_en ?? '',
-                'donghua_cover_image' => $episode->donghua->image_cover ?? '',
+                'donghua_cover_image' => asset('storage/' . $episode->donghua->image_cover ?? ''),
                 'season' => (int) $episode->donghua->season ?? 0,
                 'episode_number' => (int) $episode->episode_number,
                 'episode_watched' => (int) $episode->donghua->episode_watched ?? 0,

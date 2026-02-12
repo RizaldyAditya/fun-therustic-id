@@ -76,6 +76,10 @@ trait Utilities
             'id' => $episode->id,
             'title' => $episode->donghua->title_en ?? '',
             'episode_number' => (int) $episode->episode_number,
+            'stream_id' => (int) $episode->stream_id ?? 0,
+            'stream_url' => $episode->stream_url ?? null,
+            'video_source_url' => $episode->video_source_url ?? null,
+            'notes' => $episode->notes ?? null,
             'created_at' => $episode->created_at ? $episode->created_at->diffForHumans() : $episode->created_at->format('F d, Y'),
             'donghua' => $this->apiDonghuaDetail(collect([$episode->donghua]))->first(),
         ]);
