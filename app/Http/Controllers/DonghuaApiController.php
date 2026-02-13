@@ -137,16 +137,16 @@ class DonghuaApiController extends Controller
         $pageSize = (int) $request->get('page_size', 50);
 
         // Get search query
-        $search = $request->get('q', '');
+        $search    = $request->get('q', '');
         $stream_id = $request->get('stream_id', null);
 
         // Get sort parameters
-        $sortBy = $request->get('sort_by', 'created_at');
+        $sortBy    = $request->get('sort_by', 'created_at');
         $sortOrder = strtolower($request->get('sort_order', 'desc')) === 'asc' ? 'asc' : 'desc';
 
         // Validate sort_by column
         $allowedSortColumns = ['created_at', 'episode_number', 'donghua_id'];
-        if (! in_array($sortBy, $allowedSortColumns)) {
+        if (!in_array($sortBy, $allowedSortColumns)) {
             $sortBy = 'created_at';
         }
 
@@ -165,7 +165,7 @@ class DonghuaApiController extends Controller
                 // When no search, still select from episodes
                 $q->select('donghua_episodes.*');
             })
-            ->when(! empty($stream_id) && is_numeric($stream_id), function ($q) use ($stream_id) {
+            ->when(!empty($stream_id) && is_numeric($stream_id), function ($q) use ($stream_id) {
                 $q->where('stream_id', $stream_id);
             })
             ->orderBy($sortBy, $sortOrder);
@@ -180,14 +180,14 @@ class DonghuaApiController extends Controller
                 'title' => $episode->title ?? '',
                 'donghua_id' => (int) $episode->donghua->id ?? 0,
                 'donghua_title' => $episode->donghua->title_en ?? '',
-                'donghua_cover_image' => asset('storage/'.$episode->donghua->image_cover ?? ''),
+                'donghua_cover_image' => asset('storage/' . $episode->donghua->image_cover ?? ''),
                 'season' => (int) $episode->donghua->season ?? 0,
                 'episode_number' => (int) $episode->episode_number,
                 'episode_watched' => (int) $episode->donghua->episode_watched ?? 0,
                 'episode_watched_seasonal' => (int) $episode->donghua->episode_watched_seasonal ?? 0,
                 'episode_latest' => (int) $episode->donghua->episode_latest ?? 0,
                 'episode_dl' => (int) $episode->donghua->episode_dl ?? 0,
-                'video_source_url' => $episode->video_source_url['english']['dailymotion'] ?? $episode->video_source_url['english']['ok_ru'] ?? null,
+                'video_source_url' => $episode->video_source_url,
                 'stream_id' => $episode->stream->id ?? null,
                 'stream_name' => $episode->stream->name ?? null,
                 'stream_url' => $episode->stream_url ?? null,
@@ -247,7 +247,7 @@ class DonghuaApiController extends Controller
         }
 
         // Ensure we have an array of IDs
-        if (empty($episodeIds) || ! is_array($episodeIds)) {
+        if (empty($episodeIds) || !is_array($episodeIds)) {
             return response()->json([]);
         }
 
@@ -261,14 +261,14 @@ class DonghuaApiController extends Controller
 
         foreach ($episodes as $episode) {
             $donghua = $episode->donghua;
-            if (! $donghua) {
+            if (!$donghua) {
                 continue;
             }
 
             $donghuaId = $donghua->id;
 
             // Initialize donghua entry if not exists
-            if (! isset($donghuaMap[$donghuaId])) {
+            if (!isset($donghuaMap[$donghuaId])) {
                 $donghuaMap[$donghuaId] = [
                     'title' => $donghua->title_en,
                     'path' => $donghua->local_download_path,
@@ -277,8 +277,7 @@ class DonghuaApiController extends Controller
             }
 
             // Map episode_number to video_source_url
-            $url = $episode->video_source_url['english']['dailymotion'] ?? $episode->video_source_url['english']['ok_ru'] ?? null;
-            $donghuaMap[$donghuaId]['episodes'][$episode->episode_number] = $url;
+            $donghuaMap[$donghuaId]['episodes'][$episode->episode_number] = $episode->video_source_url;
         }
 
         return response()->json(array_values($donghuaMap));
@@ -303,7 +302,7 @@ class DonghuaApiController extends Controller
                 'notes',
             ]));
 
-            if (! empty($episodeData)) {
+            if (!empty($episodeData)) {
                 $episode->update($episodeData);
             }
 
@@ -311,7 +310,7 @@ class DonghuaApiController extends Controller
             if ($request->has('donghua')) {
                 $donghuaData = array_filter($request->input('donghua'));
 
-                if (! empty($donghuaData)) {
+                if (!empty($donghuaData)) {
                     // This updates the related Donghua model directly
                     $episode->donghua()->update($donghuaData);
                 }
