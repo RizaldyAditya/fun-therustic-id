@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Filament\Resources\Episodes\Tables;
 
 use App\Filament\Resources\Donghuas\DonghuaResource;
@@ -38,16 +39,16 @@ class EpisodesTable
                     ->alignCenter()
                     ->action(
                         Action::make('preview')
-                            ->label(fn($record) => $record->donghua?->title_en)
-                            ->modalHeading(fn($record) => $record->donghua?->title_en)
-                            ->modalDescription(fn($record) => $record->donghua?->title_zh)
+                            ->label(fn ($record) => $record->donghua?->title_en)
+                            ->modalHeading(fn ($record) => $record->donghua?->title_en)
+                            ->modalDescription(fn ($record) => $record->donghua?->title_zh)
                             ->modalWidth('2xl')
                             ->modalSubmitAction(false)
                             ->modalCancelActionLabel('Close')
                             ->schema([
                                 ViewField::make('image_preview')
                                     ->view('filament.image-preview')
-                                    ->viewData(fn($record) => [
+                                    ->viewData(fn ($record) => [
                                         'image' => $record->donghua?->image_cover,
                                     ]),
                             ])
@@ -57,8 +58,9 @@ class EpisodesTable
                     ->label('Episode Title')
                     ->description(function ($record) {
                         if ($record->donghua) {
-                            return $record->donghua->title_en . ' (' . $record->donghua->title_zh . ')';
+                            return $record->donghua->title_en.' ('.$record->donghua->title_zh.')';
                         }
+
                         return '-';
                     })
                     ->sortable()
@@ -72,17 +74,17 @@ class EpisodesTable
                         return $record->donghua->episode_dl >= $record->donghua->episode_latest;
                     })
                     ->icons([
-                        'heroicon-s-check' => fn($record) => $record->donghua->episode_dl >= $record->donghua->episode_latest,
-                        'heroicon-s-arrow-down-on-square-stack' => fn($record) => $record->donghua->episode_dl < $record->donghua->episode_latest,
+                        'heroicon-s-check' => fn ($record) => $record->donghua->episode_dl >= $record->donghua->episode_latest,
+                        'heroicon-s-arrow-down-on-square-stack' => fn ($record) => $record->donghua->episode_dl < $record->donghua->episode_latest,
                     ])
                     ->colors([
-                        'success' => fn($record) => $record->donghua->episode_dl >= $record->donghua->episode_latest,
-                        'warning' => fn($record) => $record->donghua->episode_dl < $record->donghua->episode_latest,
+                        'success' => fn ($record) => $record->donghua->episode_dl >= $record->donghua->episode_latest,
+                        'warning' => fn ($record) => $record->donghua->episode_dl < $record->donghua->episode_latest,
                     ])
                     ->tooltip(function ($record) {
                         return $record->donghua->episode_dl >= $record->donghua->episode_latest
                         ? 'All latest episodes downloaded.'
-                        : ($record->donghua->episode_latest - $record->donghua->episode_dl) . ' New episodes available to download.';
+                        : ($record->donghua->episode_latest - $record->donghua->episode_dl).' New episodes available to download.';
                     }),
                 TextColumn::make('episode_number')->label('# Episode')->sortable()->searchable()->alignCenter()->toggleable(),
                 TextColumn::make('donghua.episode_watched')
@@ -91,6 +93,7 @@ class EpisodesTable
                         if ($record->donghua) {
                             return $record->donghua->episode_watched_seasonal;
                         }
+
                         return '-';
                     })
                     ->alignCenter()
@@ -112,11 +115,27 @@ class EpisodesTable
                     ->searchable()
                     ->imageHeight(30)
                     ->alignCenter()
-                    ->url(fn($record) => $record->stream_url)
+                    ->url(fn ($record) => $record->stream_url)
                     ->openUrlInNewTab(),
                 TextColumn::make('video_source_url')
                     ->label('Video Source URL')
-                    ->url(fn($record) => $record->video_source_url)
+                    ->formatStateUsing(function ($record) {
+                        $urls = $record->video_source_url;
+                        if (! $urls) {
+                            return null;
+                        }
+
+                        // Prefer English dailymotion, then English ok.ru
+                        return $urls['english']['dailymotion'] ?? $urls['english']['ok_ru'] ?? null;
+                    })
+                    ->url(function ($record) {
+                        $urls = $record->video_source_url;
+                        if (! $urls) {
+                            return null;
+                        }
+
+                        return $urls['english']['dailymotion'] ?? $urls['english']['ok_ru'] ?? null;
+                    })
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->label('Release Date')
@@ -138,14 +157,14 @@ class EpisodesTable
                 Action::make('viewVideoSourceUrl')
                     ->label('')
                     ->icon('heroicon-s-play-circle')
-                    ->modalHeading(fn($record) => $record->title)
-                    ->modalDescription(fn($record) => $record->donghua->title_en)
+                    ->modalHeading(fn ($record) => $record->title)
+                    ->modalDescription(fn ($record) => $record->donghua->title_en)
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Close')
                     ->modalWidth('4xl')
-                    ->modalContent(fn($record): View => view(
+                    ->modalContent(fn ($record): View => view(
                         'filament.iframe-field',
-                        ['url' => $record->video_source_url]
+                        ['url' => $record->video_source_url['english']['dailymotion'] ?? $record->video_source_url['english']['ok_ru'] ?? null]
                     ))
                     ->color('info')
                     ->slideover()
@@ -155,7 +174,7 @@ class EpisodesTable
                     ->label('')
                     ->icon('heroicon-s-pencil-square')
                     ->color('success')
-                    ->url(fn($record): string => DonghuaResource::getUrl('edit', ['record' => $record->donghua_id]))
+                    ->url(fn ($record): string => DonghuaResource::getUrl('edit', ['record' => $record->donghua_id]))
                     ->tooltip('Edit Donghua'),
                 DeleteAction::make()->label('')->tooltip('Delete Episode'),
             ])
@@ -172,10 +191,17 @@ class EpisodesTable
                         $grouped = $records->groupBy('donghua_id')->map(function ($episodes) {
                             $donghua = $episodes->first()->donghua; // Get the parent Donghua info
 
+                            $episodeUrls = $episodes->mapWithKeys(function ($episode) {
+                                $urls = $episode->video_source_url;
+                                $url = $urls['english']['dailymotion'] ?? $urls['english']['ok_ru'] ?? null;
+
+                                return [$episode->episode_number => $url];
+                            })->toArray();
+
                             return [
                                 'title' => $donghua->title_en,
                                 'path' => $donghua->local_download_path,
-                                'episodes' => $episodes->pluck('video_source_url', 'episode_number')->toArray(),
+                                'episodes' => $episodeUrls,
                             ];
                         })->values()->toArray();
 

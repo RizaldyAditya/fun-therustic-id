@@ -7,7 +7,6 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
-        "alareqi/filament-pwa": "^1.0",
         "bezhansalleh/filament-shield": "^4.0",
         "filament/filament": "^4.0",
         "intervention/image": "^3.11",
