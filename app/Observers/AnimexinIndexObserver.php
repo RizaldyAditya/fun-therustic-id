@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Observers;
 
 ini_set('max_execution_time', 0); // no time limit()
@@ -39,7 +40,7 @@ class AnimexinIndexObserver extends CrawlObserver
         ?UriInterface $foundOnUrl = null,
         ?string $linkText = null// Ensure this is nullable string
     ): void {
-        $html       = (string) $response->getBody();
+        $html = (string) $response->getBody();
         $domCrawler = new DomCrawler($html);
 
         // get donghua title
@@ -47,7 +48,7 @@ class AnimexinIndexObserver extends CrawlObserver
 
         // find donghua id
         $donghua_id = null;
-        $donghua    = Donghua::where('external_titles->animexin_title', trim($donghuaTitle ?? ''))->first();
+        $donghua = Donghua::where('external_titles->animexin_title', trim($donghuaTitle ?? ''))->first();
         if ($donghua && $donghua->id) {
             $donghua_id = $donghua->id;
         }
@@ -64,9 +65,9 @@ class AnimexinIndexObserver extends CrawlObserver
 
                 // download image -> update donghua -> image_cover
                 $response = Http::get($donghuaImage);
-                if (!$donghua->image_cover && $response->successful()) {
+                if (! $donghua->image_cover && $response->successful()) {
                     $extension = pathinfo(parse_url($donghuaImage, PHP_URL_PATH), PATHINFO_EXTENSION) ?: 'jpg';
-                    $fileName  = 'img/covers/' . Str::uuid() . '.' . $extension;
+                    $fileName = 'img/covers/'.Str::uuid().'.'.$extension;
                     Storage::disk('public')->put($fileName, $response->body());
 
                     Donghua::where('id', $donghua_id)
@@ -88,17 +89,71 @@ class AnimexinIndexObserver extends CrawlObserver
 
                     // get episode number
                     $episodeNumberText = $node->filter('a > .epl-num')->text();
-                    $parsed            = $this->sanitizeEpisodeNumber($episodeNumberText);
-                    $episodeNumber     = $parsed['display'];
+                    $parsed = $this->sanitizeEpisodeNumber($episodeNumberText);
+                    $episodeNumber = $parsed['display'];
 
-                    // get video source url
+                    // get video source url from select dropdown
                     $crawlerEpisodeLink = new DomCrawler($this->client->get($episodeLink)->getBody()->getContents());
-                    $videoSourceUrl     = $crawlerEpisodeLink->filter('iframe')->attr('src');
-                    if (str_starts_with($videoSourceUrl, '//')) {
-                        $videoSourceUrl = 'https:' . $videoSourceUrl;
+
+                    $videoSourceUrlJson = [
+                        'english' => [
+                            'dailymotion' => null,
+                            'ok_ru' => null,
+                        ],
+                        'indonesia' => [
+                            'dailymotion' => null,
+                            'ok_ru' => null,
+                        ],
+                    ];
+
+                    $select = $crawlerEpisodeLink->filter('.item.video-nav > .mobius > select');
+                    if ($select->count() > 0) {
+                        $select->filter('option')->each(function (DomCrawler $option) use (&$videoSourceUrlJson) {
+                            $optionText = strtolower($option->text());
+                            $optionValue = $option->attr('value');
+
+                            // Only process english or indonesian
+                            $language = null;
+                            if (str_contains($optionText, 'english')) {
+                                $language = 'english';
+                            } elseif (str_contains($optionText, 'indonesian')) {
+                                $language = 'indonesia';
+                            }
+
+                            if ($language && $optionValue) {
+                                try {
+                                    $decoded = base64_decode($optionValue);
+
+                                    // Extract iframe src from decoded HTML
+                                    if (preg_match('/src="([^"]+)"/', $decoded, $matches)) {
+                                        $url = $matches[1];
+
+                                        // Add https: prefix if URL starts with //
+                                        if (str_starts_with($url, '//')) {
+                                            $url = 'https:'.$url;
+                                        }
+
+                                        // Determine source (dailymotion or ok.ru)
+                                        if (str_contains($url, 'dailymotion')) {
+                                            $videoSourceUrlJson[$language]['dailymotion'] = $url;
+                                        } elseif (str_contains($url, 'ok.ru')) {
+                                            $videoSourceUrlJson[$language]['ok_ru'] = $url;
+                                        }
+                                    }
+                                } catch (\Exception $e) {
+                                    // Skip invalid base64
+                                }
+                            }
+                        });
                     }
 
-                    if (!str_contains($videoSourceUrl, 'youtube')) {
+                    // Check if we have at least one valid URL
+                    $hasValidUrl = ! empty($videoSourceUrlJson['english']['dailymotion'])
+                        || ! empty($videoSourceUrlJson['english']['ok_ru'])
+                        || ! empty($videoSourceUrlJson['indonesia']['dailymotion'])
+                        || ! empty($videoSourceUrlJson['indonesia']['ok_ru']);
+
+                    if ($hasValidUrl) {
                         // save episode
                         Episode::firstOrCreate(
                             ['stream_url' => $episodeLink],
@@ -107,13 +162,13 @@ class AnimexinIndexObserver extends CrawlObserver
                                 'title' => trim($episodeTitle),
                                 'stream_id' => $stream->id,
                                 'episode_number' => $episodeNumber,
-                                'video_source_url' => $videoSourceUrl,
+                                'video_source_url' => $videoSourceUrlJson,
                                 'is_an_update' => false,
                             ]
                         );
                     }
                 } catch (\Exception $e) {
-                    Log::warning('Failed to parse a node: ' . $e->getMessage());
+                    Log::warning('Failed to parse a node: '.$e->getMessage());
                 }
             });
         }

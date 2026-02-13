@@ -2,24 +2,23 @@
 
 namespace App\Providers\Filament;
 
-use Filament\Panel;
-use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
-use Filament\PanelProvider;
-use Filament\Support\Enums\Width;
-use Filament\Support\Colors\Color;
 use App\Filament\Pages\EditProfile;
-use Filament\Navigation\NavigationGroup;
-use Alareqi\FilamentPwa\FilamentPwaPlugin;
+use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\Authenticate;
-use Illuminate\Session\Middleware\StartSession;
-use Illuminate\Cookie\Middleware\EncryptCookies;
 use Filament\Http\Middleware\AuthenticateSession;
-use Illuminate\Routing\Middleware\SubstituteBindings;
-use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+use Filament\Navigation\NavigationGroup;
+use Filament\Panel;
+use Filament\PanelProvider;
+use Filament\Support\Colors\Color;
+use Filament\Support\Enums\Width;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use Illuminate\Cookie\Middleware\EncryptCookies;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+use Illuminate\Routing\Middleware\SubstituteBindings;
+use Illuminate\Session\Middleware\StartSession;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -32,14 +31,14 @@ class AdminPanelProvider extends PanelProvider
             ->path('/')
             ->viteTheme([
                 'resources/css/filament/admin/theme.css',
-                'resources/css/app.css'
+                'resources/css/app.css',
             ])
             ->login()
             ->profile(isSimple: false, page: EditProfile::class)
             ->colors([
                 'primary' => Color::Amber,
             ])
-            ->favicon(asset('favicon.ico' . '?v=2024-06-03'))
+            ->favicon(asset('favicon.ico'.'?v=2024-06-03'))
             // ->brandLogo(asset('favicon-v2.png'))
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
@@ -87,7 +86,6 @@ class AdminPanelProvider extends PanelProvider
             ->maxContentWidth(Width::Full)
             ->plugins([
                 FilamentShieldPlugin::make(),
-                FilamentPwaPlugin::make(),
             ]);
     }
 }

@@ -1,41 +1,42 @@
 <?php
+
 namespace App\Filament\Widgets;
 
+use App\Filament\Resources\Donghuas\DonghuaResource;
 use App\Models\Episode;
-use Filament\Tables\Table;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
-use Filament\Actions\EditAction;
-use Filament\Widgets\TableWidget;
 use Filament\Actions\DeleteAction;
-use Illuminate\Contracts\View\View;
-use Filament\Support\Icons\Heroicon;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
-use Filament\Schemas\Components\Form;
-use Filament\Schemas\Components\Grid;
 use Filament\Forms\Components\Textarea;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ViewField;
+use Filament\Infolists\Components\ImageEntry;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
+use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\TextInputColumn;
+use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\SelectFilter;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Tables\Columns\TextInputColumn;
+use Filament\Tables\Table;
+use Filament\Widgets\TableWidget;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
-use Filament\Infolists\Components\ImageEntry;
-use Filament\Tables\Concerns\InteractsWithTable;
-use App\Filament\Resources\Donghuas\DonghuaResource;
-use App\Filament\Resources\Episodes\Schemas\EpisodesForm;
 
 class DonghuaLatestEpisodes extends TableWidget
 {
     use InteractsWithTable;
 
-    protected static ?int $sort                = 2;
-    public ?string $filterStatus               = null;
+    protected static ?int $sort = 2;
+
+    public ?string $filterStatus = null;
+
     protected int|string|array $columnSpan = 'full';
 
     public function table(Table $table): Table
@@ -62,13 +63,13 @@ class DonghuaLatestEpisodes extends TableWidget
                     ->alignCenter()
                     ->action(
                         Action::make('preview')
-                            ->modalHeading(fn($record) => $record->donghua->title_en)
-                            ->modalDescription(fn($record) => $record->donghua->title_zh)
+                            ->modalHeading(fn ($record) => $record->donghua->title_en)
+                            ->modalDescription(fn ($record) => $record->donghua->title_zh)
                             ->modalWidth('2xl')
                             ->modalSubmitAction(false)
                             ->schema([
                                 ViewField::make('donghua.image_preview')->view('filament.image-preview')
-                                    ->viewData(fn($record) => [
+                                    ->viewData(fn ($record) => [
                                         'image' => $record->donghua?->image_cover,
                                     ]),
                             ])
@@ -87,17 +88,17 @@ class DonghuaLatestEpisodes extends TableWidget
                         return $record->donghua->episode_dl >= $record->donghua->episode_latest;
                     })
                     ->icons([
-                        'heroicon-s-check' => fn($record) => $record->donghua->episode_dl >= $record->donghua->episode_latest,
-                        'heroicon-s-arrow-down-on-square-stack' => fn($record) => $record->donghua->episode_dl < $record->donghua->episode_latest,
+                        'heroicon-s-check' => fn ($record) => $record->donghua->episode_dl >= $record->donghua->episode_latest,
+                        'heroicon-s-arrow-down-on-square-stack' => fn ($record) => $record->donghua->episode_dl < $record->donghua->episode_latest,
                     ])
                     ->colors([
-                        'success' => fn($record) => $record->donghua->episode_dl >= $record->donghua->episode_latest,
-                        'warning' => fn($record) => $record->donghua->episode_dl < $record->donghua->episode_latest,
+                        'success' => fn ($record) => $record->donghua->episode_dl >= $record->donghua->episode_latest,
+                        'warning' => fn ($record) => $record->donghua->episode_dl < $record->donghua->episode_latest,
                     ])
                     ->tooltip(function ($record) {
                         return ($record->donghua->episode_dl >= $record->donghua->episode_latest)
                         ? 'All latest episodes downloaded.'
-                        : ($record->donghua->episode_latest - $record->donghua->episode_dl) . ' New episodes available to download.';
+                        : ($record->donghua->episode_latest - $record->donghua->episode_dl).' New episodes available to download.';
                     }),
                 TextColumn::make('episode_number')->label('# EP')->sortable(),
                 TextInputColumn::make('donghua.episode_dl')
@@ -112,17 +113,32 @@ class DonghuaLatestEpisodes extends TableWidget
                     ->visibility('public')
                     ->imageHeight(28)
                     ->alignCenter()
-                    ->url(fn(Episode $record): string => $record->stream_url)
+                    ->url(fn (Episode $record): string => $record->stream_url)
                     ->openUrlInNewTab()
                     ->tooltip('Go to stream URL.'),
                 TextColumn::make('stream_url')
                     ->label('Stream URL')
-                    ->url(fn(Episode $record): string => $record->stream_url)
+                    ->url(fn (Episode $record): string => $record->stream_url)
                     ->openUrlInNewTab()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('video_source_url')
                     ->label('Video Source URL')
-                    ->url(fn(Episode $record): string => $record->video_source_url)
+                    ->formatStateUsing(function ($record) {
+                        $urls = $record->video_source_url;
+                        if (! $urls) {
+                            return null;
+                        }
+
+                        return $urls['english']['dailymotion'] ?? $urls['english']['ok_ru'] ?? null;
+                    })
+                    ->url(function ($record) {
+                        $urls = $record->video_source_url;
+                        if (! $urls) {
+                            return null;
+                        }
+
+                        return $urls['english']['dailymotion'] ?? $urls['english']['ok_ru'] ?? null;
+                    })
                     ->openUrlInNewTab()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
@@ -143,7 +159,7 @@ class DonghuaLatestEpisodes extends TableWidget
                     ->label('Reload')
                     ->icon('heroicon-m-arrow-path')
                     ->color('primary')
-                    ->action(fn() => $this->dispatch('$refresh'))
+                    ->action(fn () => $this->dispatch('$refresh'))
                     ->extraAttributes([
                         'wire:loading.attr' => 'disabled',
                         'wire:target' => 'refresh',
@@ -154,14 +170,14 @@ class DonghuaLatestEpisodes extends TableWidget
                     ->label('')
                     ->icon('heroicon-s-play-circle')
                     ->slideOver()
-                    ->modalHeading(fn($record) => $record->title)
-                    ->modalDescription(fn($record) => $record->donghua->title_en)
+                    ->modalHeading(fn ($record) => $record->title)
+                    ->modalDescription(fn ($record) => $record->donghua->title_en)
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Close')
                     ->modalWidth('4xl')
-                    ->modalContent(fn($record): View => view(
+                    ->modalContent(fn ($record): View => view(
                         'filament.iframe-field',
-                        ['url' => $record->video_source_url]
+                        ['url' => $record->video_source_url['english']['dailymotion'] ?? $record->video_source_url['english']['ok_ru'] ?? null]
                     ))
                     ->color('success')
                     ->tooltip('Watch Now'),
@@ -170,8 +186,8 @@ class DonghuaLatestEpisodes extends TableWidget
                     ->icon('heroicon-s-document-magnifying-glass')
                     ->slideOver()
                     ->tooltip('Donghua Details')
-                    ->modalHeading(fn($record) => $record->donghua->title_en)
-                    ->modalDescription(fn($record) => $record->donghua->title_zh)
+                    ->modalHeading(fn ($record) => $record->donghua->title_en)
+                    ->modalDescription(fn ($record) => $record->donghua->title_zh)
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Close')
                     ->modalWidth('4xl')
@@ -197,15 +213,15 @@ class DonghuaLatestEpisodes extends TableWidget
                                             ->label('Status')
                                             ->badge(),
                                         TextEntry::make('donghua.is_airing')->label('Airing Status')
-                                            ->badge(fn($record) => $record->donghua->is_airing ? 'primary' : 'success')
-                                            ->formatStateUsing(fn($state) => $state ? 'Airing' : 'Completed')
-                                            ->color(fn($state) => $state ? 'primary' : 'success'),
+                                            ->badge(fn ($record) => $record->donghua->is_airing ? 'primary' : 'success')
+                                            ->formatStateUsing(fn ($state) => $state ? 'Airing' : 'Completed')
+                                            ->color(fn ($state) => $state ? 'primary' : 'success'),
                                         TextEntry::make('donghua.mc_name')
                                             ->label('MC Name')
                                             ->color('primary')
                                             ->placeholder('~'),
                                         TextEntry::make('donghua.mc_wikia')->label('MC Wikia')
-                                            ->url(fn($record) => $record->donghua->mc_wikia)
+                                            ->url(fn ($record) => $record->donghua->mc_wikia)
                                             ->openUrlInNewTab()
                                             ->color('info')
                                             ->placeholder('~'),
@@ -228,7 +244,7 @@ class DonghuaLatestEpisodes extends TableWidget
                             ->schema([
                                 TextEntry::make('donghua.myanimelist')
                                     ->label('MyAnimeList')
-                                    ->url(fn($record) => $record->donghua->myanimelist)
+                                    ->url(fn ($record) => $record->donghua->myanimelist)
                                     ->openUrlInNewTab()
                                     ->color('info')
                                     ->placeholder('-'),
@@ -281,14 +297,33 @@ class DonghuaLatestEpisodes extends TableWidget
                             ->preload()
                             ->inlineLabel(),
                         TextInput::make('stream_url')->required()->inlineLabel(),
-                        TextInput::make('video_source_url')->required()->inlineLabel(),
+                        TextInput::make('video_source_url.english.dailymotion')
+                            ->label('English - Dailymotion')
+                            ->placeholder('https://...')
+                            ->nullable()
+                            ->inlineLabel(),
+                        TextInput::make('video_source_url.english.ok_ru')
+                            ->label('English - Ok.ru')
+                            ->placeholder('https://...')
+                            ->nullable()
+                            ->inlineLabel(),
+                        TextInput::make('video_source_url.indonesia.dailymotion')
+                            ->label('Indonesia - Dailymotion')
+                            ->placeholder('https://...')
+                            ->nullable()
+                            ->inlineLabel(),
+                        TextInput::make('video_source_url.indonesia.ok_ru')
+                            ->label('Indonesia - Ok.ru')
+                            ->placeholder('https://...')
+                            ->nullable()
+                            ->inlineLabel(),
                         Textarea::make('notes')->rows(4),
                     ]),
                 Action::make('editParent')
                     ->label('')
                     ->icon('heroicon-s-pencil-square')
                     ->color('success')
-                    ->url(fn($record): string => DonghuaResource::getUrl('edit', ['record' => $record->donghua_id]))
+                    ->url(fn ($record): string => DonghuaResource::getUrl('edit', ['record' => $record->donghua_id]))
                     ->openUrlInNewTab()
                     ->slideOver()
                     ->tooltip('Edit Donghua'),
@@ -307,10 +342,17 @@ class DonghuaLatestEpisodes extends TableWidget
                         $grouped = $records->groupBy('donghua_id')->map(function ($episodes) {
                             $donghua = $episodes->first()->donghua; // Get the parent Donghua info
 
+                            $episodeUrls = $episodes->mapWithKeys(function ($episode) {
+                                $urls = $episode->video_source_url;
+                                $url = $urls['english']['dailymotion'] ?? $urls['english']['ok_ru'] ?? null;
+
+                                return [$episode->episode_number => $url];
+                            })->toArray();
+
                             return [
                                 'title' => $donghua->title_en,
                                 'path' => $donghua->local_download_path,
-                                'episodes' => $episodes->pluck('video_source_url', 'episode_number')->toArray(),
+                                'episodes' => $episodeUrls,
                             ];
                         })->values()->toArray();
 

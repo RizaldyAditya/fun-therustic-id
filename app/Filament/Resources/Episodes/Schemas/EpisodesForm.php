@@ -1,12 +1,13 @@
 <?php
+
 namespace App\Filament\Resources\Episodes\Schemas;
 
-use Filament\Schemas\Schema;
 use Filament\Forms\Components\Select;
-use Filament\Schemas\Components\Grid;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 
 class EpisodesForm
 {
@@ -27,6 +28,9 @@ class EpisodesForm
                                     ->required(),
                                 TextInput::make('episode_number')->label('Episode Number')->numeric()->required(),
                                 TextInput::make('title')->label('Episode Title'),
+                                Textarea::make('notes')
+                                    ->label('Episode Notes')
+                                    ->rows(5),
                             ]),
                         Section::make('Streaming Web')
                             ->schema([
@@ -34,14 +38,23 @@ class EpisodesForm
                                     ->relationship('stream', 'name')
                                     ->required(),
                                 TextInput::make('stream_url')->label('Stream URL')->required(),
-                                TextInput::make('video_source_url')->label('Video Source URL')->required(),
+                                TextInput::make('video_source_url.english.dailymotion')
+                                    ->label('English - Dailymotion')
+                                    ->placeholder('https://...')
+                                    ->nullable(),
+                                TextInput::make('video_source_url.english.ok_ru')
+                                    ->label('English - Ok.ru')
+                                    ->placeholder('https://...')
+                                    ->nullable(),
+                                TextInput::make('video_source_url.indonesia.dailymotion')
+                                    ->label('Indonesia - Dailymotion')
+                                    ->placeholder('https://...')
+                                    ->nullable(),
+                                TextInput::make('video_source_url.indonesia.ok_ru')
+                                    ->label('Indonesia - Ok.ru')
+                                    ->placeholder('https://...')
+                                    ->nullable(),
                             ]),
-                        Section::make('Notes')
-                            ->schema([
-                                Textarea::make('notes')
-                                    ->label('Episode Notes')
-                                    ->rows(5),
-                            ])
                     ]),
             ]);
     }

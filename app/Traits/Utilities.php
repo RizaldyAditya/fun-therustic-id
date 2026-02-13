@@ -14,7 +14,7 @@ trait Utilities
 
         // 1. Extract bracketed info [xxx] to preserve it (e.g., [Sub])
         preg_match_all('/\[([^\]]*)\]/', $episodeNumber, $matches);
-        $brackets = !empty($matches[0]) ? $matches[0][0] : '';
+        $brackets = ! empty($matches[0]) ? $matches[0][0] : '';
 
         // 2. Handle "Ep 476 to 477" -> Take 476
         if (preg_match('/(\d+)\s+to\s+(\d+)/i', $episodeNumber, $toMatches)) {
@@ -34,11 +34,11 @@ trait Utilities
         // 5. Cleanup strings and non-numeric junk
         $episodeNumber = preg_replace('/\[.*?\]/', '', $episodeNumber);
         $episodeNumber = preg_replace('/\((.*?)\)/', '', $episodeNumber);
-        $cleanNumber   = preg_replace('/[^0-9]/', '', $episodeNumber);
+        $cleanNumber = preg_replace('/[^0-9]/', '', $episodeNumber);
 
         // 6. Final integer for logic and display string
-        $intVal     = (int) $cleanNumber;
-        $displayVal = $cleanNumber . ($brackets ? ' ' . $brackets : '');
+        $intVal = (int) $cleanNumber;
+        $displayVal = $cleanNumber.($brackets ? ' '.$brackets : '');
 
         return [
             'int' => $intVal,
@@ -48,12 +48,12 @@ trait Utilities
 
     public function apiDonghuaDetail($data)
     {
-        return $data->map(fn($donghua) => [
+        return $data->map(fn ($donghua) => [
             'id' => $donghua->id,
             'title' => $donghua->title_en ?? '',
             'titleCn' => $donghua->title_zh ?? '',
             'synopsis' => $donghua->synopsis ?? '',
-            'poster' => asset('storage/' . $donghua->image_cover),
+            'poster' => asset('storage/'.$donghua->image_cover),
             'season' => (int) $donghua->season ?? '',
             'episode_watched' => (int) $donghua->episode_watched ?? '',
             'episode_watched_seasonal' => (int) $donghua->episode_watched_seasonal ?? '',
@@ -72,13 +72,13 @@ trait Utilities
 
     public function apiDonghuaEpisode($data)
     {
-        return $data->map(fn($episode) => [
+        return $data->map(fn ($episode) => [
             'id' => $episode->id,
             'title' => $episode->donghua->title_en ?? '',
             'episode_number' => (int) $episode->episode_number,
             'stream_id' => (int) $episode->stream_id ?? 0,
             'stream_url' => $episode->stream_url ?? null,
-            'video_source_url' => $episode->video_source_url ?? null,
+            'video_source_url' => $episode->video_source_url['english']['dailymotion'] ?? $episode->video_source_url['english']['ok_ru'] ?? null,
             'notes' => $episode->notes ?? null,
             'created_at' => $episode->created_at ? $episode->created_at->diffForHumans() : $episode->created_at->format('F d, Y'),
             'donghua' => $this->apiDonghuaDetail(collect([$episode->donghua]))->first(),

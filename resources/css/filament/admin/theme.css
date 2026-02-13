@@ -13,13 +13,7 @@
     gap: 1.5rem !important;
 }
 
-/* Hide the PWA installation banner */
-.pwa-install-banner,
-.filament-pwa-installation-banner {
-    display: none !important;
-}
-
-/* Fix SelectColumn clear button positioning */
+/* Make the grid spacing tighter for a "Wall of Content" feel */
 .fi-ta-select-column {
     display: flex !important;
     align-items: center !important;

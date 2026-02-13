@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Observers;
 
 use App\Models\Donghua;
@@ -37,7 +38,7 @@ class DonghuaworldObserver extends CrawlObserver
         ?UriInterface $foundOnUrl = null,
         ?string $linkText = null// Ensure this is nullable string
     ): void {
-        $html       = (string) $response->getBody();
+        $html = (string) $response->getBody();
         $domCrawler = new DomCrawler($html);
 
         // Your parsing logic
@@ -51,7 +52,7 @@ class DonghuaworldObserver extends CrawlObserver
 
                 // find donghua id
                 $donghua_id = null;
-                $donghua    = Donghua::where('external_titles->donghuaworld_title', trim($donghuaTitle ?? ''))->first();
+                $donghua = Donghua::where('external_titles->donghuaworld_title', trim($donghuaTitle ?? ''))->first();
                 if ($donghua && $donghua->id) {
                     $donghua_id = $donghua->id;
                 }
@@ -67,23 +68,77 @@ class DonghuaworldObserver extends CrawlObserver
                     $episodeTitle = $node->filter('.bsx > a.tip > .tt > h2')->text();
 
                     // get episode number
-                    $node_episode     = $node->filter('.bsx > a.tip > .limit > .bt > .epx');
-                    $rawText          = $node_episode->count() > 0 ? $node_episode->text() : '0';
-                    $parsed           = $this->sanitizeEpisodeNumber($rawText);
+                    $node_episode = $node->filter('.bsx > a.tip > .limit > .bt > .epx');
+                    $rawText = $node_episode->count() > 0 ? $node_episode->text() : '0';
+                    $parsed = $this->sanitizeEpisodeNumber($rawText);
                     $episodeNumberPre = $parsed['int'];
-                    $episodeNumber    = $parsed['display'];
+                    $episodeNumber = $parsed['display'];
 
-                    // get video source url
+                    // get video source url from select dropdown
                     $crawlerEpisodeLink = new DomCrawler($this->client->get($episodeLink)->getBody()->getContents());
-                    $videoSourceUrl     = $crawlerEpisodeLink->filter('iframe')->attr('src');
-                    if (str_starts_with($videoSourceUrl, '//')) {
-                        $videoSourceUrl = 'https:' . $videoSourceUrl;
+
+                    $videoSourceUrlJson = [
+                        'english' => [
+                            'dailymotion' => null,
+                            'ok_ru' => null,
+                        ],
+                        'indonesia' => [
+                            'dailymotion' => null,
+                            'ok_ru' => null,
+                        ],
+                    ];
+
+                    $select = $crawlerEpisodeLink->filter('.item.video-nav > .mobius > select');
+                    if ($select->count() > 0) {
+                        $select->filter('option')->each(function (DomCrawler $option) use (&$videoSourceUrlJson) {
+                            $optionText = strtolower($option->text());
+                            $optionValue = $option->attr('value');
+
+                            // Only process english or indonesian
+                            $language = null;
+                            if (str_contains($optionText, 'english')) {
+                                $language = 'english';
+                            } elseif (str_contains($optionText, 'indonesian')) {
+                                $language = 'indonesia';
+                            }
+
+                            if ($language && $optionValue) {
+                                try {
+                                    $decoded = base64_decode($optionValue);
+
+                                    // Extract iframe src from decoded HTML
+                                    if (preg_match('/src="([^"]+)"/', $decoded, $matches)) {
+                                        $url = $matches[1];
+
+                                        // Add https: prefix if URL starts with //
+                                        if (str_starts_with($url, '//')) {
+                                            $url = 'https:'.$url;
+                                        }
+
+                                        // Determine source (dailymotion or ok.ru)
+                                        if (str_contains($url, 'dailymotion')) {
+                                            $videoSourceUrlJson[$language]['dailymotion'] = $url;
+                                        } elseif (str_contains($url, 'ok.ru')) {
+                                            $videoSourceUrlJson[$language]['ok_ru'] = $url;
+                                        }
+                                    }
+                                } catch (\Exception $e) {
+                                    // Skip invalid base64
+                                }
+                            }
+                        });
                     }
+
+                    // Check if we have at least one valid URL
+                    $hasValidUrl = ! empty($videoSourceUrlJson['english']['dailymotion'])
+                        || ! empty($videoSourceUrlJson['english']['ok_ru'])
+                        || ! empty($videoSourceUrlJson['indonesia']['dailymotion'])
+                        || ! empty($videoSourceUrlJson['indonesia']['ok_ru']);
 
                     // get all episode links
                     $allEpisodes = $crawlerEpisodeLink->filter('.nvs.nvsc > a')->attr('href');
 
-                    if (!str_contains($videoSourceUrl, 'youtube')) {
+                    if ($hasValidUrl) {
                         // save episode
                         Episode::firstOrCreate(
                             ['stream_url' => $episodeLink],
@@ -92,7 +147,7 @@ class DonghuaworldObserver extends CrawlObserver
                                 'title' => trim($episodeTitle),
                                 'stream_id' => $stream->id,
                                 'episode_number' => $episodeNumber,
-                                'video_source_url' => $videoSourceUrl,
+                                'video_source_url' => $videoSourceUrlJson,
                             ]
                         );
 
@@ -122,9 +177,9 @@ class DonghuaworldObserver extends CrawlObserver
 
                         // download image -> update donghua -> image_cover
                         $response = Http::get($donghuaImage);
-                        if (!$donghua->image_cover && $response->successful()) {
+                        if (! $donghua->image_cover && $response->successful()) {
                             $extension = pathinfo(parse_url($donghuaImage, PHP_URL_PATH), PATHINFO_EXTENSION) ?: 'jpg';
-                            $fileName  = 'img/covers/' . Str::uuid() . '.' . $extension;
+                            $fileName = 'img/covers/'.Str::uuid().'.'.$extension;
                             Storage::disk('public')->put($fileName, $response->body());
 
                             Donghua::where('id', $donghua_id)
@@ -135,7 +190,7 @@ class DonghuaworldObserver extends CrawlObserver
                     }
                 }
             } catch (\Exception $e) {
-                Log::warning('Failed to parse a node: ' . $e->getMessage());
+                Log::warning('Failed to parse a node: '.$e->getMessage());
             }
         });
     }
