@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Livewire;
 
 use App\Models\Episode;
@@ -24,21 +25,22 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Component;
 
-class EpisodeManager extends Component implements HasForms, HasTable, HasActions
+class EpisodeManager extends Component implements HasActions, HasForms, HasTable
 {
-    use InteractsWithTable;
-    use InteractsWithForms;
     use InteractsWithActions;
+    use InteractsWithForms;
+    use InteractsWithTable;
 
     public $donghuaId;
+
     public $streamId;
 
     public function table(Table $table): Table
     {
         return $table
             ->query(Episode::query()
-                    ->where('donghua_id', $this->donghuaId)
-                    ->where('stream_id', $this->streamId)
+                ->where('donghua_id', $this->donghuaId)
+                ->where('stream_id', $this->streamId)
             )
             ->columns([
                 TextInputColumn::make('episode_number')
@@ -57,10 +59,10 @@ class EpisodeManager extends Component implements HasForms, HasTable, HasActions
                     ->searchable()
                     ->sortable(query: function (Builder $query, string $direction): Builder {
                         return $query
-                            ->orderByRaw('CAST(episode_number AS UNSIGNED) ' . $direction);
+                            ->orderByRaw('CAST(episode_number AS UNSIGNED) '.$direction);
                     }),
                 TextColumn::make('title')
-                    ->description(fn($record) => $record->notes)
+                    ->description(fn ($record) => $record->notes)
                     ->wrap()
                     ->searchable(),
                 ImageColumn::make('stream.logo')
@@ -69,7 +71,7 @@ class EpisodeManager extends Component implements HasForms, HasTable, HasActions
                     ->label('Stream URL')
                     ->alignEnd()
                     ->imageHeight(30)
-                    ->url(fn($record) => $record->stream_url)
+                    ->url(fn ($record) => $record->stream_url)
                     ->openUrlInNewTab()
                     ->extraHeaderAttributes([
                         'style' => 'text-align: center; width: 50px;',
@@ -85,14 +87,14 @@ class EpisodeManager extends Component implements HasForms, HasTable, HasActions
                     ->color('success')
                     ->size(Size::Large)
                     ->slideOver()
-                    ->modalHeading(fn($record) => $record->title)
-                    ->modalDescription(fn($record) => $record->donghua->title_en)
+                    ->modalHeading(fn ($record) => $record->title)
+                    ->modalDescription(fn ($record) => $record->donghua->title_en)
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Close')
                     ->modalWidth('4xl')
-                    ->modalContent(fn($record): View => view(
+                    ->modalContent(fn ($record): View => view(
                         'filament.iframe-field',
-                        ['url' => $record->video_source_url]
+                        ['url' => $record->video_source_url['english']['dailymotion'] ?? $record->video_source_url['english']['ok_ru'] ?? null]
                     ))
                     ->tooltip('Watch Now'),
                 Action::make('copy_url')
@@ -101,8 +103,9 @@ class EpisodeManager extends Component implements HasForms, HasTable, HasActions
                     ->color('primary')
                     ->tooltip('Copy video source URL to clipboard.')
                     ->action(function ($record, $livewire) {
+                        $url = $record->video_source_url['english']['dailymotion'] ?? $record->video_source_url['english']['ok_ru'] ?? null;
                         $livewire->js("
-                            window.navigator.clipboard.writeText('{$record->video_source_url}');
+                            window.navigator.clipboard.writeText('$url');
                             new FilamentNotification()
                                 .title('URL copied to clipboard')
                                 .success()
@@ -129,13 +132,25 @@ class EpisodeManager extends Component implements HasForms, HasTable, HasActions
                             ->label('Stream URL')
                             ->url()
                             ->required(),
-                        TextInput::make('video_source_url')
-                            ->label('Video Source URL')
-                            ->url()
-                            ->required(),
+                        TextInput::make('video_source_url.english.dailymotion')
+                            ->label('English - Dailymotion')
+                            ->placeholder('https://...')
+                            ->nullable(),
+                        TextInput::make('video_source_url.english.ok_ru')
+                            ->label('English - Ok.ru')
+                            ->placeholder('https://...')
+                            ->nullable(),
+                        TextInput::make('video_source_url.indonesia.dailymotion')
+                            ->label('Indonesia - Dailymotion')
+                            ->placeholder('https://...')
+                            ->nullable(),
+                        TextInput::make('video_source_url.indonesia.ok_ru')
+                            ->label('Indonesia - Ok.ru')
+                            ->placeholder('https://...')
+                            ->nullable(),
                     ])
                     ->modalWidth('4xl')
-                    ->modalHeading(fn($record) => "Edit Episode: {$record->title}")
+                    ->modalHeading(fn ($record) => "Edit Episode: {$record->title}")
                     ->action(function (Episode $record, array $data) {
                         $record->update($data);
                         Notification::make()

@@ -1,6 +1,6 @@
 <div 
     x-data="{ 
-        currentUrl: '{{ $episodes->first()?->video_source_url }}', 
+        currentUrl: '{{ $episodes->first()?->video_source_url['english']['dailymotion'] ?? $episodes->first()?->video_source_url['english']['ok_ru'] ?? '' }}', 
         playVideo(url) {
             // Update our state
             this.currentUrl = url;
@@ -31,17 +31,20 @@
 
         <div style="flex-grow: 1; overflow-y: auto; padding: 8px; display: flex; flex-direction: column; gap: 4px;">
             @foreach($episodes as $episode)
+                @php
+                    $videoUrl = $episode->video_source_url['english']['dailymotion'] ?? $episode->video_source_url['english']['ok_ru'] ?? null;
+                @endphp
                 <button 
                     type="button"
                     {{-- This triggers the function inside x-data --}}
-                    x-on:click="playVideo('{{ $episode->video_source_url }}')"
+                    x-on:click="playVideo('{{ $videoUrl }}')"
                     style="width: 100%; text-align: left; padding: 16px 20px; border-radius: 6px; border: none; cursor: pointer; display: block;"
                     {{-- This changes the button color based on currentUrl --}}
-                    :style="currentUrl === '{{ $episode->video_source_url }}' ? 'background: #fbbf24; color: #000;' : 'background: transparent; color: #d1d5db;'"
+                    :style="currentUrl === '{{ $videoUrl }}' ? 'background: #fbbf24; color: #000;' : 'background: transparent; color: #d1d5db;'"
                 >
                     <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 10px;">
                         <span>Episode {{ $episode->episode_number }}</span>
-                        <template x-if="currentUrl === '{{ $episode->video_source_url }}'">
+                        <template x-if="currentUrl === '{{ $videoUrl }}'">
                             <span style="font-size: 10px; background: #000; color: #fbbf24; padding: 2px 6px; border-radius: 4px; text-transform: uppercase;">Playing</span>
                         </template>
                     </div>
