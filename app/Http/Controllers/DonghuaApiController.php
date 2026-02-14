@@ -277,7 +277,8 @@ class DonghuaApiController extends Controller
             }
 
             // Map episode_number to video_source_url
-            $donghuaMap[$donghuaId]['episodes'][$episode->episode_number] = $episode->video_source_url;
+            $video_source_url = $episode->video_source_url;
+            $donghuaMap[$donghuaId]['episodes'][$episode->episode_number] = $video_source_url['english']['dailymotion'] ?? $video_source_url['english']['ok_ru'];
         }
 
         return response()->json(array_values($donghuaMap));
