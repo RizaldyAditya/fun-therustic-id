@@ -189,14 +189,20 @@ class EpisodesTable
                     ->modalSubmitAction(false)
                     ->modalContent(function (Collection $records) {
                         $grouped = $records->groupBy('donghua_id')->map(function ($episodes) {
-                            $donghua = $episodes->first()->donghua; // Get the parent Donghua info
+                            $donghua = $episodes->first()->donghua;
 
-                            $episodeUrls = $episodes->mapWithKeys(function ($episode) {
+                            $episodeUrls = [];
+                            foreach ($episodes as $episode) {
                                 $urls = $episode->video_source_url;
-                                $url = $urls['english']['dailymotion'] ?? $urls['english']['ok_ru'] ?? null;
+                                $episodeUrls[$episode->episode_number] = [];
 
-                                return [$episode->episode_number => $url];
-                            })->toArray();
+                                if (! empty($urls['english']['dailymotion'])) {
+                                    $episodeUrls[$episode->episode_number][] = $urls['english']['dailymotion'];
+                                }
+                                if (! empty($urls['english']['ok_ru'])) {
+                                    $episodeUrls[$episode->episode_number][] = $urls['english']['ok_ru'];
+                                }
+                            }
 
                             return [
                                 'title' => $donghua->title_en,
