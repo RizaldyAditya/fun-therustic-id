@@ -74,7 +74,7 @@ class DonghuaworldObserver extends CrawlObserver
                     $episodeNumberPre = $parsed['int'];
                     $episodeNumber = $parsed['display'];
 
-                    // get video source url from select dropdown
+                    // get video source url from episode page
                     $crawlerEpisodeLink = new DomCrawler($this->client->get($episodeLink)->getBody()->getContents());
 
                     $videoSourceUrlJson = [
@@ -88,23 +88,17 @@ class DonghuaworldObserver extends CrawlObserver
                         ],
                     ];
 
-                    $select = $crawlerEpisodeLink->filter('.item.video-nav > .mobius > select');
-                    if ($select->count() > 0) {
-                        $select->filter('option')->each(function (DomCrawler $option) use (&$videoSourceUrlJson) {
-                            $optionText = strtolower($option->text());
-                            $optionValue = $option->attr('value');
+                    // get video source url from server items (DonghuaWorld format)
+                    $serverLinks = $crawlerEpisodeLink->filter('.player-servers .server-item > a[data-hash]');
 
-                            // Only process english or indonesian
-                            $language = null;
-                            if (str_contains($optionText, 'english')) {
-                                $language = 'english';
-                            } elseif (str_contains($optionText, 'indonesian')) {
-                                $language = 'indonesia';
-                            }
+                    if ($serverLinks->count() > 0) {
+                        $serverLinks->each(function (DomCrawler $link) use (&$videoSourceUrlJson) {
+                            $linkText = strtolower($link->text());
+                            $hashValue = $link->attr('data-hash');
 
-                            if ($language && $optionValue) {
+                            if ($hashValue) {
                                 try {
-                                    $decoded = base64_decode($optionValue);
+                                    $decoded = base64_decode($hashValue);
 
                                     // Extract iframe src from decoded HTML
                                     if (preg_match('/src="([^"]+)"/', $decoded, $matches)) {
@@ -115,11 +109,12 @@ class DonghuaworldObserver extends CrawlObserver
                                             $url = 'https:'.$url;
                                         }
 
-                                        // Determine source (dailymotion or ok.ru)
+                                        // Determine source - dailymotion goes to dailymotion, all others go to ok_ru
                                         if (str_contains($url, 'dailymotion')) {
-                                            $videoSourceUrlJson[$language]['dailymotion'] = $url;
-                                        } elseif (str_contains($url, 'ok.ru')) {
-                                            $videoSourceUrlJson[$language]['ok_ru'] = $url;
+                                            $videoSourceUrlJson['english']['dailymotion'] = $url;
+                                        } else {
+                                            // Dark Server and any other sources go to ok_ru
+                                            $videoSourceUrlJson['english']['ok_ru'] = $url;
                                         }
                                     }
                                 } catch (\Exception $e) {
