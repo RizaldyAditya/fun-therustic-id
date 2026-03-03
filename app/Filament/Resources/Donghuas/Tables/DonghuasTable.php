@@ -63,23 +63,27 @@ class DonghuasTable
                             ->type('number')
                             ->extraInputAttributes(['step' => '1'])
                             ->alignCenter()
-                            ->extraHeaderAttributes(['style' => 'width: 200px;']),
+                            ->extraHeaderAttributes(['style' => 'width: 200px;'])
+                            ->toggleable(isToggledHiddenByDefault: false),
                         TextInputColumn::make('episode_watched_seasonal')
                             ->label('Seasonal')
                             ->type('number')
                             ->extraInputAttributes(['step' => '1'])
                             ->alignCenter()
-                            ->extraHeaderAttributes(['style' => 'width: 200px;']),
+                            ->extraHeaderAttributes(['style' => 'width: 200px;'])
+                            ->toggleable(isToggledHiddenByDefault: false),
                         TextInputColumn::make('episode_latest')
                             ->label('Latest')
                             ->type('number')
                             ->alignCenter()
-                            ->extraHeaderAttributes(['style' => 'width: 200px;']),
+                            ->extraHeaderAttributes(['style' => 'width: 200px;'])
+                            ->toggleable(isToggledHiddenByDefault: false),
                         TextColumn::make('episode_total')
                             ->label('Total')
                             ->default(fn($record) => $record->episode_total ?? $record->episode_latest ?? '-')
                             ->alignCenter()
-                            ->width(100),
+                            ->width(100)
+                            ->toggleable(isToggledHiddenByDefault: false),
                     ]),
                 ColumnGroup::make('Status')
                     ->columns([
@@ -88,17 +92,20 @@ class DonghuasTable
                             ->options(Status::query()->pluck('name', 'id'))
                             ->searchableOptions()
                             ->extraHeaderAttributes(['style' => 'width: 200px; text-align: center;'])
-                            ->width(100),
+                            ->width(100)
+                            ->toggleable(isToggledHiddenByDefault: false),
                         ToggleColumn::make('is_hot')
                             ->label('Hot')
                             ->sortable()
                             ->alignEnd()
-                            ->width(100),
+                            ->width(100)
+                            ->toggleable(isToggledHiddenByDefault: false),
                         ToggleColumn::make('is_airing')
                             ->label('Airing')
                             ->sortable()
                             ->alignEnd()
-                            ->width(100),
+                            ->width(100)
+                            ->toggleable(isToggledHiddenByDefault: false),
                     ]),
             ])
             ->filters([
@@ -108,7 +115,7 @@ class DonghuasTable
                 SelectFilter::make('is_airing')->label('Airing Status')->options(['1' => 'Airing', '0' => 'Completed']),
                 TrashedFilter::make(),
             ])
-            ->recordActions([
+            ->recordActions([                
                 Action::make('watchEpisode')
                     ->label('')
                     ->color('success')
@@ -153,6 +160,13 @@ class DonghuasTable
                             ]),
                     ])
                     ->tooltip('Watch Episodes'),
+                Action::make('myanimelist')
+                    ->label('')
+                    ->color('primary')
+                    ->icon('icon-myanimelist')
+                    ->url(fn($record) => $record->myanimelist)
+                    ->openUrlInNewTab()
+                    ->tooltip('MyAnimeList'),
                 Action::make('viewDetails')
                     ->label('')
                     ->icon('heroicon-s-clipboard')
