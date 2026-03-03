@@ -237,6 +237,13 @@ class HotsTable
                             ]),
                     ])
                     ->tooltip('See Episode List & Watch'),
+                Action::make('myanimelist')
+                    ->label('')
+                    ->color('primary')
+                    ->icon('icon-myanimelist')
+                    ->url(fn($record) => $record->myanimelist)
+                    ->openUrlInNewTab()
+                    ->tooltip('MyAnimeList'),
                 Action::make('viewDetails')
                     ->label('')
                     ->icon('heroicon-s-clipboard')
