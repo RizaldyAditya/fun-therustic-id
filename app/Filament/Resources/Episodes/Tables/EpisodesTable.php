@@ -169,6 +169,13 @@ class EpisodesTable
                     ->color('info')
                     ->slideover()
                     ->tooltip('Watch Now'),
+                Action::make('myanimelist')
+                    ->label('')
+                    ->color('primary')
+                    ->icon('icon-myanimelist')
+                    ->url(fn($record) => $record->donghua->myanimelist)
+                    ->openUrlInNewTab()
+                    ->tooltip('MyAnimeList'),
                 EditAction::make()->label('')->tooltip('Edit Episode'),
                 Action::make('editParent')
                     ->label('')
