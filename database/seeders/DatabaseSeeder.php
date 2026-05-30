@@ -18,13 +18,13 @@ class DatabaseSeeder extends Seeder
         $user = User::factory()->create([
             'name' => 'Web Master',
             'email' => 'webmaster@therustic.id',
-            'password' => '$2y$12$GPpc46oxBf2IEwSbGEuSo.6SsUzvUU.JP0.lvivIbL7ZqXbQxUy4y' // password = 123456
+            'password' => '$2y$12$GPpc46oxBf2IEwSbGEuSo.6SsUzvUU.JP0.lvivIbL7ZqXbQxUy4y', // password = 123456
         ]);
         $user->assignRole('super_admin');
 
         $this->call([
             StatusSeeder::class,
-            SourceSeeder::class
+            SourceSeeder::class,
         ]);
     }
 }

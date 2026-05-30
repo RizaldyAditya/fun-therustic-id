@@ -3,13 +3,13 @@
 namespace App\Filament\Resources\AnimeEpisodes\Schemas;
 
 use Filament\Actions\Action;
-use Filament\Schemas\Schema;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Toggle;
-use Filament\Schemas\Components\Grid;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 
 class AnimeEpisodeForm
 {
@@ -62,11 +62,11 @@ class AnimeEpisodeForm
                                     ->prefixIcon('heroicon-s-globe-alt')
                                     ->suffixAction(
                                         Action::make('openStreamUrlInNewTab')
-                                            ->url(fn($record) => $record->stream_url ?? null)
+                                            ->url(fn ($record) => $record->stream_url ?? null)
                                             ->icon('heroicon-m-arrow-top-right-on-square')
                                             ->tooltip('Open this stream website in new tab')
                                             ->openUrlInNewTab()
-                                            ->hidden(fn($state) => empty($state)),
+                                            ->hidden(fn ($state) => empty($state)),
                                     )
                                     ->inlineLabel(),
                                 TextInput::make('video_url')
@@ -75,11 +75,11 @@ class AnimeEpisodeForm
                                     ->prefixIcon('heroicon-s-globe-alt')
                                     ->suffixAction(
                                         Action::make('openVideoEmbedInNewTab')
-                                            ->url(fn($record) => $record->video_url ?? null)
+                                            ->url(fn ($record) => $record->video_url ?? null)
                                             ->icon('heroicon-m-arrow-top-right-on-square')
                                             ->tooltip('Open this video embed in new tab')
                                             ->openUrlInNewTab()
-                                            ->hidden(fn($state) => empty($state)),
+                                            ->hidden(fn ($state) => empty($state)),
                                     )
                                     ->inlineLabel(),
                                 Select::make('subtitle_lang')

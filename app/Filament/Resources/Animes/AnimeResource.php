@@ -16,10 +16,14 @@ use UnitEnum;
 class AnimeResource extends Resource
 {
     protected static string|UnitEnum|null $navigationGroup = 'Movies';
-    protected static ?int $navigationSort                      = 4;
-    protected static ?string $model                            = Anime::class;
-    protected static ?string $recordTitleAttribute             = 'title';
-    protected static ?string $modelLabel                       = 'Anime';
+
+    protected static ?int $navigationSort = 4;
+
+    protected static ?string $model = Anime::class;
+
+    protected static ?string $recordTitleAttribute = 'title';
+
+    protected static ?string $modelLabel = 'Anime';
 
     public static function form(Schema $schema): Schema
     {

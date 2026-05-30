@@ -1,9 +1,11 @@
 <?php
+
 namespace App\Providers;
 
-use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\ServiceProvider;
 use Filament\Support\Facades\FilamentTimezone;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -30,7 +32,7 @@ class AppServiceProvider extends ServiceProvider
         if (app()->runningInConsole()) {
             $cmd = implode(' ', $_SERVER['argv'] ?? []);
             if (str_contains($cmd, '--columns')) {
-                \Illuminate\Support\Facades\Log::warning('FOUND THE CULPRIT: ' . $cmd);
+                Log::warning('FOUND THE CULPRIT: '.$cmd);
             }
         }
     }

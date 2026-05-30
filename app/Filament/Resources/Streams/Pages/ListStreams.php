@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Filament\Resources\Streams\Pages;
 
 use App\Console\Commands\CrawlLatestUpdate;

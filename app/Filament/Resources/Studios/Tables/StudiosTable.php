@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Filament\Resources\Studios\Tables;
 
 use Filament\Actions\BulkAction;
@@ -18,7 +19,7 @@ class StudiosTable
             ->columns([
                 TextColumn::make('id')->label('ID')->sortable()->alignCenter()->toggleable(isToggledHiddenByDefault: true)->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('name')->sortable()->searchable(),
-                TextColumn::make('url')->label('URL')->url(fn($record) => $record->url)->openUrlInNewTab()->limit(100),
+                TextColumn::make('url')->label('URL')->url(fn ($record) => $record->url)->openUrlInNewTab()->limit(100),
                 IconColumn::make('is_active')->label('Active')->alignEnd()->boolean(),
             ])
             ->filters([
@@ -31,12 +32,12 @@ class StudiosTable
             ])
             ->recordActions([
                 EditAction::make()->label('')->tooltip('Edit'),
-                DeleteAction::make()->label('')->tooltip('Delete')
+                DeleteAction::make()->label('')->tooltip('Delete'),
             ])
             ->toolbarActions([
                 BulkAction::make('delete')
                     ->requiresConfirmation()
-                    ->action(fn(Collection $records) => $records->each->delete()),
+                    ->action(fn (Collection $records) => $records->each->delete()),
             ])
             ->defaultSort('name', 'asc');
     }

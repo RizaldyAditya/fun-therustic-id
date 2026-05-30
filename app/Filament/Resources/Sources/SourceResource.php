@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Filament\Resources\Sources;
 
 use App\Filament\Resources\Sources\Pages\CreateSource;
@@ -17,9 +18,12 @@ use UnitEnum;
 class SourceResource extends Resource
 {
     protected static string|UnitEnum|null $navigationGroup = 'Settings';
-    protected static ?string $model                            = Source::class;
-    protected static ?string $recordTitleAttribute             = 'name';
-    protected static ?string $modelLabel                       = 'Source';
+
+    protected static ?string $model = Source::class;
+
+    protected static ?string $recordTitleAttribute = 'name';
+
+    protected static ?string $modelLabel = 'Source';
 
     public static function form(Schema $schema): Schema
     {
@@ -41,9 +45,9 @@ class SourceResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index'  => ListSources::route('/'),
+            'index' => ListSources::route('/'),
             'create' => CreateSource::route('/create'),
-            'edit'   => EditSource::route('/{record}/edit'),
+            'edit' => EditSource::route('/{record}/edit'),
         ];
     }
 

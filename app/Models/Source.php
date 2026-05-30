@@ -11,7 +11,7 @@ class Source extends Model
 
     protected $fillable = [
         'name',
-        'is_active'
+        'is_active',
     ];
 
     protected $casts = [

@@ -2,11 +2,9 @@
 
 namespace App\Filament\Resources\Animes\Pages;
 
-use App\Models\Genre;
-use App\Models\Studio;
+use App\Filament\Resources\Animes\AnimeResource;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
-use App\Filament\Resources\Animes\AnimeResource;
 
 class EditAnime extends EditRecord
 {

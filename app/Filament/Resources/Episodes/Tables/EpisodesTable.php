@@ -173,7 +173,7 @@ class EpisodesTable
                     ->label('')
                     ->color('primary')
                     ->icon('icon-myanimelist')
-                    ->url(fn($record) => $record->donghua->myanimelist)
+                    ->url(fn ($record) => $record->donghua->myanimelist)
                     ->openUrlInNewTab()
                     ->tooltip('MyAnimeList'),
                 EditAction::make()->label('')->tooltip('Edit Episode'),

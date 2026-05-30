@@ -15,10 +15,10 @@ class Status extends Model
         'text_color',
         'bg_color',
         'order',
-        'is_active'
+        'is_active',
     ];
 
     protected $casts = [
-        'is_active' => 'boolean'
+        'is_active' => 'boolean',
     ];
 }

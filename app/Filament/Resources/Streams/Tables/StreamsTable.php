@@ -1,13 +1,9 @@
 <?php
+
 namespace App\Filament\Resources\Streams\Tables;
 
 use Filament\Actions\Action;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\ForceDeleteBulkAction;
-use Filament\Actions\RestoreBulkAction;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
@@ -31,7 +27,7 @@ class StreamsTable
                 TextColumn::make('homepage_url')
                     ->label('Homepage URL')
                     ->searchable()
-                    ->url(fn($record) => $record->homepage_url)
+                    ->url(fn ($record) => $record->homepage_url)
                     ->openUrlInNewTab(),
                 ToggleColumn::make('is_cover_image')
                     ->label('Cover IMG')

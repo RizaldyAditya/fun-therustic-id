@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Filament\Resources\Donghuas;
 
 use App\Filament\Resources\Donghuas\Pages\CreateDonghua;
@@ -17,10 +18,14 @@ use UnitEnum;
 class DonghuaResource extends Resource
 {
     protected static string|UnitEnum|null $navigationGroup = 'Movies';
-    protected static ?int $navigationSort                      = 2;
-    protected static ?string $model                            = Donghua::class;
-    protected static ?string $recordTitleAttribute             = 'title_en';
-    protected static ?string $modelLabel                       = 'Donghua';
+
+    protected static ?int $navigationSort = 2;
+
+    protected static ?string $model = Donghua::class;
+
+    protected static ?string $recordTitleAttribute = 'title_en';
+
+    protected static ?string $modelLabel = 'Donghua';
 
     public static function form(Schema $schema): Schema
     {
@@ -42,9 +47,9 @@ class DonghuaResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index'  => ListDonghuas::route('/'),
+            'index' => ListDonghuas::route('/'),
             'create' => CreateDonghua::route('/create'),
-            'edit'   => EditDonghua::route('/{record}/edit'),
+            'edit' => EditDonghua::route('/{record}/edit'),
         ];
     }
 

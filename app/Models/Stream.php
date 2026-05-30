@@ -16,12 +16,12 @@ class Stream extends Model
         'homepage_url',
         'logo',
         'is_crawlable',
-        'is_active'
+        'is_active',
     ];
 
     protected $casts = [
         'is_crawlable' => 'boolean',
-        'is_active' => 'boolean'
+        'is_active' => 'boolean',
     ];
 
     public function episodes(): HasMany

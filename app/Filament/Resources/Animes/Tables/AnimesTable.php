@@ -41,19 +41,19 @@ class AnimesTable
                     ->alignCenter()
                     ->action(
                         Action::make('preview')
-                            ->modalHeading(fn($record) => $record->title . ' Episode List')
-                            ->modalDescription(fn($record) => $record->title_jp)
+                            ->modalHeading(fn ($record) => $record->title.' Episode List')
+                            ->modalDescription(fn ($record) => $record->title_jp)
                             ->modalWidth('2xl')
                             ->modalSubmitAction(false)
                             ->schema([
                                 ViewField::make('image_preview')->view('filament.image-preview')
-                                    ->viewData(fn($record) => [
+                                    ->viewData(fn ($record) => [
                                         'image' => $record?->poster,
                                     ]),
                             ])
                     ),
                 TextColumn::make('title')
-                    ->description(fn($record) => $record->title_jp)
+                    ->description(fn ($record) => $record->title_jp)
                     ->sortable()
                     ->searchable()
                     ->alignStart()
@@ -72,7 +72,7 @@ class AnimesTable
                         TextColumn::make('season')
                             ->sortable()
                             ->alignCenter()
-                            ->formatStateUsing(fn($record) => config('constant.season_name')[$record->season] ?? 'N/A')
+                            ->formatStateUsing(fn ($record) => config('constant.season_name')[$record->season] ?? 'N/A')
                             ->toggleable(),
                         TextColumn::make('year')
                             ->sortable()
@@ -139,14 +139,18 @@ class AnimesTable
                             ->maxLength(4),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
-                        if (empty($data['year'])) {return $query;}
+                        if (empty($data['year'])) {
+                            return $query;
+                        }
+
                         return $query->where('year', $data['year']);
                     })
                     ->indicateUsing(function (array $data): ?string {
-                        if (!$data['year']) {
+                        if (! $data['year']) {
                             return null;
                         }
-                        return 'Year: ' . $data['year'];
+
+                        return 'Year: '.$data['year'];
                     }),
                 SelectFilter::make('broadcast_day')
                     ->options([
@@ -165,8 +169,8 @@ class AnimesTable
                     ->icon('heroicon-s-newspaper')
                     ->color('success')
                     ->modalWidth('7xl')
-                    ->modalHeading(fn($record) => $record->title)
-                    ->modalDescription(fn($record) => $record->title_jp)
+                    ->modalHeading(fn ($record) => $record->title)
+                    ->modalDescription(fn ($record) => $record->title_jp)
                     ->schema([
                         KeyValueEntry::make('attributes')
                             ->keyLabel('Attribute')
@@ -174,11 +178,10 @@ class AnimesTable
                     ])
                     ->modalSubmitAction(false)
                     ->tooltip('Extra Informations')
-                    ->slideOver()
-                ,
+                    ->slideOver(),
                 Action::make('openMyAnimeListUrl')
                     ->label('')
-                    ->url(fn($record) => $record->myanimelist_url)
+                    ->url(fn ($record) => $record->myanimelist_url)
                     ->openUrlInNewTab()
                     ->icon('heroicon-s-arrow-up-right')
                     ->color('info')
@@ -210,8 +213,8 @@ class AnimesTable
                             ->default(date('Y')),
                     ])
                     ->action(function (array $data) {
-                        $jikanService = new JikanService();
-                        $result       = $jikanService->getSeasonData($data['season'], (int) $data['year']);
+                        $jikanService = new JikanService;
+                        $result = $jikanService->getSeasonData($data['season'], (int) $data['year']);
                         if ($result) {
                             Notification::make()->success()->title('Season Anime Fetched Successfully')->send();
                         } else {
@@ -231,8 +234,8 @@ class AnimesTable
                     ])
                     ->slideOver()
                     ->action(function () {
-                        $jikanService = new JikanService();
-                        $result       = $jikanService->getGenres();
+                        $jikanService = new JikanService;
+                        $result = $jikanService->getGenres();
                         if ($result) {
                             Notification::make()->success()->title('Genres Fetched Successfully')->send();
                         } else {

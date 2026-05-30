@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Filament\Resources\Hots;
 
 use App\Filament\Resources\Hots\Pages\ListHots;
@@ -14,12 +15,18 @@ use UnitEnum;
 class HotResource extends Resource
 {
     protected static string|UnitEnum|null $navigationGroup = 'Movies';
-    protected static ?int $navigationSort                      = 1;
-    protected static ?string $model                            = Donghua::class;
-    protected static ?string $recordTitleAttribute             = 'title_en';
-    protected static ?string $modelLabel                       = 'Hot Donghua';
-    protected static ?string $slug                             = 'hot-donghuas';
-    protected static ?string $navigationBadgeColor             = 'danger';
+
+    protected static ?int $navigationSort = 1;
+
+    protected static ?string $model = Donghua::class;
+
+    protected static ?string $recordTitleAttribute = 'title_en';
+
+    protected static ?string $modelLabel = 'Hot Donghua';
+
+    protected static ?string $slug = 'hot-donghuas';
+
+    protected static ?string $navigationBadgeColor = 'danger';
 
     public static function getNavigationBadge(): ?string
     {

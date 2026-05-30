@@ -1,6 +1,8 @@
 <?php
+
 namespace App\Filament\Resources\Avns\Schemas;
 
+use App\Traits\Vndb;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
@@ -21,6 +23,8 @@ use Illuminate\Support\Str;
 
 class AvnForm
 {
+    use Vndb;
+
     public static function configure(Schema $schema): Schema
     {
         return $schema
@@ -40,6 +44,12 @@ class AvnForm
                                             ->schema([
                                                 Section::make()
                                                     ->schema([
+                                                        TextInput::make('vndb_id')
+                                                            ->label('VNDB ID')
+                                                            ->inlineLabel()
+                                                            ->required()
+                                                            ->unique()
+                                                            ->autofocus(),
                                                         TextInput::make('cover_external_url')
                                                             ->label('Fetch Cover Image from URL')
                                                             ->placeholder('https://example.com/cover.jpg')
@@ -55,12 +65,12 @@ class AvnForm
 
                                                                         try {
                                                                             $response = Http::get($state);
-                                                                            if (!$response->successful()) {
+                                                                            if (! $response->successful()) {
                                                                                 throw new \Exception('URL unreachable');
                                                                             }
 
                                                                             $extension = pathinfo(parse_url($state, PHP_URL_PATH), PATHINFO_EXTENSION) ?: 'jpg';
-                                                                            $filename  = 'img/avn-covers/' . Str::random(40) . '.' . $extension;
+                                                                            $filename = 'img/avn-covers/'.Str::random(40).'.'.$extension;
                                                                             Storage::disk('public')->put($filename, $response->body());
                                                                             $set('cover_image', $filename);
                                                                             $set('cover_external_url', null);
@@ -116,9 +126,9 @@ class AvnForm
                                                                     ->icon('heroicon-m-arrow-top-right-on-square')
                                                                     ->color('primary')
                                                                     ->tooltip('Open in new tab')
-                                                                    ->url(fn($state) => $state)
+                                                                    ->url(fn ($state) => $state)
                                                                     ->openUrlInNewTab()
-                                                                    ->visible(fn($state) => !empty($state))
+                                                                    ->visible(fn ($state) => ! empty($state))
                                                             ),
                                                         Select::make('rating')
                                                             ->label('Rating')
@@ -140,7 +150,7 @@ class AvnForm
                                                             ->preload()
                                                             ->placeholder('Select Genres')
                                                             ->searchable()
-                                                            ->visible(fn(callable $get) => $get('genre_id') !== null),
+                                                            ->visible(fn (callable $get) => $get('genre_id') !== null),
                                                     ]),
                                             ]),
                                         Grid::make()
@@ -197,12 +207,12 @@ class AvnForm
 
                                                                 try {
                                                                     $response = Http::get($state);
-                                                                    if (!$response->successful()) {
+                                                                    if (! $response->successful()) {
                                                                         throw new \Exception('URL unreachable');
                                                                     }
 
                                                                     $extension = pathinfo(parse_url($state, PHP_URL_PATH), PATHINFO_EXTENSION) ?: 'jpg';
-                                                                    $filename  = 'img/avn-gallery/' . Str::random(40) . '.' . $extension;
+                                                                    $filename = 'img/avn-gallery/'.Str::random(40).'.'.$extension;
                                                                     Storage::disk('public')->put($filename, $response->body());
                                                                     $set('image_url', $filename);
                                                                     $set('external_url', null);
@@ -252,19 +262,19 @@ class AvnForm
                                                 TextInput::make('google_drive_id')
                                                     ->label('Google Drive ID')
                                                     ->placeholder('ID will appear after saving...')
-                                                    ->formatStateUsing(fn($record) => $record?->file_url)
+                                                    ->formatStateUsing(fn ($record) => $record?->file_url)
                                                     ->readOnly()
-                                                    ->hidden(fn($state) => empty($state))
-                                                    ->prefixIcon(fn($state) => $state ? 'heroicon-m-check-badge' : null)
+                                                    ->hidden(fn ($state) => empty($state))
+                                                    ->prefixIcon(fn ($state) => $state ? 'heroicon-m-check-badge' : null)
                                                     ->prefixIconColor('success')
                                                     ->suffixAction(
                                                         Action::make('open_drive')
                                                             ->icon('heroicon-m-arrow-top-right-on-square')
                                                             ->color('primary')
                                                             ->tooltip('View on Google Drive')
-                                                            ->url(fn($state) => $state ? "https://drive.google.com/file/d/{$state}/view" : null)
+                                                            ->url(fn ($state) => $state ? "https://drive.google.com/file/d/{$state}/view" : null)
                                                             ->openUrlInNewTab()
-                                                            ->visible(fn($state) => !empty($state))
+                                                            ->visible(fn ($state) => ! empty($state))
                                                     ),
                                                 Textarea::make('description')->rows(3),
                                                 FileUpload::make('file_url')
@@ -272,17 +282,18 @@ class AvnForm
                                                     ->disk('google')
                                                     ->directory(config('filesystems.disks.google.folderName'))
                                                     ->acceptedFileTypes(['application/zip'])
-                                                    ->required(fn($record) => $record === null)
+                                                    ->required(fn ($record) => $record === null)
                                                     ->preserveFilenames()
                                                     ->live()
-                                                    ->hidden(fn($record) => !empty($record?->file_url))
+                                                    ->hidden(fn ($record) => ! empty($record?->file_url))
                                                     ->dehydrateStateUsing(function ($state) {
                                                         if (blank($state)) {
                                                             return null;
                                                         }
-                                                        if (!str_contains($state, '/')) {
+                                                        if (! str_contains($state, '/')) {
                                                             return $state;
                                                         }
+
                                                         return $state;
                                                     }),
                                             ])
@@ -305,36 +316,37 @@ class AvnForm
                                                 TextInput::make('google_drive_id')
                                                     ->label('Google Drive ID')
                                                     ->placeholder('ID will appear after saving...')
-                                                    ->formatStateUsing(fn($record) => $record?->file_url)
+                                                    ->formatStateUsing(fn ($record) => $record?->file_url)
                                                     ->readOnly()
-                                                    ->hidden(fn($state) => empty($state))
-                                                    ->prefixIcon(fn($state) => $state ? 'heroicon-m-check-badge' : null)
+                                                    ->hidden(fn ($state) => empty($state))
+                                                    ->prefixIcon(fn ($state) => $state ? 'heroicon-m-check-badge' : null)
                                                     ->prefixIconColor('success')
                                                     ->suffixAction(
                                                         Action::make('open_drive')
                                                             ->icon('heroicon-m-arrow-top-right-on-square')
                                                             ->color('primary')
                                                             ->tooltip('View on Google Drive')
-                                                            ->url(fn($state) => $state ? "https://drive.google.com/file/d/{$state}/view" : null)
+                                                            ->url(fn ($state) => $state ? "https://drive.google.com/file/d/{$state}/view" : null)
                                                             ->openUrlInNewTab()
-                                                            ->visible(fn($state) => !empty($state))
+                                                            ->visible(fn ($state) => ! empty($state))
                                                     ),
                                                 FileUpload::make('file_url')
                                                     ->label('Re/Upload ZIP File')
                                                     ->disk('google')
                                                     ->directory(config('filesystems.disks.google.folderName'))
                                                     ->acceptedFileTypes(['application/pdf'])
-                                                    ->required(fn($record) => $record === null)
+                                                    ->required(fn ($record) => $record === null)
                                                     ->preserveFilenames()
                                                     ->live()
-                                                    ->hidden(fn($record) => !empty($record?->file_url))
+                                                    ->hidden(fn ($record) => ! empty($record?->file_url))
                                                     ->dehydrateStateUsing(function ($state) {
                                                         if (blank($state)) {
                                                             return null;
                                                         }
-                                                        if (!str_contains($state, '/')) {
+                                                        if (! str_contains($state, '/')) {
                                                             return $state;
                                                         }
+
                                                         return $state;
                                                     }),
                                             ])

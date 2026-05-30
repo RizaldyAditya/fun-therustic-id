@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Filament\Resources\Avns\Pages;
 
 use App\Filament\Resources\Avns\AvnResource;

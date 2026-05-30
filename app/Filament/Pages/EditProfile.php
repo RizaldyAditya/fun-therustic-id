@@ -24,13 +24,13 @@ class EditProfile extends BaseEditProfile
                     ->maxSize(2048)
                     ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/gif', 'image/webp'])
                     ->columnSpanFull(),
-                
+
                 $this->getNameFormComponent(),
-                
+
                 $this->getEmailFormComponent(),
-                
+
                 $this->getPasswordFormComponent(),
-                
+
                 $this->getPasswordConfirmationFormComponent(),
             ]);
     }
