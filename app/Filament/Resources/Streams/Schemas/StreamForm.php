@@ -1,17 +1,18 @@
 <?php
+
 namespace App\Filament\Resources\Streams\Schemas;
 
-use Illuminate\Support\Str;
 use Filament\Actions\Action;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Http;
-use Filament\Forms\Components\Toggle;
-use Filament\Schemas\Components\Grid;
 use Illuminate\Support\Facades\Storage;
-use Filament\Forms\Components\TextInput;
-use Filament\Notifications\Notification;
-use Filament\Schemas\Components\Section;
-use Filament\Forms\Components\FileUpload;
+use Illuminate\Support\Str;
 
 class StreamForm
 {
@@ -56,12 +57,12 @@ class StreamForm
 
                                                 try {
                                                     $response = Http::get($state);
-                                                    if (!$response->successful()) {
+                                                    if (! $response->successful()) {
                                                         throw new \Exception('URL unreachable');
                                                     }
 
                                                     $extension = pathinfo(parse_url($state, PHP_URL_PATH), PATHINFO_EXTENSION) ?: 'jpg';
-                                                    $filename  = 'img/logos/' . Str::random(40) . '.' . $extension;
+                                                    $filename = 'img/logos/'.Str::random(40).'.'.$extension;
                                                     Storage::disk('public')->put($filename, $response->body());
                                                     $set('logo', $filename);
                                                     $set('fetchStreamLogo', null);

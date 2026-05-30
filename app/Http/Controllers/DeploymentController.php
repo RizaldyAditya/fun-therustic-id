@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -11,25 +12,26 @@ class DeploymentController extends Controller
     {
         // Validate the GitHub Signature (Security)
         $signature = $request->header('X-Hub-Signature-256');
-        $payload   = $request->getContent();
-        $secret    = config('app.deploy_secret');
-        $hash      = 'sha256=' . hash_hmac('sha256', $payload, $secret);
+        $payload = $request->getContent();
+        $secret = config('app.deploy_secret');
+        $hash = 'sha256='.hash_hmac('sha256', $payload, $secret);
 
-        if (!hash_equals($hash, $signature)) {
+        if (! hash_equals($hash, $signature)) {
             Log::warning('Deployment attempt with invalid signature');
             abort(403, 'Invalid signature');
         }
 
-        $path      = base_path();
-        $php       = PHP_BINARY;
+        $path = base_path();
+        $php = PHP_BINARY;
         $gitResult = Process::path($path)->run('git fetch origin && git reset --hard origin/main 2>&1');
         if ($gitResult->failed()) {
             Log::error('Git Pull Failed', ['output' => $gitResult->output()]);
+
             return response()->json(['message' => 'Git failed'], 500);
         }
 
         $commands = [
-            "composer install --no-dev --optimize-autoloader --no-scripts",
+            'composer install --no-dev --optimize-autoloader --no-scripts',
             "$php artisan migrate --force",
             "$php artisan shield:generate --all",
             "$php artisan permission:cache-reset",
@@ -40,19 +42,20 @@ class DeploymentController extends Controller
             "$php artisan route:cache",
             "$php artisan view:cache",
         ];
-        $fullCommand   = implode(' && ', $commands);
+        $fullCommand = implode(' && ', $commands);
         $processResult = Process::path($path)->run($fullCommand);
 
         if ($processResult->failed()) {
             // Check Laravel Logs (storage/logs/laravel.log)
             Log::error('Deployment Failed at Command Phase', [
-                'exit_code'       => $processResult->exitCode(),
-                'error_output'    => $processResult->errorOutput(), // This captures the ACTUAL terminal error
+                'exit_code' => $processResult->exitCode(),
+                'error_output' => $processResult->errorOutput(), // This captures the ACTUAL terminal error
                 'standard_output' => $processResult->output(),
             ]);
+
             return response()->json([
                 'message' => 'Commands failed',
-                'error'   => $processResult->errorOutput(),
+                'error' => $processResult->errorOutput(),
             ], 500);
         }
 

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Filament\Resources\Studios;
 
 use App\Filament\Resources\Studios\Pages\CreateStudio;
@@ -16,10 +17,13 @@ use UnitEnum;
 
 class StudioResource extends Resource
 {
-    protected static ?string $model                            = Studio::class;
+    protected static ?string $model = Studio::class;
+
     protected static string|UnitEnum|null $navigationGroup = 'Settings';
-    protected static ?string $recordTitleAttribute             = 'name';
-    protected static ?string $modelLabel                       = 'Studio';
+
+    protected static ?string $recordTitleAttribute = 'name';
+
+    protected static ?string $modelLabel = 'Studio';
 
     public static function form(Schema $schema): Schema
     {
@@ -41,9 +45,9 @@ class StudioResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index'  => ListStudios::route('/'),
+            'index' => ListStudios::route('/'),
             'create' => CreateStudio::route('/create'),
-            'edit'   => EditStudio::route('/{record}/edit'),
+            'edit' => EditStudio::route('/{record}/edit'),
         ];
     }
 

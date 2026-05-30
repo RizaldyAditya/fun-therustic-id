@@ -6,7 +6,8 @@ use Filament\Widgets\Widget;
 
 class LatestEpisodesSwitcher extends Widget
 {
-    protected string $view  = 'filament.latest-episodes-switcher';
+    protected string $view = 'filament.latest-episodes-switcher';
+
     public string $viewType = 'card'; // set the default view
 
     public function setView(string $type)
@@ -14,5 +15,5 @@ class LatestEpisodesSwitcher extends Widget
         $this->viewType = $type;
     }
 
-    protected int | string | array $columnSpan = 'full';
+    protected int|string|array $columnSpan = 'full';
 }

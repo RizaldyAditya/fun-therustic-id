@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Filament\Resources\Statuses;
 
 use App\Filament\Resources\Statuses\Pages\CreateStatus;
@@ -15,9 +16,12 @@ use UnitEnum;
 class StatusResource extends Resource
 {
     protected static string|UnitEnum|null $navigationGroup = 'Settings';
-    protected static ?string $model                            = Status::class;
-    protected static ?string $recordTitleAttribute             = 'name';
-    protected static ?string $modelLabel                       = 'Status';
+
+    protected static ?string $model = Status::class;
+
+    protected static ?string $recordTitleAttribute = 'name';
+
+    protected static ?string $modelLabel = 'Status';
 
     public static function form(Schema $schema): Schema
     {
@@ -39,9 +43,9 @@ class StatusResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index'  => ListStatuses::route('/'),
+            'index' => ListStatuses::route('/'),
             'create' => CreateStatus::route('/create'),
-            'edit'   => EditStatus::route('/{record}/edit'),
+            'edit' => EditStatus::route('/{record}/edit'),
         ];
     }
 }

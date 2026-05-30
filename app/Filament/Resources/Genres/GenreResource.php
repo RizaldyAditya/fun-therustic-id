@@ -16,9 +16,12 @@ use UnitEnum;
 class GenreResource extends Resource
 {
     protected static string|UnitEnum|null $navigationGroup = 'Settings';
-    protected static ?string $model                            = Genre::class;
-    protected static ?string $recordTitleAttribute             = 'name';
-    protected static ?string $modelLabel                       = 'Genre';
+
+    protected static ?string $model = Genre::class;
+
+    protected static ?string $recordTitleAttribute = 'name';
+
+    protected static ?string $modelLabel = 'Genre';
 
     public static function form(Schema $schema): Schema
     {

@@ -18,12 +18,12 @@ Artisan::command('app:crawl-test {--url=}', function () {
 
 Artisan::command('app:crawl-updates {website} {--page=}', function () {
     $website = $this->argument('website');
-    $page    = $this->option('page') ?? false;
+    $page = $this->option('page') ?? false;
     $this->call(CrawlLatestUpdate::class, ['website' => $website, '--page' => $page]);
 });
 
 Artisan::command('app:crawl-index {website} {--donghua_id=}', function () {
-    $website    = $this->argument('website');
+    $website = $this->argument('website');
     $donghua_id = $this->option('donghua_id');
     $this->call(CrawlIndexPage::class, ['website' => $website, '--donghua_id' => $donghua_id]);
 });

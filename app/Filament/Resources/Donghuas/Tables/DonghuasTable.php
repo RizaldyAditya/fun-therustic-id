@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Filament\Resources\Donghuas\Tables;
 
 use App\Models\Status;
@@ -41,19 +42,19 @@ class DonghuasTable
                     ->alignCenter()
                     ->action(
                         Action::make('preview')
-                            ->modalHeading(fn($record) => $record->title_en . ' Episode List')
-                            ->modalDescription(fn($record) => $record->title_zh)
+                            ->modalHeading(fn ($record) => $record->title_en.' Episode List')
+                            ->modalDescription(fn ($record) => $record->title_zh)
                             ->modalWidth('2xl')
                             ->modalSubmitAction(false)
                             ->schema([
                                 ViewField::make('image_preview')->view('filament.image-preview')
-                                    ->viewData(fn($record) => [
+                                    ->viewData(fn ($record) => [
                                         'image' => $record?->image_cover,
                                     ]),
                             ])
                     ),
                 TextColumn::make('title_en')->label('Title (EN/CN)')->sortable()->searchable()
-                    ->description(fn($record) => $record->title_zh)
+                    ->description(fn ($record) => $record->title_zh)
                     ->width(400)
                     ->wrap(),
                 ColumnGroup::make('Watched Episode')
@@ -80,7 +81,7 @@ class DonghuasTable
                             ->toggleable(isToggledHiddenByDefault: false),
                         TextColumn::make('episode_total')
                             ->label('Total')
-                            ->default(fn($record) => $record->episode_total ?? $record->episode_latest ?? '-')
+                            ->default(fn ($record) => $record->episode_total ?? $record->episode_latest ?? '-')
                             ->alignCenter()
                             ->width(100)
                             ->toggleable(isToggledHiddenByDefault: false),
@@ -115,13 +116,13 @@ class DonghuasTable
                 SelectFilter::make('is_airing')->label('Airing Status')->options(['1' => 'Airing', '0' => 'Completed']),
                 TrashedFilter::make(),
             ])
-            ->recordActions([                
+            ->recordActions([
                 Action::make('watchEpisode')
                     ->label('')
                     ->color('success')
                     ->icon('heroicon-m-play')
                     ->slideOver()
-                    ->modalHeading(fn($record) => "{$record->title_en} Episode List")
+                    ->modalHeading(fn ($record) => "{$record->title_en} Episode List")
                     ->modalWidth('7xl')
                     ->modalSubmitAction(false) // Hide the "Submit" button
                     ->modalCancelActionLabel('Close')
@@ -131,30 +132,30 @@ class DonghuasTable
                             ->tabs([
                                 Tab::make('AnimeXin')
                                     ->schema([
-                                        ViewField::make('donghua.episode_loader_ax')->view('filament.episode-loader')->viewData(fn($record) => [
+                                        ViewField::make('donghua.episode_loader_ax')->view('filament.episode-loader')->viewData(fn ($record) => [
                                             'donghuaId' => $record->id,
-                                            'streamId'  => 1,
+                                            'streamId' => 1,
                                         ]),
                                     ]),
                                 Tab::make('AnimeKhor')
                                     ->schema([
-                                        ViewField::make('donghua.episode_loader_ak')->view('filament.episode-loader')->viewData(fn($record) => [
+                                        ViewField::make('donghua.episode_loader_ak')->view('filament.episode-loader')->viewData(fn ($record) => [
                                             'donghuaId' => $record->id,
-                                            'streamId'  => 2,
+                                            'streamId' => 2,
                                         ]),
                                     ]),
                                 Tab::make('DonghuaStream')
                                     ->schema([
-                                        ViewField::make('donghua.episode_loader_ds')->view('filament.episode-loader')->viewData(fn($record) => [
+                                        ViewField::make('donghua.episode_loader_ds')->view('filament.episode-loader')->viewData(fn ($record) => [
                                             'donghuaId' => $record->id,
-                                            'streamId'  => 4,
+                                            'streamId' => 4,
                                         ]),
                                     ]),
                                 Tab::make('DonghuaWorld')
                                     ->schema([
-                                        ViewField::make('donghua.episode_loader_dw')->view('filament.episode-loader')->viewData(fn($record) => [
+                                        ViewField::make('donghua.episode_loader_dw')->view('filament.episode-loader')->viewData(fn ($record) => [
                                             'donghuaId' => $record->id,
-                                            'streamId'  => 5,
+                                            'streamId' => 5,
                                         ]),
                                     ]),
                             ]),
@@ -164,7 +165,7 @@ class DonghuasTable
                     ->label('')
                     ->color('primary')
                     ->icon('icon-myanimelist')
-                    ->url(fn($record) => $record->myanimelist)
+                    ->url(fn ($record) => $record->myanimelist)
                     ->openUrlInNewTab()
                     ->tooltip('MyAnimeList'),
                 Action::make('viewDetails')
@@ -172,8 +173,8 @@ class DonghuasTable
                     ->icon('heroicon-s-clipboard')
                     ->tooltip('Donghua Details')
                     ->slideOver()
-                    ->modalHeading(fn($record) => $record->title_en)
-                    ->modalDescription(fn($record) => $record->title_zh)
+                    ->modalHeading(fn ($record) => $record->title_en)
+                    ->modalDescription(fn ($record) => $record->title_zh)
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Close')
                     ->modalWidth('7xl')
@@ -199,15 +200,15 @@ class DonghuasTable
                                             ->label('Status')
                                             ->badge(),
                                         TextEntry::make('is_airing')->label('Airing Status')
-                                            ->badge(fn($record) => $record->is_airing ? 'primary' : 'success')
-                                            ->formatStateUsing(fn($state) => $state ? 'Airing' : 'Completed')
-                                            ->color(fn($state) => $state ? 'primary' : 'success'),
+                                            ->badge(fn ($record) => $record->is_airing ? 'primary' : 'success')
+                                            ->formatStateUsing(fn ($state) => $state ? 'Airing' : 'Completed')
+                                            ->color(fn ($state) => $state ? 'primary' : 'success'),
                                         TextEntry::make('mc_name')
                                             ->label('MC Name')
                                             ->color('primary')
                                             ->placeholder('~'),
                                         TextEntry::make('mc_wikia')->label('MC Wikia')
-                                            ->url(fn($record) => $record->mc_wikia)
+                                            ->url(fn ($record) => $record->mc_wikia)
                                             ->openUrlInNewTab()
                                             ->color('info')
                                             ->placeholder('~'),
@@ -236,7 +237,7 @@ class DonghuasTable
                             ->schema([
                                 TextEntry::make('myanimelist')
                                     ->label('MyAnimeList')
-                                    ->url(fn($record) => $record->myanimelist)
+                                    ->url(fn ($record) => $record->myanimelist)
                                     ->openUrlInNewTab()
                                     ->color('info')
                                     ->placeholder('-'),

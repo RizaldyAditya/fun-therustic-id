@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Console\Commands;
 
 use App\Observers\CrawlTestObserver;
@@ -28,11 +29,11 @@ class CrawlTest extends Command
     public function handle()
     {
         $url = $this->option('url');
-        $this->info('Starting crawl website : ' . $url);
+        $this->info('Starting crawl website : '.$url);
         Crawler::create()
             ->ignoreRobots()
             ->setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:146.0) Gecko/20100101 Firefox/146.0')
-            ->setCrawlObserver(new CrawlTestObserver())
+            ->setCrawlObserver(new CrawlTestObserver)
             ->setCrawlProfile(new CrawlInternalUrls($url))
             ->setMaximumDepth(0)
             ->startCrawling($url);

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Observers;
 
 use Illuminate\Support\Facades\Log;
@@ -15,7 +16,7 @@ class CrawlTestObserver extends CrawlObserver
         ?UriInterface $foundOnUrl = null,
         ?string $linkText = null// Ensure this is nullable string
     ): void {
-        $html       = (string) $response->getBody();
+        $html = (string) $response->getBody();
         $domCrawler = new DomCrawler($html);
 
         // crawl full html page

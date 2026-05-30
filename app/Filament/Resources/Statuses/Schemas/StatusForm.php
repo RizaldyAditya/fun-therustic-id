@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Filament\Resources\Statuses\Schemas;
 
 use Filament\Forms\Components\ColorPicker;

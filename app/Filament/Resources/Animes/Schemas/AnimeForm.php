@@ -35,6 +35,7 @@ class AnimeForm
             return null;
         }
         $studio = Studio::firstOrCreate(['name' => $name]);
+
         return $studio->id;
     }
 
@@ -47,6 +48,7 @@ class AnimeForm
             return null;
         }
         $source = Source::firstOrCreate(['name' => $name]);
+
         return $source->id;
     }
 
@@ -58,25 +60,26 @@ class AnimeForm
         $genreIds = [];
         foreach ($genres as $genre) {
             $name = is_array($genre) ? $genre['name'] : $genre;
-            if (!empty($name)) {
+            if (! empty($name)) {
                 $genreModel = Genre::firstOrCreate(['name' => $name]);
                 $genreIds[] = $genreModel->id;
             }
         }
+
         return $genreIds;
     }
 
     public static function configure(Schema $schema): Schema
     {
         $downloadPoster = function ($state, $set) {
-            if (!$state) {
+            if (! $state) {
                 return;
             }
 
             try {
                 $response = Http::get($state);
                 if ($response->successful()) {
-                    $path = 'img/anime-covers/' . Str::random(40) . '.jpg';
+                    $path = 'img/anime-covers/'.Str::random(40).'.jpg';
                     Storage::disk('public')->put($path, $response->body());
                     $set('poster', $path);
                     Notification::make()->title('Poster Image Downloaded!')->success()->send();
@@ -110,7 +113,7 @@ class AnimeForm
                                                             ->unique()
                                                             ->prefixAction(
                                                                 Action::make('openMyanimelist')
-                                                                    ->url(fn($state) => 'https://myanimelist.net/')
+                                                                    ->url(fn ($state) => 'https://myanimelist.net/')
                                                                     ->icon('heroicon-s-globe-alt')
                                                                     ->tooltip('Open myanimelist.net in new tab')
                                                                     ->openUrlInNewTab()
@@ -119,11 +122,11 @@ class AnimeForm
                                                             ->placeholder('https://myanimelist.net/anime/xxx/...?q=...&cat=...')
                                                             ->suffixAction(
                                                                 Action::make('openMyanimelistOfThisAnime')
-                                                                    ->url(fn($record) => $record->myanimelist_url ?? null)
+                                                                    ->url(fn ($record) => $record->myanimelist_url ?? null)
                                                                     ->icon('heroicon-m-arrow-top-right-on-square')
                                                                     ->tooltip('Open this anime myanimelist.net of this anime in new tab')
                                                                     ->openUrlInNewTab()
-                                                                    ->hidden(fn($state) => empty($state)),
+                                                                    ->hidden(fn ($state) => empty($state)),
                                                             )
                                                             ->suffixAction(
                                                                 Action::make('fetchFromJikan')
@@ -134,7 +137,7 @@ class AnimeForm
                                                                             return;
                                                                         }
 
-                                                                        $jikan     = new JikanService();
+                                                                        $jikan = new JikanService;
                                                                         $animeData = $jikan->getAnimeData($state);
 
                                                                         if ($animeData) {
@@ -153,7 +156,7 @@ class AnimeForm
                                                                             }
 
                                                                             // Genres: auto-create if not exists, then set IDs
-                                                                            if (!empty($animeData['genres'])) {
+                                                                            if (! empty($animeData['genres'])) {
                                                                                 $genreIds = self::getOrCreateGenres($animeData['genres']);
                                                                                 $set('genre_id', $genreIds);
                                                                             }
@@ -170,24 +173,24 @@ class AnimeForm
                                                                             $set('episode_total', $animeData['episodes']);
                                                                             $set('myanimelist_score', $animeData['myanimelist_score']);
                                                                             $set('air_date', $animeData['aired']['prop']['from']['year']
-                                                                                . '-' . $animeData['aired']['prop']['from']['month']
-                                                                                . '-' . $animeData['aired']['prop']['from']['day']);
+                                                                                .'-'.$animeData['aired']['prop']['from']['month']
+                                                                                .'-'.$animeData['aired']['prop']['from']['day']);
                                                                             $set('is_airing', $animeData['is_airing']);
 
                                                                             // extra attributes
                                                                             if (isset($animeData['theme']) && isset($animeData['external'])) {
                                                                                 $currentAttributes = $get('attributes') ?? [];
-                                                                                $newAttributes     = [];
-                                                                                $no                = 1;
+                                                                                $newAttributes = [];
+                                                                                $no = 1;
                                                                                 if (count($animeData['theme']['openings']) > 0) {
                                                                                     foreach ($animeData['theme']['openings'] as $opening) {
-                                                                                        $newAttributes['Soundtrack OP ' . $no] = $opening;
+                                                                                        $newAttributes['Soundtrack OP '.$no] = $opening;
                                                                                         $no++;
                                                                                     }
                                                                                 }
                                                                                 if (count($animeData['theme']['endings']) > 0) {
                                                                                     foreach ($animeData['theme']['endings'] as $ending) {
-                                                                                        $newAttributes['Soundtrack ED ' . $no] = $ending;
+                                                                                        $newAttributes['Soundtrack ED '.$no] = $ending;
                                                                                         $no++;
                                                                                     }
                                                                                 }
@@ -225,10 +228,10 @@ class AnimeForm
                                                             ->searchable()
                                                             ->placeholder('Select Genres')
                                                             ->inlineLabel()
-                                                            ->visible(fn(callable $get) => $get('genre_id') !== null)
-                                                            ->getOptionLabelsUsing(fn($values) => Genre::whereIn('id', $values)
-                                                                    ->pluck('name', 'id')
-                                                                    ->toArray() + array_combine($values, $values)
+                                                            ->visible(fn (callable $get) => $get('genre_id') !== null)
+                                                            ->getOptionLabelsUsing(fn ($values) => Genre::whereIn('id', $values)
+                                                                ->pluck('name', 'id')
+                                                                ->toArray() + array_combine($values, $values)
                                                             ),
                                                         Select::make('status_id')
                                                             ->relationship('status', 'name')
@@ -256,7 +259,7 @@ class AnimeForm
                                                             ->suffixAction(
                                                                 Action::make('download')
                                                                     ->icon('heroicon-m-arrow-down-tray')
-                                                                    ->action(fn($state, $set) => $downloadPoster($state, $set))
+                                                                    ->action(fn ($state, $set) => $downloadPoster($state, $set))
                                                             ),
                                                         FileUpload::make('poster')
                                                             ->label('Poster Image')
@@ -270,7 +273,7 @@ class AnimeForm
                                                             ->searchable()
                                                             ->preload()
                                                             ->inlineLabel()
-                                                            ->getOptionLabelsUsing(fn($value) => Studio::find($value)?->name ?? $value),
+                                                            ->getOptionLabelsUsing(fn ($value) => Studio::find($value)?->name ?? $value),
                                                         Select::make('source_id')
                                                             ->relationship('source', 'name')
                                                             ->preload()

@@ -37,9 +37,9 @@ class DonghuaLatestEpisodeCards extends TableWidget
     {
         return $table
             ->query(Episode::query()->with('donghua', 'stream')
-                    ->where('is_an_update', true)
-                    ->where('created_at', '>=', now()->subDays(2))
-                    ->latest()
+                ->where('is_an_update', true)
+                ->where('created_at', '>=', now()->subDays(2))
+                ->latest()
             )
             ->columns([
                 TextColumn::make('donghua.title_en')->searchable()->extraAttributes(['style' => 'display: none;']),

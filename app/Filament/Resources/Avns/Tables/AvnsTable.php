@@ -1,30 +1,34 @@
 <?php
+
 namespace App\Filament\Resources\Avns\Tables;
 
 use App\Models\Status;
-use Filament\Tables\Table;
+use App\Traits\Vndb;
 use Filament\Actions\Action;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\RestoreAction;
-use Filament\Tables\Filters\Filter;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\ViewField;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\SelectColumn;
-use Filament\Tables\Filters\SelectFilter;
-use Illuminate\Database\Eloquent\Builder;
-use Filament\Tables\Filters\TrashedFilter;
-use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\TextInputColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TrashedFilter;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class AvnsTable
 {
+    use Vndb;
+
     public static function configure(Table $table): Table
     {
         return $table
@@ -32,6 +36,10 @@ class AvnsTable
                 TextColumn::make('id')
                     ->label('ID')
                     ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextInputColumn::make('vndb_id')
+                    ->label('VNDB ID')
+                    ->sortable(false)
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('title')
                     ->sortable()
@@ -62,14 +70,14 @@ class AvnsTable
                         'heroicon-s-x-mark' => 'dropped',
                         'heroicon-s-trash' => 'abandoned',
                     ])
-                    ->color(fn(string $state): string => match ($state) {
+                    ->color(fn (string $state): string => match ($state) {
                         'to-download', 'playing' => 'info',
                         'plan-to-play', 'on-hold' => 'warning',
                         'waiting-for-update', 'completed' => 'success',
                         'dropped', 'abandoned' => 'danger',
                         default => 'gray',
                     })
-                    ->tooltip(fn(string $state): string => match ($state) {
+                    ->tooltip(fn (string $state): string => match ($state) {
                         'to-download' => 'To Download',
                         'plan-to-play' => 'Plan to Play',
                         'playing' => 'Playing',
@@ -91,23 +99,21 @@ class AvnsTable
                     ->sortable()
                     ->html()
                     ->formatStateUsing(function ($state) {
-                        if (!$state) {
+                        if (! $state) {
                             return '<span class="text-gray-300">No Rating</span>';
                         }
-                        $stars      = str_repeat('⭐', $state);
+                        $stars = str_repeat('⭐', $state);
                         $emptyCount = 5 - $state;
-                        $empty      = '<span class="text-gray-300" style="opacity: 0.5;">' . str_repeat('⭐', $emptyCount) . '</span>';
-                        return '<div class="flex items-center text-lg leading-none">' . $stars . $empty . '</div>';
+                        $empty = '<span class="text-gray-300" style="opacity: 0.5;">'.str_repeat('⭐', $emptyCount).'</span>';
+
+                        return '<div class="flex items-center text-lg leading-none">'.$stars.$empty.'</div>';
                     })
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('itch_io_url')
+                TextInputColumn::make('itch_io_url')
                     ->label('itch.io Link')
-                    ->limit(30)
-                    ->url(fn($record) => $record->itch_io_url)
+                    ->url(fn ($record) => $record->itch_io_url)
                     ->openUrlInNewTab()
                     ->searchable()
-                    ->badge()
-                    ->color('info')
                     ->toggleable(isToggledHiddenByDefault: true),
                 ImageColumn::make('cover_image')
                     ->label('Cover Image')
@@ -118,13 +124,13 @@ class AvnsTable
                     ->toggleable()
                     ->action(
                         Action::make('preview')
-                            ->modalHeading(fn($record) => $record->title . ' Cover Image')
-                            ->modalDescription(fn($record) => $record->version ? 'Version: ' . $record->version : '')
+                            ->modalHeading(fn ($record) => $record->title.' Cover Image')
+                            ->modalDescription(fn ($record) => $record->version ? 'Version: '.$record->version : '')
                             ->modalWidth('4xl')
                             ->modalSubmitAction(false)
                             ->schema([
                                 ViewField::make('image_preview')->view('filament.image-preview')
-                                    ->viewData(fn($record) => [
+                                    ->viewData(fn ($record) => [
                                         'image' => $record?->cover_image,
                                     ]),
                             ])
@@ -164,11 +170,12 @@ class AvnsTable
                     ->alignCenter()
                     ->state(static function ($record): bool {
                         $latestSave = $record->saves()->latest('version')->first();
-                        if (!$latestSave) {
+                        if (! $latestSave) {
                             return false;
                         }
                         $played = trim(strtolower($record->last_played_version));
-                        $saved  = trim(strtolower($latestSave->version));
+                        $saved = trim(strtolower($latestSave->version));
+
                         return $played === $saved;
                     })
                     ->icons([
@@ -181,9 +188,10 @@ class AvnsTable
                     ])
                     ->tooltip(function ($record) {
                         $latestSave = $record->saves()->latest('version')->first();
-                        if (!$latestSave) {
-                            return "No save files uploaded yet.";
+                        if (! $latestSave) {
+                            return 'No save files uploaded yet.';
                         }
+
                         return trim($record->last_played_version) === ($latestSave->version)
                         ? "Cloud save is up to date ({$latestSave->version})"
                         : "Cloud save ({$latestSave->version}) is older than your last played version ({$record->last_played_version})";
@@ -212,23 +220,42 @@ class AvnsTable
                     ->label('')
                     ->icon('heroicon-s-arrow-up-right')
                     ->color('success')
-                    ->url(fn($record) => $record->itch_io_url)
+                    ->url(fn ($record) => $record->itch_io_url)
                     ->openUrlInNewTab()
                     ->tooltip('Open AVN on itch.io'),
+                Action::make('view_vndb')
+                    ->label('VNDB')
+                    ->color('primary')
+                    ->tooltip('Open VNDB page')
+                    ->modalHeading(fn ($record) => "VNDB: {$record->title}")
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Close')
+                    ->modalWidth('full')
+                    ->modalContent(function ($record) {
+                        $vndata = Vndb::getVnData($record->vndb_id);
+                        $chardata = Vndb::getCharactersData($record->vndb_id);
 
+                        return view('filament.vndb-modal', [
+                            'vndb_id' => $record->vndb_id,
+                            'title' => $record->title,
+                            'image' => $record->cover_image,
+                            'vndata' => $vndata,
+                            'chardata' => $chardata,
+                        ]);
+                    }),
                 Action::make('view_gallery')
                     ->label('')
                     ->icon('heroicon-s-photo')
-                    ->color(fn($record) => $record->galleries()->exists() ? 'info' : 'danger')
-                    ->modalHeading(fn($record) => "Gallery: {$record->title}")
+                    ->color(fn ($record) => $record->galleries()->exists() ? 'info' : 'danger')
+                    ->modalHeading(fn ($record) => "Gallery: {$record->title}")
                     ->modalWidth('7xl')        // Extra wide for the carousel feel
                     ->modalSubmitAction(false) // Hide the "Submit" button
                     ->modalCancelActionLabel('Close')
-                    ->modalContent(fn($record) => view('filament.gallery-carousel', [
+                    ->modalContent(fn ($record) => view('filament.gallery-carousel', [
                         'images' => $record->galleries()->orderBy('sort_order')->get(),
                     ]))
                     ->slideOver()
-                    ->tooltip(fn($record) => $record->galleries()->exists() ? 'View AVN Gallery' : 'No gallery uploaded yet.'),
+                    ->tooltip(fn ($record) => $record->galleries()->exists() ? 'View AVN Gallery' : 'No gallery uploaded yet.'),
                 EditAction::make()
                     ->label('')
                     ->tooltip('Edit AVN'),

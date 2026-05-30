@@ -2,16 +2,16 @@
 
 namespace App\Filament\Pages;
 
-use Filament\Actions\Action;
-use App\Filament\Widgets\DonghuaStatsOverview;
-use Filament\Pages\Dashboard as BaseDashboard;
-use App\Filament\Widgets\DonghuaLatestEpisodes;
-use App\Filament\Widgets\LatestEpisodesSwitcher;
 use App\Filament\Widgets\DonghuaLatestEpisodeCards;
+use App\Filament\Widgets\DonghuaLatestEpisodes;
+use App\Filament\Widgets\DonghuaStatsOverview;
+use Filament\Actions\Action;
+use Filament\Pages\Dashboard as BaseDashboard;
 
 class Dashboard extends BaseDashboard
 {
     public string $activeTab = 'donghua';
+
     public string $latestViewType = 'card';
 
     protected function getQueryParams(): array
@@ -38,7 +38,7 @@ class Dashboard extends BaseDashboard
         return [
             Action::make('setDonghua')
                 ->label('Donghua RSS')
-                ->color(fn() => $this->activeTab === 'donghua' ? 'success' : 'gray')
+                ->color(fn () => $this->activeTab === 'donghua' ? 'success' : 'gray')
                 ->icon('heroicon-m-sparkles')
                 ->action(function () {
                     $this->activeTab = 'donghua';
@@ -46,7 +46,7 @@ class Dashboard extends BaseDashboard
 
             Action::make('setAnime')
                 ->label('Anime RSS')
-                ->color(fn() => $this->activeTab === 'anime' ? 'success' : 'gray')
+                ->color(fn () => $this->activeTab === 'anime' ? 'success' : 'gray')
                 ->icon('heroicon-m-bolt')
                 ->action(function () {
                     $this->activeTab = 'anime';
@@ -55,14 +55,14 @@ class Dashboard extends BaseDashboard
             Action::make('toggleView')
                 ->label('')
                 ->color('info')
-                ->icon(fn() => $this->latestViewType === 'card' ? 'heroicon-m-table-cells' : 'heroicon-m-squares-2x2')
+                ->icon(fn () => $this->latestViewType === 'card' ? 'heroicon-m-table-cells' : 'heroicon-m-squares-2x2')
                 ->action(function () {
                     $this->latestViewType = $this->latestViewType === 'card' ? 'table' : 'card';
                 }),
         ];
     }
 
-    public function getColumns(): int | array
+    public function getColumns(): int|array
     {
         return $this->activeTab === 'anime' ? 2 : 1;
     }

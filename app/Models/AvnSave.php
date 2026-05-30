@@ -1,7 +1,9 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Yaza\LaravelGoogleDriveStorage\Gdrive;
@@ -27,8 +29,9 @@ class AvnSave extends Model
 
         static::saving(function ($save) {
             if (is_null($save->file_url) && $save->getOriginal('file_url')) {
-                $save->file_url  = $save->getOriginal('file_url');
+                $save->file_url = $save->getOriginal('file_url');
                 $save->file_path = $save->getOriginal('file_path'); // Keep path too
+
                 return;
             }
 
@@ -36,9 +39,9 @@ class AvnSave extends Model
                 try {
                     $save->file_path = $save->file_url;
 
-                    /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
+                    /** @var FilesystemAdapter $disk */
                     $disk = Storage::disk('google');
-                    if (!$disk->exists($save->file_url)) {
+                    if (! $disk->exists($save->file_url)) {
                         return $save->file_url;
                     }
                     $fullUrl = $disk->url($save->file_url);
@@ -48,7 +51,7 @@ class AvnSave extends Model
                         $save->file_url = $queryArray['id'];
                     }
                 } catch (\Exception $e) {
-                    Log::error("Gdrive Path Processing Error: " . $e->getMessage());
+                    Log::error('Gdrive Path Processing Error: '.$e->getMessage());
                 }
             }
         });
@@ -58,13 +61,13 @@ class AvnSave extends Model
                 try {
                     Gdrive::delete($save->file_path);
                 } catch (\Exception $e) {
-                    Log::error("Gdrive Delete by Path failed: " . $e->getMessage());
+                    Log::error('Gdrive Delete by Path failed: '.$e->getMessage());
                 }
             } elseif ($save->file_url) {
                 try {
                     Storage::disk('google')->delete($save->file_url);
                 } catch (\Exception $e) {
-                    Log::error("Gdrive Delete by ID failed: " . $e->getMessage());
+                    Log::error('Gdrive Delete by ID failed: '.$e->getMessage());
                 }
             }
         });
