@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Filament\Widgets;
 
 use App\Models\Donghua;
@@ -7,28 +8,32 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class DonghuaStatsOverview extends StatsOverviewWidget
 {
-    protected static ?int $sort        = 1;
-    protected static bool $isLazy      = false;
+    protected static ?int $sort = 1;
+
+    protected static bool $isLazy = false;
+
     protected ?string $pollingInterval = null;
-    protected ?string $heading         = 'Watch Stats';
-    protected ?string $description     = "Tracking my path from a mortal viewer to a donghua sage.
+
+    protected ?string $heading = 'Watch Stats';
+
+    protected ?string $description = "Tracking my path from a mortal viewer to a donghua sage.
         Here lies the record of every world I've visited, every series on my radar, and those still waiting for a breakthrough.
         Quality over quantity, but the stats tell the true story.";
 
     protected function getColumns(): int
     {
-        return 6; 
+        return 6;
     }
 
     protected function getStats(): array
     {
         // get data counts
-        $is_airing        = Donghua::where('is_airing', 1)->count();
-        $watching      = Donghua::where('status_id', 3)->count();
+        $is_airing = Donghua::where('is_airing', 1)->count();
+        $watching = Donghua::where('status_id', 3)->count();
         $plan_to_watch = Donghua::where('status_id', 2)->count();
-        $completed     = Donghua::where('status_id', 5)->count();
-        $on_hold       = Donghua::where('status_id', 4)->count();
-        $dropped       = Donghua::where('status_id', 6)->count();
+        $completed = Donghua::where('status_id', 5)->count();
+        $on_hold = Donghua::where('status_id', 4)->count();
+        $dropped = Donghua::where('status_id', 6)->count();
 
         return [
             Stat::make('Airing', $is_airing)->color('primary'),

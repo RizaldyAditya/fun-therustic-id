@@ -2,22 +2,22 @@
 
 namespace App\Filament\Resources\AnimeEpisodes\Tables;
 
-use Filament\Tables\Table;
+use App\Filament\Resources\Animes\AnimeResource;
 use Filament\Actions\Action;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
-use Illuminate\Contracts\View\View;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\ViewField;
 use Filament\Tables\Columns\ImageColumn;
-use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Columns\SelectColumn;
-use Filament\Tables\Columns\ToggleColumn;
-use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\TextInputColumn;
-use App\Filament\Resources\Animes\AnimeResource;
+use Filament\Tables\Columns\ToggleColumn;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
+use Illuminate\Contracts\View\View;
 
 class AnimeEpisodesTable
 {
@@ -38,20 +38,20 @@ class AnimeEpisodesTable
                     ->alignCenter()
                     ->action(
                         Action::make('preview')
-                            ->modalHeading(fn($record) => $record->title . ' Episode List')
-                            ->modalDescription(fn($record) => $record->title_jp)
+                            ->modalHeading(fn ($record) => $record->title.' Episode List')
+                            ->modalDescription(fn ($record) => $record->title_jp)
                             ->modalWidth('2xl')
                             ->modalSubmitAction(false)
                             ->schema([
                                 ViewField::make('image_preview')->view('filament.image-preview')
-                                    ->viewData(fn($record) => [
+                                    ->viewData(fn ($record) => [
                                         'image' => $record?->anime?->poster,
                                     ]),
                             ])
                     ),
                 TextColumn::make('anime.title')
                     ->label('Anime Title')
-                    ->description(fn($record) => $record->anime->title_jp),
+                    ->description(fn ($record) => $record->anime->title_jp),
                 TextColumn::make('title')
                     ->label('Episode Title')
                     ->sortable()
@@ -101,12 +101,12 @@ class AnimeEpisodesTable
                 Action::make('viewVideoSourceUrl')
                     ->label('')
                     ->icon('heroicon-s-play-circle')
-                    ->modalHeading(fn($record) => $record->title)
-                    ->modalDescription(fn($record) => $record->anime->title_jp)
+                    ->modalHeading(fn ($record) => $record->title)
+                    ->modalDescription(fn ($record) => $record->anime->title_jp)
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Close')
                     ->modalWidth('4xl')
-                    ->modalContent(fn($record): View => view(
+                    ->modalContent(fn ($record): View => view(
                         'filament.iframe-field',
                         ['url' => $record->video_url]
                     ))
@@ -117,7 +117,7 @@ class AnimeEpisodesTable
                     ->label('')
                     ->icon('heroicon-s-arrow-top-right-on-square')
                     ->color('success')
-                    ->url(fn($record) => $record->stream_url)
+                    ->url(fn ($record) => $record->stream_url)
                     ->openUrlInNewTab()
                     ->tooltip('Open Stream URL in New Tab'),
                 EditAction::make()->label('')->tooltip('Edit Anime Episode'),
@@ -125,7 +125,7 @@ class AnimeEpisodesTable
                     ->label('')
                     ->icon('heroicon-s-pencil-square')
                     ->color('success')
-                    ->url(fn($record): string => AnimeResource::getUrl('edit', ['record' => $record->anime_id]))
+                    ->url(fn ($record): string => AnimeResource::getUrl('edit', ['record' => $record->anime_id]))
                     ->tooltip('Edit Anime'),
                 DeleteAction::make()->label('')->tooltip('Delete Anime Episode'),
             ])

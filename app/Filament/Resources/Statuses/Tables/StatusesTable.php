@@ -1,15 +1,16 @@
 <?php
+
 namespace App\Filament\Resources\Statuses\Tables;
 
-use Filament\Tables\Table;
 use Filament\Actions\BulkAction;
-use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
-use Illuminate\Support\Collection;
+use Filament\Actions\EditAction;
+use Filament\Tables\Columns\ColorColumn;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\ColorColumn;
 use Filament\Tables\Filters\TernaryFilter;
+use Filament\Tables\Table;
+use Illuminate\Support\Collection;
 
 class StatusesTable
 {
@@ -37,12 +38,12 @@ class StatusesTable
             ])
             ->recordActions([
                 EditAction::make()->label('')->tooltip('Edit'),
-                DeleteAction::make()->label('')->tooltip('Delete')
+                DeleteAction::make()->label('')->tooltip('Delete'),
             ])
             ->toolbarActions([
                 BulkAction::make('delete')
                     ->requiresConfirmation()
-                    ->action(fn(Collection $records) => $records->each->delete()),
+                    ->action(fn (Collection $records) => $records->each->delete()),
             ])
             ->defaultSort('order', 'asc');
     }

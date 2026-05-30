@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Filament\Resources\Users\Schemas;
 
 use Filament\Forms\Components\FileUpload;
@@ -8,7 +9,6 @@ use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Password;
 
 class UserForm
 {
@@ -45,16 +45,16 @@ class UserForm
                                     ->minLength(8)
                                     ->inlineLabel()
                                     ->rule('confirmed')
-                                    ->required(fn(string $context): bool => $context === 'create')
-                                    ->dehydrated(fn($state) => filled($state))
-                                    ->dehydrateStateUsing(fn($state) => Hash::make($state)),
+                                    ->required(fn (string $context): bool => $context === 'create')
+                                    ->dehydrated(fn ($state) => filled($state))
+                                    ->dehydrateStateUsing(fn ($state) => Hash::make($state)),
                                 TextInput::make('password_confirmation')
                                     ->label('Confirm Password')
                                     ->password()
                                     ->minLength(8)
                                     ->inlineLabel()
-                                    ->visible(fn(string $context, $get) => $context === 'create' || filled($get('password')))
-                                    ->required(fn(string $context, $get): bool => $context === 'create' || filled($get('password')))
+                                    ->visible(fn (string $context, $get) => $context === 'create' || filled($get('password')))
+                                    ->required(fn (string $context, $get): bool => $context === 'create' || filled($get('password')))
                                     ->dehydrated(false),
                                 Select::make('roles')
                                     ->label('Roles')

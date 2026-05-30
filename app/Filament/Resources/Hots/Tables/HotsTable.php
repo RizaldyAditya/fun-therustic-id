@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Filament\Resources\Hots\Tables;
 
 use App\Filament\Resources\Donghuas\DonghuaResource;
@@ -41,13 +42,13 @@ class HotsTable
                     ->tooltip('View Cover Image')
                     ->action(
                         Action::make('preview')
-                            ->modalHeading(fn($record) => $record->title_en)
-                            ->modalDescription(fn($record) => $record->title_zh)
+                            ->modalHeading(fn ($record) => $record->title_en)
+                            ->modalDescription(fn ($record) => $record->title_zh)
                             ->modalWidth('2xl')
                             ->modalSubmitAction(false)
                             ->schema([
                                 ViewField::make('donghua.image_preview')->view('filament.image-preview')
-                                    ->viewData(fn($record) => [
+                                    ->viewData(fn ($record) => [
                                         'image' => $record->image_cover,
                                     ]),
                             ])
@@ -70,17 +71,17 @@ class HotsTable
                                 return $record->episode_watched_seasonal >= $record->episode_latest;
                             })
                             ->icons([
-                                'heroicon-s-check' => fn($record) => $record->episode_watched_seasonal >= $record->episode_latest,
-                                'heroicon-s-eye-slash' => fn($record) => $record->episode_watched_seasonal < $record->episode_latest,
+                                'heroicon-s-check' => fn ($record) => $record->episode_watched_seasonal >= $record->episode_latest,
+                                'heroicon-s-eye-slash' => fn ($record) => $record->episode_watched_seasonal < $record->episode_latest,
                             ])
                             ->colors([
-                                'success' => fn($record) => $record->episode_watched_seasonal >= $record->episode_latest,
-                                'danger' => fn($record) => $record->episode_watched_seasonal < $record->episode_latest,
+                                'success' => fn ($record) => $record->episode_watched_seasonal >= $record->episode_latest,
+                                'danger' => fn ($record) => $record->episode_watched_seasonal < $record->episode_latest,
                             ])
                             ->tooltip(function ($record) {
                                 return $record->episode_watched_seasonal >= $record->episode_latest
                                 ? 'All caught up!'
-                                : ($record->episode_latest - $record->episode_watched_seasonal) . ' New episodes available to watch.';
+                                : ($record->episode_latest - $record->episode_watched_seasonal).' New episodes available to watch.';
                             }),
                         IconColumn::make('downloaded')
                             ->label('')
@@ -89,17 +90,17 @@ class HotsTable
                                 return $record->episode_dl >= $record->episode_latest;
                             })
                             ->icons([
-                                'heroicon-s-check' => fn($record) => $record->episode_dl >= $record->episode_latest,
-                                'heroicon-s-arrow-down-on-square-stack' => fn($record) => $record->episode_dl < $record->episode_latest,
+                                'heroicon-s-check' => fn ($record) => $record->episode_dl >= $record->episode_latest,
+                                'heroicon-s-arrow-down-on-square-stack' => fn ($record) => $record->episode_dl < $record->episode_latest,
                             ])
                             ->colors([
-                                'success' => fn($record) => $record->episode_dl >= $record->episode_latest,
-                                'warning' => fn($record) => $record->episode_dl < $record->episode_latest,
+                                'success' => fn ($record) => $record->episode_dl >= $record->episode_latest,
+                                'warning' => fn ($record) => $record->episode_dl < $record->episode_latest,
                             ])
                             ->tooltip(function ($record) {
                                 return $record->episode_dl >= $record->episode_latest
                                 ? 'All latest episodes downloaded.'
-                                : ($record->episode_latest - $record->episode_dl) . ' New episodes available to download.';
+                                : ($record->episode_latest - $record->episode_dl).' New episodes available to download.';
                             }),
                     ]),
                 ColumnGroup::make('Episode')
@@ -134,7 +135,7 @@ class HotsTable
                             ->extraHeaderAttributes(['style' => 'width: 200px;']),
                         TextColumn::make('episode_total')
                             ->label('# Total')
-                            ->default(fn($record) => $record->episode_total ?? $record->episode_latest ?? '-')
+                            ->default(fn ($record) => $record->episode_total ?? $record->episode_latest ?? '-')
                             ->alignCenter()
                             ->tooltip('# Total')
                             ->toggleable(),
@@ -175,7 +176,7 @@ class HotsTable
                     ->query(function (Builder $query, array $data): Builder {
                         return $query->when(
                             $data['value'] === 'unwatched',
-                            fn(Builder $query): Builder => $query->whereColumn('episode_watched_seasonal', '<', 'episode_latest')
+                            fn (Builder $query): Builder => $query->whereColumn('episode_watched_seasonal', '<', 'episode_latest')
                                 ->where('episode_watched_seasonal', '>', 0)
                                 ->where('episode_latest', '>', 0),
                         );
@@ -186,7 +187,7 @@ class HotsTable
                     ->label('Reload')
                     ->icon('heroicon-m-arrow-path')
                     ->color('primary')
-                    ->action(fn($livewire) => $livewire->dispatch('$refresh'))
+                    ->action(fn ($livewire) => $livewire->dispatch('$refresh'))
                     ->extraAttributes([
                         'wire:loading.attr' => 'disabled',
                         'wire:target' => 'refresh',
@@ -198,7 +199,7 @@ class HotsTable
                     ->color('success')
                     ->icon('heroicon-s-play')
                     ->slideOver()
-                    ->modalHeading(fn($record) => "{$record->title_en} Episode List")
+                    ->modalHeading(fn ($record) => "{$record->title_en} Episode List")
                     ->modalWidth('7xl')
                     ->modalSubmitAction(false) // Hide the "Submit" button
                     ->modalCancelActionLabel('Close')
@@ -208,28 +209,28 @@ class HotsTable
                             ->tabs([
                                 Tab::make('AnimeXin')
                                     ->schema([
-                                        ViewField::make('donghua.episode_loader_ax')->view('filament.episode-loader')->viewData(fn($record) => [
+                                        ViewField::make('donghua.episode_loader_ax')->view('filament.episode-loader')->viewData(fn ($record) => [
                                             'donghuaId' => $record->id,
                                             'streamId' => 1,
                                         ]),
                                     ]),
                                 Tab::make('AnimeKhor')
                                     ->schema([
-                                        ViewField::make('donghua.episode_loader_ak')->view('filament.episode-loader')->viewData(fn($record) => [
+                                        ViewField::make('donghua.episode_loader_ak')->view('filament.episode-loader')->viewData(fn ($record) => [
                                             'donghuaId' => $record->id,
                                             'streamId' => 2,
                                         ]),
                                     ]),
                                 Tab::make('DonghuaStream')
                                     ->schema([
-                                        ViewField::make('donghua.episode_loader_ds')->view('filament.episode-loader')->viewData(fn($record) => [
+                                        ViewField::make('donghua.episode_loader_ds')->view('filament.episode-loader')->viewData(fn ($record) => [
                                             'donghuaId' => $record->id,
                                             'streamId' => 4,
                                         ]),
                                     ]),
                                 Tab::make('DonghuaWorld')
                                     ->schema([
-                                        ViewField::make('donghua.episode_loader_dw')->view('filament.episode-loader')->viewData(fn($record) => [
+                                        ViewField::make('donghua.episode_loader_dw')->view('filament.episode-loader')->viewData(fn ($record) => [
                                             'donghuaId' => $record->id,
                                             'streamId' => 5,
                                         ]),
@@ -241,7 +242,7 @@ class HotsTable
                     ->label('')
                     ->color('primary')
                     ->icon('icon-myanimelist')
-                    ->url(fn($record) => $record->myanimelist)
+                    ->url(fn ($record) => $record->myanimelist)
                     ->openUrlInNewTab()
                     ->tooltip('MyAnimeList'),
                 Action::make('viewDetails')
@@ -249,8 +250,8 @@ class HotsTable
                     ->icon('heroicon-s-clipboard')
                     ->tooltip('Donghua Details')
                     ->slideOver()
-                    ->modalHeading(fn($record) => $record->title_en)
-                    ->modalDescription(fn($record) => $record->title_zh)
+                    ->modalHeading(fn ($record) => $record->title_en)
+                    ->modalDescription(fn ($record) => $record->title_zh)
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Close')
                     ->modalWidth('7xl')
@@ -276,15 +277,15 @@ class HotsTable
                                             ->label('Status')
                                             ->badge(),
                                         TextEntry::make('is_airing')->label('Airing Status')
-                                            ->badge(fn($record) => $record->is_airing ? 'primary' : 'success')
-                                            ->formatStateUsing(fn($state) => $state ? 'Airing' : 'Completed')
-                                            ->color(fn($state) => $state ? 'primary' : 'success'),
+                                            ->badge(fn ($record) => $record->is_airing ? 'primary' : 'success')
+                                            ->formatStateUsing(fn ($state) => $state ? 'Airing' : 'Completed')
+                                            ->color(fn ($state) => $state ? 'primary' : 'success'),
                                         TextEntry::make('mc_name')
                                             ->label('MC Name')
                                             ->color('primary')
                                             ->placeholder('~'),
                                         TextEntry::make('mc_wikia')->label('MC Wikia')
-                                            ->url(fn($record) => $record->mc_wikia)
+                                            ->url(fn ($record) => $record->mc_wikia)
                                             ->openUrlInNewTab()
                                             ->color('info')
                                             ->placeholder('~'),
@@ -308,7 +309,7 @@ class HotsTable
                             ->schema([
                                 TextEntry::make('myanimelist')
                                     ->label('MyAnimeList')
-                                    ->url(fn($record) => $record->myanimelist)
+                                    ->url(fn ($record) => $record->myanimelist)
                                     ->openUrlInNewTab()
                                     ->color('info')
                                     ->placeholder('-'),
@@ -342,7 +343,7 @@ class HotsTable
                     ->label('')
                     ->icon('heroicon-s-pencil-square')
                     ->color('warning')
-                    ->url(fn($record): string => DonghuaResource::getUrl('edit', ['record' => $record]))
+                    ->url(fn ($record): string => DonghuaResource::getUrl('edit', ['record' => $record]))
                     ->tooltip('Edit Donghua'),
             ])
             ->toolbarActions([

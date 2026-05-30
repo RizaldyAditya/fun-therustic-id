@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Filament\Resources\Hots\Pages;
 
 use App\Filament\Resources\Hots\HotResource;

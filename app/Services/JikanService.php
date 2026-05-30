@@ -14,10 +14,6 @@ class JikanService
 {
     /**
      * Get season data
-     * 
-     * @param string $season
-     * @param int $year
-     * @return bool
      */
     public function getSeasonData(string $season, int $year): bool
     {
@@ -26,22 +22,20 @@ class JikanService
         if ($response->failed()) {
             return false;
         }
-        $data  = $response->json('data');
+        $data = $response->json('data');
         $state = $this->importSeasonData($data);
+
         return $state;
     }
 
     /**
      * Get anime data
-     * 
-     * @param string $url
-     * @return ?array
      */
     public function getAnimeData(string $url): ?array
     {
         preg_match('/anime\/(\d+)/', $url, $matches);
         $malId = $matches[1] ?? null;
-        if (!$malId) {
+        if (! $malId) {
             return null;
         }
 
@@ -83,9 +77,8 @@ class JikanService
 
     /**
      * Import season data
-     * 
-     * @param array $season
-     * @return bool
+     *
+     * @param  array  $season
      */
     private function importSeasonData($season): bool
     {
@@ -96,8 +89,12 @@ class JikanService
         foreach ($season as $data) {
             // title
             foreach ($data['titles'] as $v) {
-                if ($v['type'] === 'Default') {$title_default = trim($v['title'] ?? '');}
-                if ($v['type'] === 'Japanese') {$title_japanese = trim($v['title'] ?? '');}
+                if ($v['type'] === 'Default') {
+                    $title_default = trim($v['title'] ?? '');
+                }
+                if ($v['type'] === 'Japanese') {
+                    $title_japanese = trim($v['title'] ?? '');
+                }
             }
 
             // fetch poster and save it to local server
@@ -108,15 +105,15 @@ class JikanService
                     return false;
                 }
                 $file_name = pathinfo($poster, PATHINFO_BASENAME);
-                $file_path = 'img/anime-covers/' . $file_name;
+                $file_path = 'img/anime-covers/'.$file_name;
                 Storage::disk('public')->put($file_path, $response->body());
                 $poster = $file_path;
             }
 
             // process studio
-            $studio    = $data['studios'][0]['name'] ?? null;
+            $studio = $data['studios'][0]['name'] ?? null;
             $studio_id = null;
-            if (!empty($studio)) {
+            if (! empty($studio)) {
                 $studio_id = Studio::firstOrCreate(['name' => $studio])->id;
             }
 
@@ -130,7 +127,7 @@ class JikanService
             $targetDate = Carbon::parse($data['aired']['from']);
             if ($is_airing) {
                 $status_id = 1;
-            } else if (!$is_airing && $targetDate->greaterThan($now)) {
+            } elseif (! $is_airing && $targetDate->greaterThan($now)) {
                 $status_id = 12;
             } else {
                 $status_id = 5;
@@ -174,8 +171,6 @@ class JikanService
 
     /**
      * Fetch genres from Jikan API and save them to database.
-     *
-     * @return bool
      */
     public function getGenres(): bool
     {
@@ -184,7 +179,7 @@ class JikanService
         if ($response->failed()) {
             return false;
         }
-        
+
         $genres = $response->json('data');
         foreach ($genres as $genre) {
             Genre::firstOrCreate(['name' => $genre['name']]);

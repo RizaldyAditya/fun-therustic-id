@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Console\Commands;
 
 use App\Models\Donghua;
@@ -32,20 +33,22 @@ class CrawlIndexPage extends Command
      */
     public function handle()
     {
-        $input      = $this->argument('website');
+        $input = $this->argument('website');
         $donghua_id = $this->option('donghua_id');
 
         // get website
         $website = Stream::where(['label' => $input, 'is_crawlable' => true])->first();
-        if (!$website) {
+        if (! $website) {
             $this->error("→ Website '{$input}' not found or not crawlable.");
+
             return 1;
         }
 
         // get donghua
         $donghua = Donghua::find($donghua_id);
-        if (!$donghua) {
+        if (! $donghua) {
             $this->error("→ Donghua with ID '{$donghua_id}' not found.");
+
             return 1;
         }
 
@@ -53,7 +56,8 @@ class CrawlIndexPage extends Command
             case 'animexin':
                 $url = $donghua->external_titles['animexin_url'] ?? null;
                 if (empty($url)) {
-                    $this->error("→ No AnimeXin URL found for this Donghua.");
+                    $this->error('→ No AnimeXin URL found for this Donghua.');
+
                     return 1;
                 }
 
@@ -70,7 +74,8 @@ class CrawlIndexPage extends Command
             case 'animekhor':
                 $url = $donghua->external_titles['animekhor_url'] ?? null;
                 if (empty($url)) {
-                    $this->error("→ No AnimeKhor URL found for this Donghua.");
+                    $this->error('→ No AnimeKhor URL found for this Donghua.');
+
                     return 1;
                 }
 
@@ -87,7 +92,8 @@ class CrawlIndexPage extends Command
             case 'donghuastream':
                 $url = $donghua->external_titles['donghuastream_url'] ?? null;
                 if (empty($url)) {
-                    $this->error("→ No DonghuaStream URL found for this Donghua.");
+                    $this->error('→ No DonghuaStream URL found for this Donghua.');
+
                     return 1;
                 }
 
@@ -104,7 +110,8 @@ class CrawlIndexPage extends Command
             case 'donghuaworld':
                 $url = $donghua->external_titles['donghuaworld_url'] ?? null;
                 if (empty($url)) {
-                    $this->error("→ No DonghuaWorld URL found for this Donghua.");
+                    $this->error('→ No DonghuaWorld URL found for this Donghua.');
+
                     return 1;
                 }
 

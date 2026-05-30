@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Filament\Resources\Avns;
 
 use App\Filament\Resources\Avns\Pages\CreateAvn;
@@ -17,10 +18,14 @@ use UnitEnum;
 class AvnResource extends Resource
 {
     protected static string|UnitEnum|null $navigationGroup = 'Visual Novels';
-    protected static ?int $navigationSort                      = 4;
-    protected static ?string $model                            = Avn::class;
-    protected static ?string $recordTitleAttribute             = 'title';
-    protected static ?string $modelLabel                       = 'AVNs';
+
+    protected static ?int $navigationSort = 4;
+
+    protected static ?string $model = Avn::class;
+
+    protected static ?string $recordTitleAttribute = 'title';
+
+    protected static ?string $modelLabel = 'AVNs';
 
     public static function form(Schema $schema): Schema
     {
@@ -42,9 +47,9 @@ class AvnResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index'  => ListAvns::route('/'),
+            'index' => ListAvns::route('/'),
             'create' => CreateAvn::route('/create'),
-            'edit'   => EditAvn::route('/{record}/edit'),
+            'edit' => EditAvn::route('/{record}/edit'),
         ];
     }
 

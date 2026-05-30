@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Filament\Resources\Sources\Tables;
 
 use Filament\Actions\BulkAction;
@@ -21,12 +22,12 @@ class SourcesTable
             ])
             ->recordActions([
                 EditAction::make()->label('')->tooltip('Edit'),
-                DeleteAction::make()->label('')->tooltip('Delete')
+                DeleteAction::make()->label('')->tooltip('Delete'),
             ])
             ->toolbarActions([
                 BulkAction::make('delete')
                     ->requiresConfirmation()
-                    ->action(fn(Collection $records) => $records->each->delete()),
+                    ->action(fn (Collection $records) => $records->each->delete()),
             ])
             ->defaultSort('id', 'asc');
     }

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Filament\Resources\Streams;
 
 use App\Filament\Resources\Streams\Pages\CreateStream;
@@ -16,10 +17,13 @@ use UnitEnum;
 
 class StreamResource extends Resource
 {
-    protected static ?string $model                            = Stream::class;
+    protected static ?string $model = Stream::class;
+
     protected static string|UnitEnum|null $navigationGroup = 'Settings';
-    protected static ?string $recordTitleAttribute             = 'name';
-    protected static ?string $modelLabel                       = 'Stream';
+
+    protected static ?string $recordTitleAttribute = 'name';
+
+    protected static ?string $modelLabel = 'Stream';
 
     public static function form(Schema $schema): Schema
     {
@@ -41,9 +45,9 @@ class StreamResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index'  => ListStreams::route('/'),
+            'index' => ListStreams::route('/'),
             'create' => CreateStream::route('/create'),
-            'edit'   => EditStream::route('/{record}/edit'),
+            'edit' => EditStream::route('/{record}/edit'),
         ];
     }
 

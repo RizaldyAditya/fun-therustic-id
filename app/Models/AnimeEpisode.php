@@ -16,7 +16,7 @@ class AnimeEpisode extends Model
         'video_url',
         'subtitle_lang',
         'notes',
-        'is_active'
+        'is_active',
     ];
 
     public function anime(): BelongsTo

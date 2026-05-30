@@ -18,7 +18,7 @@ return new class extends Migration
             $table->integer('episode_number')->nullable();
             $table->integer('stream_id')->nullable();
             $table->string('stream_url')->nullable();
-            $table->string('video_source_url')->nullable(); 
+            $table->string('video_source_url')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();
             $table->softDeletes();

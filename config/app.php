@@ -124,4 +124,6 @@ return [
     ],
 
     'deploy_secret' => env('APP_DEPLOY_SECRET', ''),
+
+    'vndb_endpoint' => env('VNDB_ENDPOINT', 'https://api.vndb.org/kana'),
 ];

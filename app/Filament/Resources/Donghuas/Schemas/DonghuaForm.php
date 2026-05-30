@@ -1,27 +1,28 @@
 <?php
+
 namespace App\Filament\Resources\Donghuas\Schemas;
 
+use App\Console\Commands\CrawlIndexPage;
 use App\Models\Source;
 use App\Models\Status;
 use App\Models\Studio;
-use Illuminate\Support\Str;
 use Filament\Actions\Action;
-use Filament\Schemas\Schema;
-use Illuminate\Support\Facades\Http;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Tabs;
-use Filament\Forms\Components\KeyValue;
-use Filament\Forms\Components\Textarea;
-use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Storage;
-use App\Console\Commands\CrawlIndexPage;
-use Filament\Forms\Components\TextInput;
-use Filament\Notifications\Notification;
-use Filament\Forms\Components\FileUpload;
-use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class DonghuaForm
 {
@@ -59,12 +60,12 @@ class DonghuaForm
 
                                                                         try {
                                                                             $response = Http::get($state);
-                                                                            if (!$response->successful()) {
+                                                                            if (! $response->successful()) {
                                                                                 throw new \Exception('URL unreachable');
                                                                             }
 
                                                                             $extension = pathinfo(parse_url($state, PHP_URL_PATH), PATHINFO_EXTENSION) ?: 'jpg';
-                                                                            $filename  = 'img/donghua-covers/' . Str::random(40) . '.' . $extension;
+                                                                            $filename = 'img/donghua-covers/'.Str::random(40).'.'.$extension;
                                                                             Storage::disk('public')->put($filename, $response->body());
                                                                             $set('image_cover', $filename);
                                                                             $set('cover_external_url', null);
@@ -170,9 +171,9 @@ class DonghuaForm
                                                                     ->label('Visit')
                                                                     ->icon('heroicon-m-arrow-top-right-on-square')
                                                                     ->tooltip('Open MyAnimeList in a new tab')
-                                                                    ->url(fn($state) => $state)
+                                                                    ->url(fn ($state) => $state)
                                                                     ->openUrlInNewTab()
-                                                                    ->visible(fn($state) => !empty($state))
+                                                                    ->visible(fn ($state) => ! empty($state))
                                                             ),
                                                         Select::make('studio_id')
                                                             ->label('Studio')
@@ -216,14 +217,14 @@ class DonghuaForm
                                             ->valueLabel('Description')
                                             ->reorderable()
                                             ->default([
-                                                'animexin_title'      => '',
-                                                'animexin_url'        => '',
-                                                'animekhor_title'     => '',
-                                                'animekhor_url'       => '',
+                                                'animexin_title' => '',
+                                                'animexin_url' => '',
+                                                'animekhor_title' => '',
+                                                'animekhor_url' => '',
                                                 'donghuastream_title' => '',
-                                                'donghuastream_url'   => '',
-                                                'donghuaworld_title'  => '',
-                                                'donghuaworld_url'    => '',
+                                                'donghuastream_url' => '',
+                                                'donghuaworld_title' => '',
+                                                'donghuaworld_url' => '',
                                             ]),
                                     ]),
                                 Tab::make('Crawl Index')
@@ -242,7 +243,7 @@ class DonghuaForm
                                                             ->action(function ($record) {
                                                                 // Run the command
                                                                 Artisan::call(CrawlIndexPage::class, [
-                                                                    'website'      => 'animexin',
+                                                                    'website' => 'animexin',
                                                                     '--donghua_id' => $record->id, // You can pass dynamic IDs here
                                                                 ]);
 
@@ -268,7 +269,7 @@ class DonghuaForm
                                                             ->action(function ($record) {
                                                                 // Run the command
                                                                 Artisan::call(CrawlIndexPage::class, [
-                                                                    'website'      => 'animekhor',
+                                                                    'website' => 'animekhor',
                                                                     '--donghua_id' => $record->id, // You can pass dynamic IDs here
                                                                 ]);
 
@@ -294,7 +295,7 @@ class DonghuaForm
                                                             ->action(function ($record) {
                                                                 // Run the command
                                                                 Artisan::call(CrawlIndexPage::class, [
-                                                                    'website'      => 'donghuastream',
+                                                                    'website' => 'donghuastream',
                                                                     '--donghua_id' => $record->id, // You can pass dynamic IDs here
                                                                 ]);
 
@@ -320,7 +321,7 @@ class DonghuaForm
                                                             ->action(function ($record) {
                                                                 // Run the command
                                                                 Artisan::call(CrawlIndexPage::class, [
-                                                                    'website'      => 'donghuaworld',
+                                                                    'website' => 'donghuaworld',
                                                                     '--donghua_id' => $record->id, // You can pass dynamic IDs here
                                                                 ]);
 
