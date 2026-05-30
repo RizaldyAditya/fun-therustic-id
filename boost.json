@@ -1,6 +1,7 @@
 {
     "agents": [
-        "gemini"
+        "gemini",
+        "opencode"
     ],
     "editors": [
         "vscode"
