@@ -226,8 +226,8 @@ class AvnsTable
                 Action::make('view_vndb')
                     ->label('VNDB')
                     ->color('primary')
-                    ->tooltip('Open VNDB page')
-                    ->modalHeading(fn ($record) => "VNDB: {$record->title}")
+                    ->tooltip('Open VNDB Detail')
+                    ->modalHeading(fn ($record) => "VNDB")
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Close')
                     ->modalWidth('full')
@@ -271,7 +271,7 @@ class AvnsTable
                     ->icon('heroicon-s-play')
                     ->color('info')
                     ->action(function ($livewire) {
-                        $playingStatus = Status::where('slug', 'playing')->first();
+                        $playingStatus = Status::where('slug','=', 'playing')->first();
                         if ($playingStatus) {
                             $livewire->tableFilters['status_id']['value'] = $playingStatus->id;
                         }
@@ -282,12 +282,23 @@ class AvnsTable
                     ->icon('heroicon-s-arrow-left-end-on-rectangle')
                     ->color('warning')
                     ->action(function ($livewire) {
-                        $planToPlayStatus = Status::where('slug', 'plan-to-play')->first();
+                        $planToPlayStatus = Status::where('slug', '=', 'plan-to-play')->first();
                         if ($planToPlayStatus) {
                             $livewire->tableFilters['status_id']['value'] = $planToPlayStatus->id;
                         }
                     })
                     ->tooltip('Filter AVNs with Plan to Play status'),
+                Action::make('filterToDownload')
+                    ->label('To Download')
+                    ->icon('heroicon-s-arrow-down-on-square')
+                    ->color('gray')
+                    ->action(function ($livewire) {
+                        $toDownloadStatus = Status::where('slug', '=', 'to-download')->first();
+                        if ($toDownloadStatus) {
+                            $livewire->tableFilters['status_id']['value'] = $toDownloadStatus->id;
+                        }
+                    })
+                    ->tooltip('Filter AVNs with To Download status'),
                 Action::make('clearFilters')
                     ->label('Clear Filters')
                     ->icon('heroicon-s-x-mark')
@@ -307,6 +318,6 @@ class AvnsTable
                 ]),
             ])
             ->defaultSort('title')
-            ->paginated([20, 30, 50]);
+            ->paginated([10, 20, 30, 50, 100]);
     }
 }

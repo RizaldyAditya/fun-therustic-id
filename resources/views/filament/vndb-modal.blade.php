@@ -97,11 +97,11 @@
                                class="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-300 dark:border-gray-600
                                       bg-white dark:bg-gray-800 text-gray-900 dark:text-white
                                       placeholder-gray-400 dark:placeholder-gray-500
-                                      focus:ring-2 focus:ring-primary-500 focus:border-primary-500
+                                      outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500
                                       text-sm transition-shadow duration-200">
                     </div>
 
-                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
                         @foreach ($chardata as $i => $char)
                                  <div x-show="search === '' || {{ json_encode($char['name']) }}.toLowerCase().includes(search.toLowerCase()) || {{ json_encode($char['original'] ?? '') }}.toLowerCase().includes(search.toLowerCase())"
                                      x-transition:enter="transition ease-out duration-200"
@@ -111,9 +111,9 @@
                                         hover:border-primary-300 dark:hover:border-primary-700
                                         hover:shadow-sm transition-all duration-200">
                                 @if ($char['image']['url'] ?? null)
-                                    <div class="aspect-square overflow-hidden">
+                                    <div class="aspect-square overflow-hidden bg-white text-center">
                                         <img src="{{ $char['image']['url'] }}" alt="{{ $char['name'] }}"
-                                             class="w-full h-full object-cover">
+                                             class="w-full object-fill hover:scale-105 transition-all duration-200">
                                     </div>
                                 @else
                                     <div class="aspect-square bg-gray-200 dark:bg-gray-700 flex items-center justify-center">

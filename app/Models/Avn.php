@@ -23,6 +23,7 @@ class Avn extends Model
         'genre_id',
         'last_updated_on_itch',
         'last_played_version',
+        'vndb_id'
     ];
 
     public function status(): BelongsTo
