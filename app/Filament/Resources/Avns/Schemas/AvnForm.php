@@ -47,7 +47,6 @@ class AvnForm
                                                         TextInput::make('vndb_id')
                                                             ->label('VNDB ID')
                                                             ->inlineLabel()
-                                                            ->required()
                                                             ->unique()
                                                             ->autofocus(),
                                                         TextInput::make('cover_external_url')
