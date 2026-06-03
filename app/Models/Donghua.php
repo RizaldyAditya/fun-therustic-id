@@ -23,6 +23,7 @@ class Donghua extends Model
         'episode_watched_seasonal',
         'episode_total',
         'episode_dl',
+        'dl_stream',
         'local_download_path',
         'status_id',
         'is_airing',
@@ -60,6 +61,11 @@ class Donghua extends Model
     public function source(): BelongsTo
     {
         return $this->belongsTo(Source::class);
+    }
+
+    public function primary_stream(): BelongsTo
+    {
+        return $this->belongsTo(Stream::class, 'dl_stream', 'label');
     }
 
     protected static function booted()

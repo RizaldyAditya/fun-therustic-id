@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Donghuas\Schemas;
 use App\Console\Commands\CrawlIndexPage;
 use App\Models\Source;
 use App\Models\Status;
+use App\Models\Stream;
 use App\Models\Studio;
 use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
@@ -141,6 +142,7 @@ class DonghuaForm
                                                         TextInput::make('episode_watched_seasonal')->label('# Watches (Overall)')->numeric()->inlineLabel(),
                                                         TextInput::make('episode_total')->label('# Total')->numeric()->inlineLabel(),
                                                         TextInput::make('episode_dl')->label('# Downloaded')->numeric()->inlineLabel(),
+                                                        Select::make('dl_stream')->label('Download from Stream')->options(Stream::query()->pluck('name', 'label'))->inlineLabel(),
                                                     ]),
                                                 Fieldset::make('Others')
                                                     ->columns(1)

@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Episodes\Tables;
 
 use App\Filament\Resources\Donghuas\DonghuaResource;
+use App\Models\Stream;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
@@ -12,8 +13,10 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Forms\Components\ViewField;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\TextInputColumn;
 use Filament\Tables\Enums\FiltersLayout;
@@ -67,6 +70,25 @@ class EpisodesTable
                     ->searchable(),
                 TextColumn::make('donghua.title_en')->label('Donghua Title (en)')->searchable()->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('donghua.title_zh')->label('Donghua Title (zh)')->searchable()->toggleable(isToggledHiddenByDefault: true),
+                IconColumn::make('primary_stream')
+                    ->label('')
+                    ->alignCenter()
+                    ->state(static function ($record): bool {
+                        return !empty($record->donghua->primary_stream->label) && $record->donghua->primary_stream->label === $record->stream->label;
+                    })
+                    ->icons([
+                        'heroicon-s-clipboard-document-check' => fn ($record) => !empty($record->donghua->primary_stream->label) && $record->donghua->primary_stream->label === $record->stream->label,
+                        'heroicon-s-bookmark-slash' => fn ($record) => empty($record->donghua->primary_stream->label) || $record->donghua->primary_stream->label !== $record->stream->label,
+                    ])
+                    ->colors([
+                        'success' => fn ($record) => !empty($record->donghua->primary_stream->label) && $record->donghua->primary_stream->label === $record->stream->label,
+                        'danger' => fn ($record) => empty($record->donghua->primary_stream->label) || $record->donghua->primary_stream->label !== $record->stream->label,
+                    ])
+                    ->tooltip(function ($record) {
+                        return !empty($record->donghua->primary_stream->label) && $record->donghua->primary_stream->label === $record->stream->label
+                        ? 'This is the primary stream.'
+                        : 'This is not the primary stream.';
+                    }),
                 IconColumn::make('downloaded')
                     ->label('')
                     ->alignCenter()
@@ -137,9 +159,14 @@ class EpisodesTable
                         return $urls['english']['dailymotion'] ?? $urls['english']['ok_ru'] ?? null;
                     })
                     ->toggleable(isToggledHiddenByDefault: true),
+                SelectColumn::make('donghua.dl_stream')
+                    ->label('DL Stream')
+                    ->options(Stream::query()->pluck('name', 'label'))
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->native(false),
                 TextColumn::make('created_at')
                     ->label('Release Date')
-                    ->isoDate('YYYY-MM-DD HH:mm')
+                    ->date('F jS, Y')
                     ->sortable()
                     ->alignCenter()
                     ->toggleable(),
