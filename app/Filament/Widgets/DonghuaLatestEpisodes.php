@@ -4,6 +4,7 @@ namespace App\Filament\Widgets;
 
 use App\Filament\Resources\Donghuas\DonghuaResource;
 use App\Models\Episode;
+use App\Models\Stream;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Actions\DeleteAction;
@@ -19,6 +20,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\TextInputColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
@@ -81,6 +83,25 @@ class DonghuaLatestEpisodes extends TableWidget
                     })
                     ->searchable()
                     ->sortable(),
+                IconColumn::make('primary_stream')
+                    ->label('')
+                    ->alignCenter()
+                    ->state(static function ($record): bool {
+                        return !empty($record->donghua->primary_stream->label) && $record->donghua->primary_stream->label === $record->stream->label;
+                    })
+                    ->icons([
+                        'heroicon-s-clipboard-document-check' => fn ($record) => !empty($record->donghua->primary_stream->label) && $record->donghua->primary_stream->label === $record->stream->label,
+                        'heroicon-s-bookmark-slash' => fn ($record) => empty($record->donghua->primary_stream->label) || $record->donghua->primary_stream->label !== $record->stream->label,
+                    ])
+                    ->colors([
+                        'success' => fn ($record) => !empty($record->donghua->primary_stream->label) && $record->donghua->primary_stream->label === $record->stream->label,
+                        'danger' => fn ($record) => empty($record->donghua->primary_stream->label) || $record->donghua->primary_stream->label !== $record->stream->label,
+                    ])
+                    ->tooltip(function ($record) {
+                        return !empty($record->donghua->primary_stream->label) && $record->donghua->primary_stream->label === $record->stream->label
+                        ? 'This is the primary stream.'
+                        : 'This is not the primary stream.';
+                    }),
                 IconColumn::make('downloaded')
                     ->label('')
                     ->alignCenter()
@@ -141,9 +162,14 @@ class DonghuaLatestEpisodes extends TableWidget
                     })
                     ->openUrlInNewTab()
                     ->toggleable(isToggledHiddenByDefault: true),
+                SelectColumn::make('donghua.dl_stream')
+                    ->label('DL Stream')
+                    ->options(Stream::query()->pluck('name', 'label'))
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->native(false),
                 TextColumn::make('created_at')
                     ->label('Release Date')
-                    ->dateTime('M d Y, H:i')
+                    ->date('F jS, Y')
                     ->sortable(query: function ($query, string $direction) {
                         return $query->orderBy('created_at', $direction);
                     }),

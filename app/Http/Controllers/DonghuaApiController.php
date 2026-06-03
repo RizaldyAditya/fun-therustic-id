@@ -152,7 +152,7 @@ class DonghuaApiController extends Controller
         }
 
         // Build query with eager loading - use JOIN instead of whereHas for better performance
-        $query = Episode::with(['donghua', 'stream'])
+        $query = Episode::with(['donghua', 'stream', 'donghua.primary_stream'])
             ->when($search, function ($q) use ($search) {
                 // Join with donghuas table for searching on donghua titles
                 $q->join('donghuas', 'donghua_episodes.donghua_id', '=', 'donghuas.id')

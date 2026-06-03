@@ -65,6 +65,7 @@ trait Utilities
             'is_hot' => (bool) $donghua->is_hot,
             'studio' => $donghua->studio->name ?? '',
             'source' => $donghua->source->name ?? '',
+            'dl_stream' => $donghua->primary_stream->label ?? '',
             'trending_sort' => $donghua->trending_sort ?? 99,
             'created_at' => $donghua->created_at,
         ]);

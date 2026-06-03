@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Hots\Tables;
 
 use App\Filament\Resources\Donghuas\DonghuaResource;
 use App\Models\Status;
+use App\Models\Stream;
 use Filament\Actions\Action;
 use Filament\Forms\Components\ViewField;
 use Filament\Infolists\Components\ImageEntry;
@@ -161,6 +162,12 @@ class HotsTable
                             ->tooltip('Airing')
                             ->toggleable(isToggledHiddenByDefault: true),
                     ]),
+                SelectColumn::make('dl_stream')
+                    ->label('DL Stream')
+                    ->options(Stream::query()->pluck('name', 'label'))
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->native(false)
+                    ->grow(),
             ])
             ->filters([
                 SelectFilter::make('status_id')
