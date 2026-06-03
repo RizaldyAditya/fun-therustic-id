@@ -191,6 +191,7 @@ class DonghuaApiController extends Controller
                 'video_source_url' => $episode->video_source_url,
                 'stream_id' => $episode->stream->id ?? null,
                 'stream_name' => $episode->stream->name ?? null,
+                'stream_label' => $episode->stream->label ?? null,
                 'stream_url' => $episode->stream_url ?? null,
                 'mc_name' => $episode->donghua->mc_name ?? null,
                 'notes' => $episode->notes ?? null,
