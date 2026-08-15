@@ -272,6 +272,7 @@ class DonghuaApiController extends Controller
             // Initialize donghua entry if not exists
             if (! isset($donghuaMap[$donghuaId])) {
                 $donghuaMap[$donghuaId] = [
+                    'donghua_id' => $donghua->id,
                     'title' => $donghua->title_en,
                     'path' => $donghua->local_download_path,
                     'episodes' => [],
