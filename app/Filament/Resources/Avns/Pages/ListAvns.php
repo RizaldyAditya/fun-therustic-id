@@ -81,7 +81,7 @@ class ListAvns extends ListRecords
                     ->options(Status::pluck('name', 'id'))
                     ->required()
                     ->default($defaultStatusId),
-                TextInput::make('import_itch_io_url')
+                TextInput::make('import_socigames_url')
                     ->label('SociGames URL')
                     ->url()
                     ->default($item['url']),
@@ -95,6 +95,21 @@ class ListAvns extends ListRecords
                     ->previewable(),
             ])
             ->action(function (array $data): void {
+                $socigamesUrl = $data['import_socigames_url'] ?? null;
+
+                // Check for duplicate by socigames_url
+                if ($socigamesUrl && Avn::where('socigames_url', $socigamesUrl)->exists()) {
+                    Notification::make()
+                        ->title('AVN Already Exists')
+                        ->body('An AVN with this SociGames URL already exists. Skipping import.')
+                        ->warning()
+                        ->send();
+
+                    $this->dispatch('closeModal', name: 'importSocigames');
+
+                    return;
+                }
+
                 $coverPath = null;
 
                 // Handle cover image: download from URL or use uploaded file
@@ -116,7 +131,7 @@ class ListAvns extends ListRecords
                     'developer' => $data['import_developer'],
                     'version' => $data['import_version'],
                     'status_id' => $data['import_status_id'],
-                    'itch_io_url' => $data['import_itch_io_url'] ?? null,
+                    'socigames_url' => $socigamesUrl,
                     'cover_image' => $coverPath,
                     'last_played_version' => null,
                 ]);

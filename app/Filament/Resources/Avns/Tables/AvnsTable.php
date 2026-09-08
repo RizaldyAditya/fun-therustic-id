@@ -115,6 +115,12 @@ class AvnsTable
                     ->openUrlInNewTab()
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('socigames_url')
+                    ->label('SociGames Link')
+                    ->url(fn ($record) => $record->socigames_url)
+                    ->openUrlInNewTab()
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 ImageColumn::make('cover_image')
                     ->label('Cover Image')
                     ->disk('public')
@@ -216,11 +222,20 @@ class AvnsTable
                 // a button to open itch.io url to new tab
                 Action::make('view_itch_io')
                     ->label('')
-                    ->icon('heroicon-s-arrow-up-right')
-                    ->color('success')
+                    ->icon('heroicon-s-paper-clip')
+                    ->color('info')
                     ->url(fn ($record) => $record->itch_io_url)
                     ->openUrlInNewTab()
-                    ->tooltip('Open AVN on itch.io'),
+                    ->tooltip('Open AVN on itch.io')
+                    ->disabled(fn ($record) => empty($record->itch_io_url)),
+                Action::make('view_socigames')
+                    ->label('')
+                    ->icon('heroicon-s-paper-clip')
+                    ->color('info')
+                    ->url(fn ($record) => $record->socigames_url)
+                    ->openUrlInNewTab()
+                    ->tooltip('Open AVN on socigames')
+                    ->disabled(fn ($record) => empty($record->socigames_url)),
                 Action::make('view_vndb')
                     ->label('VNDB')
                     ->color('primary')
