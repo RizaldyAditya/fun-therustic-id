@@ -129,6 +129,21 @@ class AvnForm
                                                                     ->openUrlInNewTab()
                                                                     ->visible(fn ($state) => ! empty($state))
                                                             ),
+                                                        TextInput::make('socigames_url')
+                                                            ->label('SociGames URL')
+                                                            ->url()
+                                                            ->inlineLabel()
+                                                            ->prefixIcon('heroicon-m-globe-alt')
+                                                            ->suffixAction(
+                                                                Action::make('visit_socigames')
+                                                                    ->label('Visit')
+                                                                    ->icon('heroicon-m-arrow-top-right-on-square')
+                                                                    ->color('primary')
+                                                                    ->tooltip('Open in new tab')
+                                                                    ->url(fn ($state) => $state)
+                                                                    ->openUrlInNewTab()
+                                                                    ->visible(fn ($state) => ! empty($state))
+                                                            ),
                                                         Select::make('rating')
                                                             ->label('Rating')
                                                             ->options([
