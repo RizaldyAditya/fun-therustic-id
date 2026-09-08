@@ -2,6 +2,7 @@
 
 use App\Console\Commands\CrawlIndexPage;
 use App\Console\Commands\CrawlLatestUpdate;
+use App\Console\Commands\CrawlSocigames;
 use App\Console\Commands\CrawlTest;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
@@ -16,6 +17,10 @@ Artisan::command('app:crawl-test {--url=}', function () {
     $this->call(CrawlTest::class, ['--url' => $url]);
 });
 
+Artisan::command('app:crawl-socigames', function () {
+    $this->call(CrawlSocigames::class);
+});
+
 Artisan::command('app:crawl-updates {website} {--page=}', function () {
     $website = $this->argument('website');
     $page = $this->option('page') ?? false;
@@ -27,6 +32,8 @@ Artisan::command('app:crawl-index {website} {--donghua_id=}', function () {
     $donghua_id = $this->option('donghua_id');
     $this->call(CrawlIndexPage::class, ['website' => $website, '--donghua_id' => $donghua_id]);
 });
+
+Schedule::command('app:crawl-socigames')->everyThreeHours();
 
 Schedule::command('app:crawl-updates animexin')->everyFifteenMinutes();
 
