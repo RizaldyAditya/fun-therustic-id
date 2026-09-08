@@ -208,9 +208,7 @@ class AvnsTable
             ->filters([
                 Filter::make('needs_update')
                     ->label('Needs Update')
-                    ->query(function (Builder $query) {
-                        return $query->whereColumn('version', '!=', 'last_played_version');
-                    }),
+                    ->query(fn (Builder $query) => $query->whereColumn('version', '!=', 'last_played_version')),
                 SelectFilter::make('status_id')->relationship('status', 'name'),
                 TrashedFilter::make(),
             ])
@@ -227,7 +225,7 @@ class AvnsTable
                     ->label('VNDB')
                     ->color('primary')
                     ->tooltip('Open VNDB Detail')
-                    ->modalHeading(fn ($record) => "VNDB")
+                    ->modalHeading(fn ($record) => 'VNDB')
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Close')
                     ->modalWidth('full')
@@ -271,9 +269,10 @@ class AvnsTable
                     ->icon('heroicon-s-play')
                     ->color('info')
                     ->action(function ($livewire) {
-                        $playingStatus = Status::where('slug','=', 'playing')->first();
+                        $playingStatus = Status::where('slug', '=', 'playing')->first();
                         if ($playingStatus) {
                             $livewire->tableFilters['status_id']['value'] = $playingStatus->id;
+                            $livewire->tableFilters['needs_update']['isActive'] = false;
                         }
                     })
                     ->tooltip('Filter AVNs with Playing status'),
@@ -285,6 +284,7 @@ class AvnsTable
                         $planToPlayStatus = Status::where('slug', '=', 'plan-to-play')->first();
                         if ($planToPlayStatus) {
                             $livewire->tableFilters['status_id']['value'] = $planToPlayStatus->id;
+                            $livewire->tableFilters['needs_update']['isActive'] = false;
                         }
                     })
                     ->tooltip('Filter AVNs with Plan to Play status'),
@@ -296,15 +296,46 @@ class AvnsTable
                         $toDownloadStatus = Status::where('slug', '=', 'to-download')->first();
                         if ($toDownloadStatus) {
                             $livewire->tableFilters['status_id']['value'] = $toDownloadStatus->id;
+                            $livewire->tableFilters['needs_update']['isActive'] = false;
                         }
                     })
                     ->tooltip('Filter AVNs with To Download status'),
+                Action::make('filterDropped')
+                    ->label('Dropped')
+                    ->icon('heroicon-s-x-circle')
+                    ->color('danger')
+                    ->action(function ($livewire) {
+                        $droppedStatus = Status::where('slug', '=', 'dropped')->first();
+                        if ($droppedStatus) {
+                            $livewire->tableFilters['status_id']['value'] = $droppedStatus->id;
+                            $livewire->tableFilters['needs_update']['isActive'] = false;
+                        }
+                    }),
+                Action::make('filterAbandoned')
+                    ->label('Abandoned')
+                    ->icon('heroicon-s-x-circle')
+                    ->color('danger')
+                    ->action(function ($livewire) {
+                        $abandonedStatus = Status::where('slug', '=', 'abandoned')->first();
+                        if ($abandonedStatus) {
+                            $livewire->tableFilters['status_id']['value'] = $abandonedStatus->id;
+                            $livewire->tableFilters['needs_update']['isActive'] = false;
+                        }
+                    }),
+                Action::make('newUpdate')
+                    ->label('New Update')
+                    ->icon('heroicon-s-arrow-path')
+                    ->color('info')
+                    ->action(function ($livewire) {
+                        $livewire->tableFilters['needs_update']['isActive'] = true;
+                    }),
                 Action::make('clearFilters')
                     ->label('Clear Filters')
                     ->icon('heroicon-s-x-mark')
                     ->color('gray')
                     ->action(function ($livewire) {
                         $livewire->tableFilters['status_id']['value'] = null;
+                        $livewire->tableFilters['needs_update']['isActive'] = false;
                     })
                     ->tooltip('Clear status filters'),
             ])
