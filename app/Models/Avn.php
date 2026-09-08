@@ -19,11 +19,12 @@ class Avn extends Model
         'description',
         'rating',
         'itch_io_url',
+        'socigames_url',
         'cover_image',
         'genre_id',
         'last_updated_on_itch',
         'last_played_version',
-        'vndb_id'
+        'vndb_id',
     ];
 
     public function status(): BelongsTo
