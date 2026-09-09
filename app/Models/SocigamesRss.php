@@ -12,6 +12,10 @@ class SocigamesRss extends Model
         'title',
         'url',
         'version',
+        'developer',
+        'description',
+        'genres',
+        'engine',
         'cover_image',
         'release_date',
     ];

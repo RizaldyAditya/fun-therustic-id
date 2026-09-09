@@ -18,5 +18,25 @@ class SociGamesSeeder extends Seeder
                 'updated_at' => now(),
             ]
         );
+
+        $engines = [
+            '3411' => "Ren'Py",
+            '3413' => 'Unity',
+            '3414' => 'RPGM',
+            '3416' => 'Unreal Engine',
+            '3418' => 'Java',
+        ];
+
+        foreach ($engines as $categoryId => $name) {
+            DB::table('vars')->updateOrInsert(
+                ['name' => $categoryId],
+                [
+                    'value' => $name,
+                    'group' => 'Socigames Engine',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]
+            );
+        }
     }
 }
