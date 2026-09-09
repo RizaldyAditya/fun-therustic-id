@@ -33,6 +33,10 @@ class CrawlSocigames extends Command
 
         $this->info("Crawling SociGames category ID: {$categoryId}");
 
+        $engines = VarEntry::where('group', 'Socigames Engine')
+            ->pluck('value', 'name')
+            ->toArray();
+
         $posts = $this->fetchPosts($categoryId);
 
         if (empty($posts)) {
@@ -50,6 +54,8 @@ class CrawlSocigames extends Command
 
         $images = $this->resolveMediaUrls($mediaIds);
 
+        $posts = array_reverse($posts);
+
         $created = 0;
         $skipped = 0;
 
@@ -62,12 +68,29 @@ class CrawlSocigames extends Command
 
             $releaseDate = $post['date'] ? date('Y-m-d', strtotime($post['date'])) : null;
 
+            $contentHtml = $post['content']['rendered'] ?? '';
+            $parsedContent = $this->parseContent($contentHtml);
+
+            $postCategories = $post['categories'] ?? [];
+            $engine = null;
+            foreach ($postCategories as $catId) {
+                if (isset($engines[(string) $catId])) {
+                    $engine = $engines[(string) $catId];
+
+                    break;
+                }
+            }
+
             SocigamesRss::updateOrCreate(
                 ['title' => $parsed['title'], 'version' => $parsed['version']],
                 [
                     'url' => $post['link'] ?? '',
                     'cover_image' => $coverImage,
                     'release_date' => $releaseDate,
+                    'developer' => $parsedContent['developer'],
+                    'description' => $parsedContent['description'],
+                    'genres' => $parsedContent['genres'],
+                    'engine' => $engine,
                 ]
             );
 
@@ -86,7 +109,7 @@ class CrawlSocigames extends Command
             $response = $this->apiGet('/wp-json/wp/v2/posts', [
                 'categories' => $categoryId,
                 'per_page' => 50,
-                '_fields' => 'id,date,title,link,featured_media',
+                '_fields' => 'id,date,title,link,featured_media,content,categories',
             ]);
 
             if ($response->failed()) {
@@ -168,6 +191,53 @@ class CrawlSocigames extends Command
         return [
             'title' => $rawTitle,
             'version' => null,
+        ];
+    }
+
+    /**
+     * @return array{developer: string|null, description: string|null, genres: string|null}
+     */
+    private function parseContent(string $contentHtml): array
+    {
+        $developer = null;
+        $description = null;
+        $genres = null;
+
+        // Extract developer: <strong>Developer</strong>: Name (text before first <a> tag)
+        if (preg_match('/<strong>Developer<\/strong>\s*:\s*(.+?)(?:<a\b|<br|<\/p)/i', $contentHtml, $matches)) {
+            $developer = strip_tags(html_entity_decode($matches[1]));
+            $developer = preg_replace('/[\s\x{00A0}\x{200B}\x{FEFF}]+/u', ' ', $developer);
+            $developer = preg_replace('/^\s*[-–—]\s*|\s*[-–—]\s*$/u', '', $developer);
+            $developer = trim($developer) ?: null;
+        }
+
+        // Extract genres: <strong>Genre</strong>: tag1, tag2, tag3
+        if (preg_match('/<strong>Genre<\/strong>\s*:\s*(.+?)(?:<\/p)/is', $contentHtml, $matches)) {
+            $genres = strip_tags(html_entity_decode($matches[1]));
+            $genres = trim(preg_replace('/\s+/', ' ', $genres));
+            $genres = trim($genres, ', ');
+            $genres = $genres ?: null;
+        }
+
+        // Extract description: first <p> text before <strong>Developer</strong>
+        if (preg_match('/<p>(.+?)<\/p>/s', $contentHtml, $matches)) {
+            $para = strip_tags(html_entity_decode($matches[1]));
+            $para = trim(preg_replace('/\s+/', ' ', $para));
+            // Stop at "Developer" if found
+            if (preg_match('/^(.+?)\s*Developer\s*:/i', $para, $descMatches)) {
+                $para = trim($descMatches[1]);
+            }
+            // Remove boilerplate: "Title Download Game Final Walkthrough + Inc Patch Latest Version – "
+            if (preg_match('/\s*[-–—]\s*/u', $para, $dashMatch, PREG_OFFSET_CAPTURE)) {
+                $para = trim(substr($para, $dashMatch[0][1] + strlen($dashMatch[0][0])));
+            }
+            $description = trim($para) ?: null;
+        }
+
+        return [
+            'developer' => $developer,
+            'description' => $description,
+            'genres' => $genres,
         ];
     }
 }

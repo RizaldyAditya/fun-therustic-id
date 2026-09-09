@@ -22,6 +22,7 @@ class Avn extends Model
         'socigames_url',
         'cover_image',
         'genre_id',
+        'engine',
         'last_updated_on_itch',
         'last_played_version',
         'vndb_id',
