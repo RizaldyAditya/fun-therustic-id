@@ -117,7 +117,7 @@ class DonghuastreamIndexObserver extends CrawlObserver
 
                             // Only process english or indonesian
                             $language = null;
-                            if (str_contains($optionText, 'english')) {
+                            if (str_contains($optionText, 'english') || str_contains($optionText, 'dailymotion')) {
                                 $language = 'english';
                             } elseif (str_contains($optionText, 'indonesian')) {
                                 $language = 'indonesia';
