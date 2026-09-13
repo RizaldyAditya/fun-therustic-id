@@ -26,7 +26,7 @@ class DonghuaworldIndexObserver extends CrawlObserver
 
     protected $client;
 
-    public function __construct()
+    public function __construct(protected ?int $donghuaId = null)
     {
         $this->client = new Client;
     }
@@ -41,134 +41,115 @@ class DonghuaworldIndexObserver extends CrawlObserver
         ?string $linkText = null// Ensure this is nullable string
     ): void {
         Log::info("Crawling: {$url}");
+
+        if (! $this->donghuaId) {
+            return;
+        }
+
+        $donghua = Donghua::find($this->donghuaId);
+        if (! $donghua) {
+            return;
+        }
+
         $html = (string) $response->getBody();
         $domCrawler = new DomCrawler($html);
 
-        // get donghua title
-        $donghuaTitle = $domCrawler->filter('h1.entry-title')->text();
+        $stream = Stream::where('label', 'donghuaworld')->first();
 
-        // find donghua id
-        $donghua_id = null;
-        $donghua = Donghua::where('external_titles->donghuaworld_title', trim($donghuaTitle ?? ''))->first();
-        if ($donghua && $donghua->id) {
-            $donghua_id = $donghua->id;
-        }
+        if ($stream->is_cover_image) {
+            $donghuaImage = $domCrawler->filter('.thumbook > .thumb > img')->attr('src');
+            Log::info($donghuaImage);
+            $donghuaImage = strtok($donghuaImage ?? '', '?');
 
-        if ($donghua_id) {
-            // find stream id
-            $stream = Stream::where('label', 'donghuaworld')->first();
+            $coverResponse = Http::get($donghuaImage);
+            if (! $donghua->image_cover && $coverResponse->successful()) {
+                $extension = pathinfo(parse_url($donghuaImage, PHP_URL_PATH), PATHINFO_EXTENSION) ?: 'jpg';
+                $fileName = 'img/covers/'.Str::uuid().'.'.$extension;
+                Storage::disk('public')->put($fileName, $coverResponse->body());
 
-            // update donghua -> image_cover
-            if ($stream->is_cover_image) {
-                // get donghua image cover
-                $donghuaImage = $domCrawler->filter('.thumbook > .thumb > img')->attr('src');
-                Log::info($donghuaImage);
-                $donghuaImage = strtok($donghuaImage ?? '', '?');
-
-                // download image -> update donghua -> image_cover
-                $response = Http::get($donghuaImage);
-                if (! $donghua->image_cover && $response->successful()) {
-                    $extension = pathinfo(parse_url($donghuaImage, PHP_URL_PATH), PATHINFO_EXTENSION) ?: 'jpg';
-                    $fileName = 'img/covers/'.Str::uuid().'.'.$extension;
-                    Storage::disk('public')->put($fileName, $response->body());
-
-                    Donghua::where('id', $donghua_id)
-                        ->update([
-                            'image_cover' => $fileName ?? '',
-                        ]);
-                }
+                Donghua::where('id', $this->donghuaId)
+                    ->update([
+                        'image_cover' => $fileName ?? '',
+                    ]);
             }
-
-            // Your parsing logic
-            $domCrawler->filter('.eplister > ul > li')->each(function (DomCrawler $node) use ($donghua_id, $stream) {
-                try {
-                    Sleep::for(200)->milliseconds();
-
-                    // get episode link
-                    $episodeLink = $node->filter('a')->attr('href');
-
-                    // get episode title
-                    $episodeTitle = $node->filter('a > .epl-title')->text();
-
-                    // get episode number
-                    $episodeNumberText = $node->filter('a > .epl-num')->text();
-                    $parsed = $this->sanitizeEpisodeNumber($episodeNumberText);
-                    $episodeNumber = $parsed['display'];
-
-                    // get video source url from episode page
-                    $crawlerEpisodeLink = new DomCrawler($this->client->get($episodeLink)->getBody()->getContents());
-
-                    $videoSourceUrlJson = [
-                        'english' => [
-                            'dailymotion' => null,
-                            'ok_ru' => null,
-                        ],
-                        'indonesia' => [
-                            'dailymotion' => null,
-                            'ok_ru' => null,
-                        ],
-                    ];
-
-                    // get video source url from server items (DonghuaWorld format)
-                    $serverLinks = $crawlerEpisodeLink->filter('.player-servers .server-item > a[data-hash]');
-
-                    if ($serverLinks->count() > 0) {
-                        $serverLinks->each(function (DomCrawler $link) use (&$videoSourceUrlJson) {
-                            $linkText = strtolower($link->text());
-                            $hashValue = $link->attr('data-hash');
-
-                            if ($hashValue) {
-                                try {
-                                    $decoded = base64_decode($hashValue);
-
-                                    // Extract iframe src from decoded HTML
-                                    if (preg_match('/src="([^"]+)"/', $decoded, $matches)) {
-                                        $url = $matches[1];
-
-                                        // Add https: prefix if URL starts with //
-                                        if (str_starts_with($url, '//')) {
-                                            $url = 'https:'.$url;
-                                        }
-
-                                        // Determine source - dailymotion goes to dailymotion, all others go to ok_ru
-                                        if (str_contains($url, 'dailymotion')) {
-                                            $videoSourceUrlJson['english']['dailymotion'] = $url;
-                                        } else {
-                                            // Dark Server and any other sources go to ok_ru
-                                            $videoSourceUrlJson['english']['ok_ru'] = $url;
-                                        }
-                                    }
-                                } catch (\Exception $e) {
-                                    // Skip invalid base64
-                                }
-                            }
-                        });
-                    }
-
-                    // Check if we have at least one valid URL
-                    $hasValidUrl = ! empty($videoSourceUrlJson['english']['dailymotion'])
-                        || ! empty($videoSourceUrlJson['english']['ok_ru'])
-                        || ! empty($videoSourceUrlJson['indonesia']['dailymotion'])
-                        || ! empty($videoSourceUrlJson['indonesia']['ok_ru']);
-
-                    if ($hasValidUrl) {
-                        Episode::firstOrCreate(
-                            ['stream_url' => $episodeLink],
-                            [
-                                'donghua_id' => $donghua_id,
-                                'title' => trim($episodeTitle),
-                                'stream_id' => $stream->id,
-                                'episode_number' => $episodeNumber,
-                                'video_source_url' => $videoSourceUrlJson,
-                                'is_an_update' => false,
-                            ]
-                        );
-                    }
-                } catch (\Exception $e) {
-                    Log::warning('Failed to parse a node: '.$e->getMessage());
-                }
-            });
         }
+
+        $domCrawler->filter('.eplister > ul > li')->each(function (DomCrawler $node) use ($stream) {
+            try {
+                Sleep::for(200)->milliseconds();
+
+                $episodeLink = $node->filter('a')->attr('href');
+                $episodeTitle = $node->filter('a > .epl-title')->text();
+
+                $episodeNumberText = $node->filter('a > .epl-num')->text();
+                $parsed = $this->sanitizeEpisodeNumber($episodeNumberText);
+                $episodeNumber = $parsed['display'];
+
+                $crawlerEpisodeLink = new DomCrawler($this->client->get($episodeLink)->getBody()->getContents());
+
+                $videoSourceUrlJson = [
+                    'english' => [
+                        'dailymotion' => null,
+                        'ok_ru' => null,
+                    ],
+                    'indonesia' => [
+                        'dailymotion' => null,
+                        'ok_ru' => null,
+                    ],
+                ];
+
+                $serverLinks = $crawlerEpisodeLink->filter('.player-servers .server-item > a[data-hash]');
+
+                if ($serverLinks->count() > 0) {
+                    $serverLinks->each(function (DomCrawler $link) use (&$videoSourceUrlJson) {
+                        $hashValue = $link->attr('data-hash');
+
+                        if ($hashValue) {
+                            try {
+                                $decoded = base64_decode($hashValue);
+
+                                if (preg_match('/src="([^"]+)"/', $decoded, $matches)) {
+                                    $url = $matches[1];
+
+                                    if (str_starts_with($url, '//')) {
+                                        $url = 'https:'.$url;
+                                    }
+
+                                    if (str_contains($url, 'dailymotion')) {
+                                        $videoSourceUrlJson['english']['dailymotion'] = $url;
+                                    } else {
+                                        $videoSourceUrlJson['english']['ok_ru'] = $url;
+                                    }
+                                }
+                            } catch (\Exception $e) {
+                                // Skip invalid base64
+                            }
+                        }
+                    });
+                }
+
+                $hasValidUrl = ! empty($videoSourceUrlJson['english']['dailymotion'])
+                    || ! empty($videoSourceUrlJson['english']['ok_ru'])
+                    || ! empty($videoSourceUrlJson['indonesia']['dailymotion'])
+                    || ! empty($videoSourceUrlJson['indonesia']['ok_ru']);
+
+                if ($hasValidUrl) {
+                    Episode::firstOrCreate(
+                        ['stream_url' => $episodeLink],
+                        [
+                            'donghua_id' => $this->donghuaId,
+                            'title' => trim($episodeTitle),
+                            'stream_id' => $stream->id,
+                            'episode_number' => $episodeNumber,
+                            'video_source_url' => $videoSourceUrlJson,
+                            'is_an_update' => false,
+                        ]
+                    );
+                }
+            } catch (\Exception $e) {
+                Log::warning('Failed to parse a node: '.$e->getMessage());
+            }
+        });
     }
 
     /**
