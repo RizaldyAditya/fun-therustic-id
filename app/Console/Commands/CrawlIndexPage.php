@@ -8,6 +8,7 @@ use App\Observers\AnimekhorIndexObserver;
 use App\Observers\AnimexinIndexObserver;
 use App\Observers\DonghuastreamIndexObserver;
 use App\Observers\DonghuaworldIndexObserver;
+use App\Observers\DonghuazoneIndexObserver;
 use Illuminate\Console\Command;
 use Spatie\Crawler\Crawler;
 use Spatie\Crawler\CrawlProfiles\CrawlInternalUrls;
@@ -120,6 +121,24 @@ class CrawlIndexPage extends Command
                     ->ignoreRobots()
                     ->setUserAgent('Mozilla/5.0...')
                     ->setCrawlObserver(new DonghuaworldIndexObserver($donghua_id))
+                    ->setCrawlProfile(new CrawlInternalUrls($url))
+                    ->setMaximumDepth(0)
+                    ->startCrawling($url);
+                $this->info('Crawl has been completed.');
+                break;
+            case 'donghuazone':
+                $url = $donghua->external_titles['donghuazone_url'] ?? null;
+                if (empty($url)) {
+                    $this->error('→ No DonghuaZone URL found for this Donghua.');
+
+                    return 1;
+                }
+
+                $this->info("Starting crawl: {$url}");
+                Crawler::create()
+                    ->ignoreRobots()
+                    ->setUserAgent('Mozilla/5.0...')
+                    ->setCrawlObserver(new DonghuazoneIndexObserver($donghua_id))
                     ->setCrawlProfile(new CrawlInternalUrls($url))
                     ->setMaximumDepth(0)
                     ->startCrawling($url);

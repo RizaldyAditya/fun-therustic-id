@@ -6,6 +6,7 @@ use App\Observers\AnimekhorObserver;
 use App\Observers\AnimexinObserver;
 use App\Observers\DonghuastreamObserver;
 use App\Observers\DonghuaworldObserver;
+use App\Observers\DonghuazoneObserver;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Illuminate\Support\Facades\DB;
@@ -106,6 +107,23 @@ class CrawlLatestUpdate extends Command implements PromptsForMissingInput
                     ->ignoreRobots()
                     ->setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:146.0) Gecko/20100101 Firefox/146.0')
                     ->setCrawlObserver(new DonghuaworldObserver)
+                    ->setCrawlProfile(new CrawlInternalUrls($url))
+                    ->setMaximumDepth(0)
+                    ->startCrawling($url);
+                $this->info('Crawl has been completed.');
+                break;
+            case 'donghuazone':
+                $url = $website['homepage_url'];
+                $page = $this->option('page') ?? false;
+                if ($page) {
+                    $url = $url."page/$page/";
+                }
+
+                $this->info('Starting crawl website : '.$url);
+                Crawler::create()
+                    ->ignoreRobots()
+                    ->setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:146.0) Gecko/20100101 Firefox/146.0')
+                    ->setCrawlObserver(new DonghuazoneObserver)
                     ->setCrawlProfile(new CrawlInternalUrls($url))
                     ->setMaximumDepth(0)
                     ->startCrawling($url);
