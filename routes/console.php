@@ -54,3 +54,8 @@ Schedule::command('app:crawl-updates donghuaworld')->hourlyAt(18);
 Schedule::command('app:crawl-updates donghuaworld')->hourlyAt(28);
 Schedule::command('app:crawl-updates donghuaworld')->hourlyAt(40);
 Schedule::command('app:crawl-updates donghuaworld')->hourlyAt(55);
+
+Schedule::command('app:crawl-updates donghuazone')->hourlyAt(10);
+Schedule::command('app:crawl-updates donghuazone')->hourlyAt(25);
+Schedule::command('app:crawl-updates donghuazone')->hourlyAt(45);
+Schedule::command('app:crawl-updates donghuazone')->hourlyAt(55);

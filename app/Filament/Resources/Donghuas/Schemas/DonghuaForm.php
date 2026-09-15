@@ -227,6 +227,8 @@ class DonghuaForm
                                                 'donghuastream_url' => '',
                                                 'donghuaworld_title' => '',
                                                 'donghuaworld_url' => '',
+                                                'donghuazone_title' => '',
+                                                'donghuazone_url' => '',
                                             ]),
                                     ]),
                                 Tab::make('Crawl Index')
@@ -336,6 +338,32 @@ class DonghuaForm
                                                             ->requiresConfirmation()
                                                             ->modalHeading('Run Crawler on DonghuaWorld')
                                                             ->modalDescription('Are you sure you want to crawl the DonghuaWorld index? This process might take a few moments.')
+                                                            ->modalSubmitActionLabel('Yes, start crawling')
+                                                            ->modalCancelActionLabel('Cancel'),
+                                                    ]),
+                                                Fieldset::make('DonghuaZone')
+                                                    ->columns(1)
+                                                    ->schema([
+                                                        Action::make('runCrawlDz')
+                                                            ->label('Crawl Episode Index')
+                                                            ->icon('heroicon-o-arrow-path')
+                                                            ->color('primary')
+                                                            ->action(function ($record) {
+                                                                // Run the command
+                                                                Artisan::call(CrawlIndexPage::class, [
+                                                                    'website' => 'donghuazone',
+                                                                    '--donghua_id' => $record->id, // You can pass dynamic IDs here
+                                                                ]);
+
+                                                                // Show a success message
+                                                                Notification::make()
+                                                                    ->title('Crawl completed successfully.')
+                                                                    ->success()
+                                                                    ->send();
+                                                            })
+                                                            ->requiresConfirmation()
+                                                            ->modalHeading('Run Crawler on DonghuaZone')
+                                                            ->modalDescription('Are you sure you want to crawl the DonghuaZone index? This process might take a few moments.')
                                                             ->modalSubmitActionLabel('Yes, start crawling')
                                                             ->modalCancelActionLabel('Cancel'),
                                                     ]),

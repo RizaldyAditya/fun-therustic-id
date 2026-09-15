@@ -34,6 +34,7 @@ class CrawlAllStreams extends Command
             'app:crawl-updates donghuastream',
             'app:crawl-updates animekhor',
             'app:crawl-updates donghuaworld',
+            'app:crawl-updates donghuazone',
         ];
 
         foreach ($commands as $command) {
