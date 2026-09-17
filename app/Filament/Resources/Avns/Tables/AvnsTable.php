@@ -141,8 +141,8 @@ class AvnsTable
                                     ]),
                             ])
                     ),
-                TextColumn::make('last_updated_on_itch')
-                    ->label('Last Updated on itch.io')
+                TextColumn::make('last_updated_date')
+                    ->label('Last Updated Date')
                     ->date()
                     ->sortable()
                     ->toggleable(),

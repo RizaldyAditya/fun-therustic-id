@@ -23,7 +23,7 @@ class Avn extends Model
         'cover_image',
         'genre_id',
         'engine',
-        'last_updated_on_itch',
+        'last_updated_date',
         'last_played_version',
         'vndb_id',
     ];

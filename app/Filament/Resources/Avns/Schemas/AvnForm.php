@@ -178,8 +178,8 @@ class AvnForm
                                                             ->preload()
                                                             ->inlineLabel()
                                                             ->required(),
-                                                        DatePicker::make('last_updated_on_itch')
-                                                            ->label('Last Updated on itch.io')
+                                                        DatePicker::make('last_updated_date')
+                                                            ->label('Last Updated Date')
                                                             ->inlineLabel(),
                                                     ]),
                                             ]),
