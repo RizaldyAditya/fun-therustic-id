@@ -125,7 +125,7 @@ namespace App\Models{
  * @property string|null $socigames_url
  * @property string|null $cover_image
  * @property int|null $genre_id
- * @property string|null $last_updated_on_itch
+ * @property string|null $last_updated_date
  * @property string|null $last_played_version
  * @property string|null $vndb_id
  * @property \Illuminate\Support\Carbon|null $created_at
