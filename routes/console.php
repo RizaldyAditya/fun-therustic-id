@@ -35,6 +35,8 @@ Artisan::command('app:crawl-index {website} {--donghua_id=}', function () {
 
 Schedule::command('app:crawl-socigames')->everyThreeHours();
 
+Schedule::command('app:crawl-anime7')->everyTwoHours();
+
 Schedule::command('app:crawl-updates animexin')->everyFifteenMinutes();
 
 Schedule::command('app:crawl-updates animekhor')->hourlyAt(12);

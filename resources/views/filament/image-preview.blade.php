@@ -1,7 +1,7 @@
 @if($image)
     <div class="flex justify-center items-center w-full py-4">
-        <img 
-            src="{{ asset('storage/' . $image) }}" 
+        <img
+            src="{{ str_starts_with($image, 'http') ? $image : asset('storage/' . $image) }}"
             class="max-w-full h-auto rounded-xl shadow-md border dark:border-white/10"
             style="max-height: 60vh; margin: auto;"
         />

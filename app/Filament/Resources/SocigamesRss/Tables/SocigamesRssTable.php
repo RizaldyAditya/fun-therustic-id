@@ -5,11 +5,10 @@ namespace App\Filament\Resources\SocigamesRss\Tables;
 use App\Models\Avn;
 use App\Models\Genre;
 use Filament\Actions\Action;
+use Filament\Forms\Components\ViewField;
 use Filament\Notifications\Notification;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Support\HtmlString;
-use Illuminate\Support\Str;
 
 class SocigamesRssTable
 {
@@ -29,11 +28,15 @@ class SocigamesRssTable
                         Action::make('viewCover')
                             ->modalHeading('Cover Image')
                             ->modalWidth('7xl')
-                            ->modalContent(fn ($record) => new HtmlString(
-                                '<img src="'.e(Str::startsWith($record->cover_image, ['http://', 'https://']) ? $record->cover_image : asset('storage/'.$record->cover_image)).'" style="width:100%; height:auto;" />'
-                            ))
                             ->modalSubmitAction(false)
                             ->modalCancelActionLabel('Close')
+                            ->schema([
+                                ViewField::make('image_preview')
+                                    ->view('filament.image-preview')
+                                    ->viewData(fn ($record) => [
+                                        'image' => $record->cover_image,
+                                    ]),
+                            ])
                     ),
 
                 Tables\Columns\TextColumn::make('title')
@@ -47,6 +50,20 @@ class SocigamesRssTable
                     ->badge()
                     ->color('success'),
 
+                Tables\Columns\IconColumn::make('imported_status')
+                    ->label('Imported')
+                    ->alignCenter()
+                    ->getStateUsing(fn ($record) => Avn::where('title', $record->title)->exists())
+                    ->boolean(),
+
+                Tables\Columns\TextColumn::make('avn_version')
+                    ->label('AVN Version')
+                    ->alignCenter()
+                    ->getStateUsing(fn ($record) => Avn::where('title', $record->title)->value('version'))
+                    ->placeholder('—')
+                    ->badge()
+                    ->color('info'),
+
                 Tables\Columns\TextColumn::make('developer')
                     ->label('Developer')
                     ->searchable()
@@ -54,7 +71,7 @@ class SocigamesRssTable
 
                 Tables\Columns\TextColumn::make('genres')
                     ->label('Genres')
-                    ->limit(40),
+                    ->wrap(),
 
                 Tables\Columns\TextColumn::make('engine')
                     ->label('Engine')
@@ -80,31 +97,34 @@ class SocigamesRssTable
                     ->icon('heroicon-m-arrow-down-tray')
                     ->modalHeading('Import to AVNs')
                     ->modalWidth('3xl')
-                    ->modalContent(fn ($record) => new HtmlString(
-                        '<div class="space-y-4">'
-                            .($record->cover_image
-                                ? '<img src="'.e(Str::startsWith($record->cover_image, ['http://', 'https://']) ? $record->cover_image : asset('storage/'.$record->cover_image)).'" class="w-full rounded-lg" />'
-                                : '')
-                            .'<div class="rounded-lg border p-4 space-y-2">'
-                                .'<p><strong>Title:</strong> '.e($record->title).'</p>'
-                                .'<p><strong>Version:</strong> '.e($record->version ?? 'N/A').'</p>'
-                                .'<p><strong>Developer:</strong> '.e($record->developer ?? 'N/A').'</p>'
-                                .'<p><strong>Genres:</strong> '.e($record->genres ?? 'N/A').'</p>'
-                                .'<p><strong>Engine:</strong> '.e($record->engine ?? 'N/A').'</p>'
-                                .'<p><strong>Description:</strong> '.e($record->description ?? 'N/A').'</p>'
-                                .'<p><strong>Release Date:</strong> '.e($record->release_date?->format('M d, Y') ?? 'N/A').'</p>'
-                            .'</div>'
-                        .'</div>'
-                    ))
                     ->modalSubmitActionLabel('Import')
+                    ->schema([
+                        ViewField::make('import_preview')
+                            ->view('filament.socigames-import-preview')
+                            ->viewData(fn ($record) => [
+                                'cover_image' => $record->cover_image,
+                                'title' => $record->title,
+                                'version' => $record->version,
+                                'developer' => $record->developer,
+                                'genres' => $record->genres,
+                                'engine' => $record->engine,
+                                'description' => $record->description,
+                                'release_date' => $record->release_date,
+                            ]),
+                    ])
                     ->action(function ($record) {
-                        $exists = Avn::where('title', $record->title)->exists();
+                        $existingAvn = Avn::where('title', $record->title)->first();
 
-                        if ($exists) {
+                        if ($existingAvn) {
+                            $existingAvn->update([
+                                'version' => $record->version,
+                                'last_updated_date' => $record->release_date,
+                            ]);
+
                             Notification::make()
                                 ->title('Already exists')
-                                ->body('An AVN with the title "'.$record->title.'" already exists.')
-                                ->warning()
+                                ->body('"'.$record->title.'" already exists. Version and last updated date have been updated.')
+                                ->info()
                                 ->send();
 
                             return;
@@ -128,7 +148,7 @@ class SocigamesRssTable
                             'socigames_url' => $record->url,
                             'genre_id' => $genreId,
                             'engine' => $record->engine,
-                            'last_updated_on_itch' => $record->release_date,
+                            'last_updated_date' => $record->release_date,
                             'status_id' => 7,
                             'rating' => 0,
                         ]);
