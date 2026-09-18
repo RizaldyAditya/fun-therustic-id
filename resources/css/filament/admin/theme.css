@@ -3,6 +3,11 @@
 @source '../../../../app/Filament/**/*';
 @source '../../../../resources/views/filament/**/*';
 
+/* Reserve scrollbar space to prevent Filament modal scroll-lock bug */
+html {
+    scrollbar-gutter: stable;
+}
+
 /* Custom Styles for your Donghua Cards */
 .group:hover {
     box-shadow: 0 0 20px rgba(var(--primary-500), 0.3);
