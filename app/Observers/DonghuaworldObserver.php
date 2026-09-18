@@ -141,7 +141,7 @@ class DonghuaworldObserver extends CrawlObserver
                                 'donghua_id' => $donghua_id,
                                 'title' => trim($episodeTitle),
                                 'stream_id' => $stream->id,
-                                'episode_number' => $episodeNumber,
+                                'episode_number' => $episodeNumberPre,
                                 'video_source_url' => $videoSourceUrlJson,
                             ]
                         );
