@@ -4,11 +4,11 @@ namespace App\Filament\Resources\Anime7Rss\Pages;
 
 use App\Filament\Resources\Anime7Rss\Anime7RssResource;
 use App\Filament\Resources\Anime7Rss\Tables\Anime7RssTable;
+use App\Jobs\CrawlAnime7Job;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Table;
-use Illuminate\Support\Facades\Artisan;
 
 class ListAnime7Rss extends ListRecords
 {
@@ -26,10 +26,10 @@ class ListAnime7Rss extends ListRecords
                 ->modalDescription('This will fetch the latest posts from anime7.download.')
                 ->modalSubmitActionLabel('Start Crawling')
                 ->action(function () {
-                    Artisan::call('app:crawl-anime7');
+                    CrawlAnime7Job::dispatch();
 
                     Notification::make()
-                        ->title('Anime7 crawl completed successfully.')
+                        ->title('Anime7 crawl started in the background.')
                         ->success()
                         ->send();
                 }),
