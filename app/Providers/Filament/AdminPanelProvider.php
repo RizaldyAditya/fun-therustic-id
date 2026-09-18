@@ -90,14 +90,18 @@ class AdminPanelProvider extends PanelProvider
                 PanelsRenderHook::BODY_END,
                 fn (): string => Blade::render(<<<'BLADE'
                     <script>
-                        document.addEventListener('modal-closed', () => {
+                        function cleanupScrollLock() {
                             requestAnimationFrame(() => {
                                 if (!document.querySelectorAll('.fi-modal-open').length) {
                                     document.documentElement.style.overflow = '';
                                     document.documentElement.style.paddingRight = '';
                                 }
                             });
-                        });
+                        }
+
+                        document.addEventListener('modal-closed', cleanupScrollLock);
+                        document.addEventListener('livewire:morphed', cleanupScrollLock);
+                        document.addEventListener('livewire:navigated', cleanupScrollLock);
                     </script>
                 BLADE),
             )
