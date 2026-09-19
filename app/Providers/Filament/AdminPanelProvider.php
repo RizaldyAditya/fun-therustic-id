@@ -102,6 +102,14 @@ class AdminPanelProvider extends PanelProvider
                         document.addEventListener('modal-closed', cleanupScrollLock);
                         document.addEventListener('livewire:morphed', cleanupScrollLock);
                         document.addEventListener('livewire:navigated', cleanupScrollLock);
+
+                        // Filament dispatches close-modal-quietly after action form submissions.
+                        // closeQuietly() does NOT call releaseScrollLock(), so we must clean up here.
+                        document.addEventListener('close-modal-quietly', () => {
+                            requestAnimationFrame(() => {
+                                requestAnimationFrame(cleanupScrollLock);
+                            });
+                        });
                     </script>
                 BLADE),
             )
