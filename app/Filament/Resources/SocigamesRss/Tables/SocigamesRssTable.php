@@ -12,6 +12,19 @@ use Filament\Tables\Table;
 
 class SocigamesRssTable
 {
+    private static function parseVersion(?string $version): ?string
+    {
+        if ($version === null) {
+            return null;
+        }
+
+        if (preg_match('/^\d+(\.\d+)*$/', $version)) {
+            return 'v'.$version;
+        }
+
+        return $version;
+    }
+
     public static function configure(Table $table): Table
     {
         return $table
@@ -114,10 +127,13 @@ class SocigamesRssTable
                     ])
                     ->action(function ($record) {
                         $existingAvn = Avn::where('title', $record->title)->first();
+                        $parsedVersion = self::parseVersion($record->version);
 
                         if ($existingAvn) {
                             $existingAvn->update([
-                                'version' => $record->version,
+                                'version' => $parsedVersion,
+                                'status_id' => 7,
+                                'socigames_url' => $record->url,
                                 'last_updated_date' => $record->release_date,
                             ]);
 
@@ -141,7 +157,7 @@ class SocigamesRssTable
 
                         Avn::create([
                             'title' => $record->title,
-                            'version' => $record->version,
+                            'version' => $parsedVersion,
                             'developer' => $record->developer,
                             'description' => $record->description,
                             'cover_image' => $record->cover_image,

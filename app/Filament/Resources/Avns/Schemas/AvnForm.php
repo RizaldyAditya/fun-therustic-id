@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Avns\Schemas;
 
+use App\Models\VarEntry;
 use App\Traits\Vndb;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
@@ -111,6 +112,16 @@ class AvnForm
                                                         TextInput::make('version')
                                                             ->required()
                                                             ->inlineLabel(),
+                                                        Select::make('engine')
+                                                            ->label('Engine')
+                                                            ->options(
+                                                                VarEntry::where('group', 'Socigames Engine')
+                                                                    ->pluck('value', 'id')
+                                                                    ->toArray()
+                                                            )
+                                                            ->inlineLabel()
+                                                            ->searchable()
+                                                            ->nullable(),
                                                         TextInput::make('last_played_version')
                                                             ->label('Last Played Version')
                                                             ->inlineLabel(),
